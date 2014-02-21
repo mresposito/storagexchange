@@ -1,4 +1,4 @@
-package com.storagexchange.common
+package com.storagexchange.commons
 
 import com.google.inject.Guice
 import com.typesafe.scalalogging.slf4j.Logging

@@ -1,4 +1,4 @@
-package com.storagexchange.common
+package com.storagexchange.commons
 
 import com.tzavellas.sse.guice.ScalaModule
 
