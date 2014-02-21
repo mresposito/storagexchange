@@ -1,0 +1,43 @@
+@(form: Form[(String, String)])
+@import helper.twitterBootstrap._
+
+@main("StorageXchange") {
+
+  <div class="page loginPage">
+    <div class="container">
+      <div class="text-center">
+        <h1>Log in</h1>
+        <h4>Get your chalk bag ready.</h4>
+
+        @helper.form(controllers.routes.Application.authorize, 'class->"form-horizontal") {
+
+          @form.globalError.map { error =>
+            <div class="row">
+              <div class="alert alert-danger col-sm-5 center">
+                <b>Try again!</b> @error.message
+              </div>
+            </div>
+          }
+
+          <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">Email</label>
+            <div class="col-sm-9">
+              <input type="email" class="form-control" id="inputEmail" name="email"  placeholder="Email" value="@form("email").value">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputPassword" class="col-sm-2 control-label">Password</label>
+            <div class="col-sm-9">
+              <input type="password" class="form-control" id="inputPassword" name="password" placeholder="Password">
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-offset-1 col-sm-10">
+              <button type="submit" class="btn btn-block btn-lg btn-flashy">Log in</button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+  }

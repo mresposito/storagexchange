@@ -1,0 +1,76 @@
+@import "font.less";
+@import "_colors.less";
+@import "_global.less";
+
+.header {
+  top: 60px;
+  position: relative;
+  text-align: center;
+
+}
+
+.center {
+  float: none;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.page {
+
+  height: 100%;
+  // margin-top: 20px;
+  background-color: @headerBar;
+  margin: 50px;
+  padding: 50px 20px;
+
+  @media (max-width: 767px) {
+    margin: 0px;
+    padding: 20px;
+  }
+
+  .container {
+    background-color: @primary;
+    padding: 15px;
+  }
+  position: relative;
+
+  h3 { 
+    line-height: 120px;
+    font-size: 35px;
+    font-family: titilliumBold;
+    color: @details;
+  }
+}
+
+.login {
+  margin-right: 40px;
+  margin-top: 10px;
+  float: right;
+  i {
+    padding-right: 4px;
+  }
+}
+
+.loginPage {
+  color: @details;
+}
+
+.signup {
+  color: @details;
+}
+
+.btn-main-login {
+  width: 100px;
+  height: 40px;
+  &:hover {
+    background-color: @highContrast;
+  }
+}
+
+/**
+* Other pages 
+*/
+@import "footer.less";
+@import "index.less";
+@import "cloud.less";
+@import "about.less";

@@ -1,15 +1,35 @@
-@(title: String)(content: Html)
-
+@(title: String, javascript: Html = Html(""))(content: Html)
 <!DOCTYPE html>
+<html lang="en_us">
+  @_head(title) {
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/main.min.css")">
+  }
 
-<html>
-    <head>
-        <title>@title</title>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
-        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
-        <script src="@routes.Assets.at("javascripts/jquery-1.9.0.min.js")" type="text/javascript"></script>
-    </head>
-    <body>
-        @content
-    </body>
+<body>
+  <!-- Navbar ================================================== -->
+
+  <div id="bodyWrap">
+  <div class="login btn-group">
+      <button type="btn" class="btn btn-default btn-main-login" onclick="location.href='/signup';">
+        <i class="fa fa-sign-in"> </i>Sign up
+      </button>
+      <button type="btn" class="btn btn-default btn-main-login" onclick="location.href='/login';">
+        <i class="fa fa-unlock-alt"> </i>Log in
+      </button>
+  </div>
+    <h1> Welcome to your Storage Exchage</h1>
+
+  <!-- end navbar -->
+
+    <div class="realBody">
+      @content
+    </div>
+  </div> <!-- end bodyWrap -->
+
+  @_footer()
+</body>
+
+<!-- Le Javascript ================================================== -->
+
+@_jsLibraries(javascript)
 </html>

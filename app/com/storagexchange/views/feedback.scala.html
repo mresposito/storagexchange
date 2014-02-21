@@ -1,0 +1,28 @@
+@main("Storage Exchange") {
+
+  <div class="page about">
+    <div class="container">
+      <h1>Feedback</h1>
+      We appreciate any input you can give us in order to improve Storage Exchange.<br>
+      Please, send us your suggestions.
+      <div class="center">
+
+        <form action="/feedback" method="post" role="form">
+          <div class="clearfix error" id="title_field">
+            <div class="form-group">
+              <label for="title">Message</label>
+              <input type="text" class="form-control input-lg" id="title" name="title" placeholder="Title" value="">
+            </div>
+          </div>
+          <div class="clearfix error" id="message_field">
+            <div class="form-group">
+              <textarea rows="10" type="text" class="form-control input-lg" id="message" name="message" placeholder="Your suggestions..." value=""></textarea>
+            </div>
+          </div>
+          <button type="submit" class="btn">Submit</button>
+        </fieldset>
+      </form>
+      </div>
+  </div>
+</div>
+}

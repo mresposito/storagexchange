@@ -25,5 +25,7 @@ object ApplicationBuild extends Build {
     "org.specs2" %% "specs2" % "2.3.3" % "test",
     "org.scalacheck" %% "scalacheck" % "1.11.0" % "test")
 
-  val main = play.Project(appName, appVersion, appDependencies)
+  val main = play.Project(appName, appVersion, appDependencies).settings(
+    templatesImport += "com.storagexchange.controllers"
+  )
 }

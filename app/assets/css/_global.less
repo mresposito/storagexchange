@@ -1,0 +1,102 @@
+@import "font.less";
+@import "_colors.less";
+
+/**
+ * Constants
+ */
+* {
+  font-family: "HelveticaNeue-Condensed","Open Sans Condensed","Helvetica",sans-serif;
+  line-height: 25px;
+}
+
+b {
+  font-family: "HelveticaNeue-CondensedBold","Open Sans Condensed","Helvetica",sans-serif;
+}
+
+h1, h2, h3, h4 {
+  font-family: museo300;
+}
+
+body {
+  background-color: black;
+}
+
+#bodyWrap {
+  background: none repeat scroll 1% 0% @background!important; 
+}
+
+.realBody {
+  color: white
+  display: block;
+  position: relative;
+  margin-top: 100px;
+}
+
+.center {
+  float: none;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.page {
+
+  height: 100%;
+  // margin-top: 20px;
+  background-color: @headerBar;
+  margin: 50px;
+  padding: 50px 20px;
+
+  @media (max-width: 767px) {
+    margin: 0px;
+    padding: 20px;
+  }
+
+  .container {
+    background-color: @primary;
+    padding: 15px;
+  }
+  position: relative;
+
+  h3 { 
+    line-height: 120px;
+    font-size: 35px;
+    font-family: titilliumBold;
+    color: @details;
+  }
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.logo {
+  font-size: 86px;
+  text-shadow: 2px 1px 0px black;
+  letter-spacing: 1px;
+
+  a { 
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
+.climbing {
+  font-family: museo500;
+  color: whitesmoke;
+}
+
+.friend {
+  font-family: museo700;
+  color: @contrast;
+}
+
+.btn-flashy {
+  background-color: @primary;
+  color: @details;
+  border-color: @details;
+
+  &:hover {
+    color: @primary;
+    background-color: @details;
+  }
+}
