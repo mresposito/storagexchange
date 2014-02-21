@@ -1,5 +1,6 @@
-package controllers
+package com.storagexchange.controllers
 
+import com.storagexchange.views
 import play.api._
 import play.api.mvc._
 
