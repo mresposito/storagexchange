@@ -1,6 +1,7 @@
 import sbt._
 import Keys._
 import play.Project._
+import org.scalastyle.sbt.ScalastylePlugin.{Settings => ScalaStyleSettings}
 
 object ApplicationBuild extends Build {
 
@@ -25,7 +26,7 @@ object ApplicationBuild extends Build {
     "org.specs2" %% "specs2" % "2.3.3" % "test",
     "org.scalacheck" %% "scalacheck" % "1.11.0" % "test")
 
-  val main = play.Project(appName, appVersion, appDependencies).settings(
-    templatesImport += "com.storagexchange.controllers"
-  )
+  val main = play.Project(appName, appVersion, appDependencies).
+    settings(templatesImport += "com.storagexchange.controllers").
+    settings(ScalaStyleSettings :_ *)
 }
