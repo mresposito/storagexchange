@@ -24,8 +24,8 @@ CREATE TABLE "User" (
   "verifiedEmail" VARCHAR,
   "universityID" BIGINT NOT NULL,
   "thumbnail" VARCHAR,
-  "creationTime" TIMESTAMP NOT NULL,
-  "lastLogin" TIMESTAMP);
+  "creationTime" BIGINT NOT NULL,
+  "lastLogin" BIGINT);
 
 # --- !Downs
 

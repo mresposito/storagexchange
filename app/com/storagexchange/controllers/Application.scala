@@ -5,6 +5,11 @@ import play.api._
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
+import play.api.db._
+import play.api.Play.current
+import anorm._
+import play.api.db.DB
+
 
 case class SignupRequest(
   myname: String,
@@ -46,7 +51,21 @@ object Application extends Controller {
     Ok(views.html.login(loginForm))
   }
   def signup = Action {
+    val conn = DB.getConnection()
+      val sqlquery = SQL("""
+                        INSERT INTO User(userID,name,email,verifiedEmail,universityID,thumbnail,creationTime,lastLogin) 
+                        VALUES (1, "john", "tmp@gmail.com", "true", 1,"hello",3,4); 
+                      """)
+      
+      DB.withConnection { implicit conn =>
+        val result: Boolean = sqlquery.execute()
+    }
     Ok(views.html.signup(newUserForm))
+  }
+
+  def registration = Action { request =>
+     
+    Ok(views.html.login(loginForm))
   }
 
   def authorize = Action {
