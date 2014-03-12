@@ -50,15 +50,18 @@ object Application extends Controller {
   def login = Action {
     Ok(views.html.login(loginForm))
   }
+
+  private[this] val createUserSql = {
+    SQL("""
+      INSERT INTO "User"
+        ("userID", "name", "email", "verifiedEmail", "universityID", "thumbnail", "creationTime", "lastLogin")
+      VALUES
+        (1, 'john', 'tmp@gmail.com', 'true', 1,'hello',3,4)
+    """.stripMargin)
+  }
   def signup = Action {
-    val conn = DB.getConnection()
-      val sqlquery = SQL("""
-                        INSERT INTO User(userID,name,email,verifiedEmail,universityID,thumbnail,creationTime,lastLogin) 
-                        VALUES (1, "john", "tmp@gmail.com", "true", 1,"hello",3,4); 
-                      """)
-      
-      DB.withConnection { implicit conn =>
-        val result: Boolean = sqlquery.execute()
+    DB.withConnection { implicit conn =>
+      createUserSql.execute()
     }
     Ok(views.html.signup(newUserForm))
   }
