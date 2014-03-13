@@ -1,6 +1,7 @@
 package com.storagexchange.controllers
 
 import com.storagexchange.views
+import com.storagexchange.models._
 import play.api._
 import play.api.mvc._
 import play.api.data._
@@ -20,13 +21,15 @@ case class SignupRequest(
   psw2: String)
 
 object Application extends Controller {
+  
+  val UserStore: UserStore = UserDAL
 
   val loginForm = Form(
     tuple(
       "email" -> nonEmptyText(minLength = 4),
       "password" -> nonEmptyText(minLength = 6)
     ) verifying ("Invalid email or password", user => user match {
-      case userData => true // TODO: put verification logic
+      case userData => UserStore.authenticate(user._1, user._2)
     })
   )
 
@@ -51,18 +54,8 @@ object Application extends Controller {
     Ok(views.html.login(loginForm))
   }
 
-  private[this] val createUserSql = {
-    SQL("""
-      INSERT INTO "User"
-        ("userID", "name", "email", "verifiedEmail", "universityID", "thumbnail", "creationTime", "lastLogin")
-      VALUES
-        (1, 'john', 'tmp@gmail.com', 'true', 1,'hello',3,4)
-    """.stripMargin)
-  }
   def signup = Action {
-    DB.withConnection { implicit conn =>
-      createUserSql.execute()
-    }
+    UserStore.insert(User("michele", "esposito", "m@e.com", 0, None))
     Ok(views.html.signup(newUserForm))
   }
 
