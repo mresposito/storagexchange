@@ -12,7 +12,8 @@ import java.sql.Timestamp
 class UserStoreSpec extends Specification {
   val userStore: UserStore = UserDAL
 
-  val user = User("michele", "esposito", "m@e.com", 0, None)
+  val password = "123456"
+  val user = User("michele", "esposito", "m@e.com", password, 0)
   val userId = user.copy(userId = Some(1))
   
   val InsertUser = BeforeHook {
@@ -23,9 +24,7 @@ class UserStoreSpec extends Specification {
   
   "User Store" should {
     "insert a user" in RunningApp {
-      DB.withConnection { implicit conn =>
-        userStore.insert(user).toInt must beEqualTo(1)
-      }
+    	userStore.insert(user).toInt must beEqualTo(1)
     }
     "authorize user" in InsertUser {
       userStore.authenticate(user.email, user.password) must beTrue

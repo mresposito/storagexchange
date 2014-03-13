@@ -17,7 +17,7 @@ trait UserTest extends Specification {
     createUser
   }
   val password = "12345678"
-  val user = User("michele", "esposito", "m@e.com", 0, None)
+  val user = User("michele", "esposito", "m@e.com", password, 0)
 
   def createUser = {
     val Some(create) = route(requestWithSamePasswords(password))
@@ -27,7 +27,9 @@ trait UserTest extends Specification {
   def genericCreateRequest(psw1: String, psw2: String, user: User) = FakeRequest(
     POST,"/users").withFormUrlEncodedBody(
       "myname" -> user.name,
+      "surname" -> user.surname,
       "email" -> user.email,
+      "university" -> user.universityId.toString,
       "psw1" -> psw1,
       "psw2" -> psw2)
   def requestWithSamePasswords(psw1: String) = requestWithDifferentPasswords(psw1, psw1)

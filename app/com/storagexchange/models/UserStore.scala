@@ -2,10 +2,12 @@ package com.storagexchange.models
 
 import java.sql.Timestamp
 import anorm._
+import anorm.SqlParser._
 import play.api.db._
 import play.api.Play.current
 
 case class User(name: String,
+  surname: String,
   email: String,
   password: String,
   universityId: Long,
@@ -29,19 +31,25 @@ trait UserStore {
 
 // Actual implementation of User Store method
 object UserDAL extends UserStore {
-
+  
   private[this] val createUserSql = {
     SQL("""
-      INSERT INTO "User"
-        ("userID", "name", "email", "verifiedEmail", "universityID", "thumbnail", "creationTime", "lastLogin")
+      INSERT INTO User
+        (name, surname, email, password, universityID, creationTime)
       VALUES
-        (1, 'john', 'tmp@gmail.com', 'true', 1,'hello',3,4)
+        ({name}, {surname}, {email}, {password}, {universityId}, {creationTime})
     """.stripMargin)
   }
 
   def insert(user: User): Long = DB.withConnection { implicit conn =>
-  	createUserSql.execute()
-  	0
+  	createUserSql.on(
+	    'name -> user.name,
+	    'surname -> user.surname,
+	    'email -> user.email,
+	    'password -> user.password,
+	    'universityId -> user.universityId,
+	    'creationTime -> 0 // FIXME: user clock
+		).executeInsert(scalar[Long].single)
   }
 
   def getById(id: Long): Option[User] = None
