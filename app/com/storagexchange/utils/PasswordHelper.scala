@@ -32,7 +32,7 @@ class PlayWithBCryptHelper extends PasswordHelper {
   }
 }
 
-class FakeHelper extends PasswordHelper {
+class FakePasswordHelper extends PasswordHelper {
 
   def createPassword(password: String): String = password + "hello"
   def checkPassword(password: String, hashedPassword: String): Boolean =  {

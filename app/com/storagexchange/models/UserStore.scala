@@ -1,5 +1,6 @@
 package com.storagexchange.models
 
+import com.storagexchange.utils.PasswordHelper
 import java.sql.Timestamp
 import anorm._
 import anorm.SqlParser._
@@ -34,7 +35,7 @@ trait UserStore {
 
 // Actual implementation of User Store method
 @Singleton
-class UserDAL @Inject() extends UserStore {
+class UserDAL @Inject()(passwordHasher: PasswordHelper) extends UserStore {
   
   private[this] val createUserSql = {
     SQL("""
@@ -42,6 +43,14 @@ class UserDAL @Inject() extends UserStore {
         (name, surname, email, password, universityID, creationTime)
       VALUES
         ({name}, {surname}, {email}, {password}, {universityId}, {creationTime})
+    """.stripMargin)
+  }
+
+  private[this] val verifyUserSql = {
+    SQL("""
+      SELECT password
+      FROM User
+      WHERE email = {email}
     """.stripMargin)
   }
 
@@ -59,5 +68,11 @@ class UserDAL @Inject() extends UserStore {
   def getById(id: Long): Option[User] = None
   def getByEmail(email: String): Option[User] = None
 
-  def authenticate(email: String, password: String): Boolean = false
+  def authenticate(email: String, password: String): Boolean = DB.withConnection { implicit conn =>
+    verifyUserSql.on(
+      'email -> email
+    ).as(scalar[String].singleOpt).map { hashedPassword => 
+      passwordHasher.checkPassword(password, hashedPassword) 
+    }.getOrElse(false)
+  }
 }
