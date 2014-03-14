@@ -90,7 +90,6 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
   	newUserForm.bindFromRequest.fold(
   	  formWithErrors => BadRequest(views.html.signup(formWithErrors)),
   	  newUser => {
-  	    // TODO: insert password hasher
   	  	val password = passwordHasher.createPassword(newUser.psw1)
   	  	// FIXME: insert proper university id
         val user = User(newUser.myname, newUser.surname,

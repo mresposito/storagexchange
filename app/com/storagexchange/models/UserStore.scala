@@ -53,6 +53,32 @@ class UserDAL @Inject()(passwordHasher: PasswordHelper) extends UserStore {
       WHERE email = {email}
     """.stripMargin)
   }
+  
+  private[this] val findUserByEmailSql = {
+    SQL("""
+       SELECT *
+       FROM User
+       WHERE email = {email}
+    """.stripMargin)
+  }
+
+  private[this] val findUserById = {
+    SQL("""
+       SELECT *
+       FROM User
+       WHERE userID = {id}
+    """.stripMargin)
+  }
+  implicit val userParser = str("name") ~
+    str("surname") ~
+    str("email") ~
+    str("password") ~
+    long("universityId") ~ 
+    long("userID").? map {
+      case name ~ surname ~ email ~ password ~ universityId ~ userId =>
+        User(name, surname, email, password, universityId, None, None, userId)
+    }
+
 
   def insert(user: User): Long = DB.withConnection { implicit conn =>
   	createUserSql.on(
@@ -65,8 +91,17 @@ class UserDAL @Inject()(passwordHasher: PasswordHelper) extends UserStore {
 		).executeInsert(scalar[Long].single)
   }
 
-  def getById(id: Long): Option[User] = None
-  def getByEmail(email: String): Option[User] = None
+  def getById(id: Long): Option[User] = DB.withConnection { implicit conn =>
+   findUserById.on(
+	   'id -> id
+   ).as(userParser.singleOpt)
+  }
+
+  def getByEmail(email: String): Option[User] = DB.withConnection { implicit conn =>
+   findUserByEmailSql.on(
+	   'email -> email
+   ).as(userParser.singleOpt)
+  }
 
   def authenticate(email: String, password: String): Boolean = DB.withConnection { implicit conn =>
     verifyUserSql.on(
