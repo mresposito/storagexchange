@@ -5,6 +5,9 @@ import play.api._
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
+import java.util.UUID
+import com.storagexchange.mail._ 
+
 
 case class SignupRequest(
   myname: String,
@@ -47,6 +50,26 @@ object Application extends Controller {
   }
   def signup = Action {
     Ok(views.html.signup(newUserForm))
+  }
+ 
+  def registration = Action { request => 
+    def emailAddr = request.body.asFormUrlEncoded.get("email")(0)  
+
+    var uuid : String = java.util.UUID.randomUUID.toString
+    val mandrill = new MandrillSender
+    val m = new MailController(mandrill)
+    //TODO: put html in separate file. for some reason wasn't able to read from "verifyEmail.scala.html"
+    m.sendVerificationEmail(new Recipient("vignesh", emailAddr),"<html> <head> <meta charset=\"utf-8\" /></head> <a href=" + "\"" + "http://localhost:9000/confirm/" + uuid + "\"" + ">Confirm</a></html>")
+    Ok(views.html.login(loginForm))
+  }
+
+  def sendAuth(token:String) {
+    return 0 
+  }
+  
+  def authenticated(token:String) = Action {
+    println(token)
+    Ok(views.html.login(loginForm))
   }
 
   def authorize = Action {
