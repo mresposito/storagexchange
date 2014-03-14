@@ -10,7 +10,7 @@ import play.api.Play.{current => curr}
 import java.sql.Timestamp
 
 class UserStoreSpec extends Specification {
-  val userStore: UserStore = UserDAL
+  val userStore: UserStore = new UserDAL
 
   val password = "123456"
   val user = User("michele", "esposito", "m@e.com", password, 0)

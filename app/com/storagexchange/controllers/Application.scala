@@ -14,6 +14,9 @@ import anorm._
 import play.api.db.DB
 import java.util.UUID
 
+import javax.inject.Singleton
+import javax.inject.Inject
+
 case class SignupRequest(
   myname: String,
   surname: String,
@@ -22,11 +25,9 @@ case class SignupRequest(
   psw1: String,
   psw2: String)
 
-object Application extends Controller {
+@Singleton
+class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper) extends Controller {
   
-  val userStore: UserStore = UserDAL
-  val passwordHasher: PasswordHelper = new PlayWithBCryptHelper
-
   val loginForm = Form(
     tuple(
       "email" -> nonEmptyText(minLength = 4),

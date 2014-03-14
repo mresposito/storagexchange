@@ -6,6 +6,9 @@ import anorm.SqlParser._
 import play.api.db._
 import play.api.Play.current
 
+import javax.inject.Singleton
+import javax.inject.Inject
+
 case class User(name: String,
   surname: String,
   email: String,
@@ -30,7 +33,8 @@ trait UserStore {
 }
 
 // Actual implementation of User Store method
-object UserDAL extends UserStore {
+@Singleton
+class UserDAL @Inject() extends UserStore {
   
   private[this] val createUserSql = {
     SQL("""
