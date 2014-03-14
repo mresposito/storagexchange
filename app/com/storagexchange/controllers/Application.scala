@@ -3,6 +3,7 @@ package com.storagexchange.controllers
 import com.storagexchange.views
 import com.storagexchange.models._
 import com.storagexchange.mail._ 
+import com.storagexchange.utils._
 import play.api._
 import play.api.mvc._
 import play.api.data._
@@ -24,6 +25,7 @@ case class SignupRequest(
 object Application extends Controller {
   
   val userStore: UserStore = UserDAL
+  val passwordHasher: PasswordHelper = new PlayWithBCryptHelper
 
   val loginForm = Form(
     tuple(
@@ -88,7 +90,7 @@ object Application extends Controller {
   	  formWithErrors => BadRequest(views.html.signup(formWithErrors)),
   	  newUser => {
   	    // TODO: insert password hasher
-  	  	val password = newUser.psw1
+  	  	val password = passwordHasher.createPassword(newUser.psw1)
   	  	// FIXME: insert proper university id
         val user = User(newUser.myname, newUser.surname,
           newUser.email, password, 0)
