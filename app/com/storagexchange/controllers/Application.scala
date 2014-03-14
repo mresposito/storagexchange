@@ -2,6 +2,7 @@ package com.storagexchange.controllers
 
 import com.storagexchange.views
 import com.storagexchange.models._
+import com.storagexchange.mail._ 
 import play.api._
 import play.api.mvc._
 import play.api.data._
@@ -10,6 +11,7 @@ import play.api.db._
 import play.api.Play.current
 import anorm._
 import play.api.db.DB
+import java.util.UUID
 
 case class SignupRequest(
   myname: String,
@@ -71,6 +73,11 @@ object Application extends Controller {
     val u = User("michele", "esposito", "m@e.com", "12", 0)
     userStore.insert(u)
     Ok(views.html.signup(newUserForm))
+  }
+ 
+  def authenticated(token:String) = Action {
+    println(token)
+    Ok(views.html.login(loginForm))
   }
 
   /**
