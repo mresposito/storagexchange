@@ -28,5 +28,6 @@ object ApplicationBuild extends Build {
 
   val main = play.Project(appName, appVersion, appDependencies).
     settings(templatesImport += "com.storagexchange.controllers").
+    //settings(templatesImport += "com.storagexchange.models").
     settings(ScalaStyleSettings :_ *)
 }

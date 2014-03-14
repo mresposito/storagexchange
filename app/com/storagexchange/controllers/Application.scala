@@ -2,6 +2,7 @@ package com.storagexchange.controllers
 
 import com.storagexchange.views
 import com.storagexchange.models._
+import com.storagexchange.mail._ 
 import play.api._
 import play.api.mvc._
 import play.api.data._
@@ -10,6 +11,8 @@ import play.api.db._
 import play.api.Play.current
 import anorm._
 import play.api.db.DB
+import java.util.UUID
+
 case class SignupRequest(
   myname: String,
   surname: String,
@@ -18,20 +21,16 @@ case class SignupRequest(
   psw1: String,
   psw2: String)
 
-case class Posting(
-  description: String
-  )
-
 object Application extends Controller {
-
-  val postStore: PostStore = PostDAL
+  
+  val userStore: UserStore = UserDAL
 
   val loginForm = Form(
     tuple(
       "email" -> nonEmptyText(minLength = 4),
       "password" -> nonEmptyText(minLength = 6)
     ) verifying ("Invalid email or password", user => user match {
-      case userData => true // TODO: put verification logic
+      case userData => userStore.authenticate(user._1, user._2)
     })
   )
 
@@ -49,38 +48,54 @@ object Application extends Controller {
       })
     )
 
-  val postingForm = Form(
-    mapping(
-      "description" -> nonEmptyText(minLength = 4)
-    )(Posting.apply)(Posting.unapply)
-  )
-
-  //val lePost = postingForm.bindFromRequest.get
-
   def index = Action {
     Ok(views.html.index())
   }
+  /**
+   * Get login page
+   */
   def login = Action {
     Ok(views.html.login(loginForm))
   }
+  /**
+   * Authorize a user if cas a good form
+   */
+  def authorize = Action { implicit request =>
+    loginForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(views.html.login(formWithErrors)),
+      user => Redirect(routes.Application.index).withSession("email" -> user._1))
+  }
+
+  /**
+   * Serve the signup page
+   */
   def signup = Action {
+    val u = User("michele", "esposito", "m@e.com", "12", 0)
+    userStore.insert(u)
     Ok(views.html.signup(newUserForm))
-    
-
+  }
+ 
+  def authenticated(token:String) = Action {
+    println(token)
+    Ok(views.html.login(loginForm))
   }
 
-  def post = Action{
-    Ok(views.html.post(postingForm))
-  }
-
-  def postReceive = Action {implicit request =>
-    val postData = postingForm.bindFromRequest.get
-    val newPost = Post(postData.description);
-    postStore.insert(newPost)
-    Ok
-  }
-
-  def authorize = Action {
-    Ok
+  /**
+   * signs up a new user
+   */
+  def registration = Action { implicit request =>
+  	newUserForm.bindFromRequest.fold(
+  	  formWithErrors => BadRequest(views.html.signup(formWithErrors)),
+  	  newUser => {
+  	    // TODO: insert password hasher
+  	  	val password = newUser.psw1
+  	  	// FIXME: insert proper university id
+        val user = User(newUser.myname, newUser.surname,
+          newUser.email, password, 0)
+        val userId = userStore.insert(user)
+        Redirect(routes.Application.index()).
+        	withSession("email" -> newUser.email)
+  	  }
+  	)
   }
 }
