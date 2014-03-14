@@ -1,13 +1,17 @@
 package com.storagexchange.controllers
 
 import com.storagexchange.views
+import com.storagexchange.models._
+import com.storagexchange.mail._ 
 import play.api._
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
+import play.api.db._
+import play.api.Play.current
+import anorm._
+import play.api.db.DB
 import java.util.UUID
-import com.storagexchange.mail._ 
-
 
 case class SignupRequest(
   myname: String,
@@ -18,13 +22,15 @@ case class SignupRequest(
   psw2: String)
 
 object Application extends Controller {
+  
+  val userStore: UserStore = UserDAL
 
   val loginForm = Form(
     tuple(
       "email" -> nonEmptyText(minLength = 4),
       "password" -> nonEmptyText(minLength = 6)
     ) verifying ("Invalid email or password", user => user match {
-      case userData => true // TODO: put verification logic
+      case userData => userStore.authenticate(user._1, user._2)
     })
   )
 
@@ -45,34 +51,51 @@ object Application extends Controller {
   def index = Action {
     Ok(views.html.index())
   }
+  /**
+   * Get login page
+   */
   def login = Action {
     Ok(views.html.login(loginForm))
   }
+  /**
+   * Authorize a user if cas a good form
+   */
+  def authorize = Action { implicit request =>
+    loginForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(views.html.login(formWithErrors)),
+      user => Redirect(routes.Application.index).withSession("email" -> user._1))
+  }
+
+  /**
+   * Serve the signup page
+   */
   def signup = Action {
+    val u = User("michele", "esposito", "m@e.com", "12", 0)
+    userStore.insert(u)
     Ok(views.html.signup(newUserForm))
   }
  
-  def registration = Action { request => 
-    def emailAddr = request.body.asFormUrlEncoded.get("email")(0)  
-
-    var uuid : String = java.util.UUID.randomUUID.toString
-    val mandrill = new MandrillSender
-    val m = new MailController(mandrill)
-    //TODO: put html in separate file. for some reason wasn't able to read from "verifyEmail.scala.html"
-    m.sendVerificationEmail(new Recipient("vignesh", emailAddr),"<html> <head> <meta charset=\"utf-8\" /></head> <a href=" + "\"" + "http://localhost:9000/confirm/" + uuid + "\"" + ">Confirm</a></html>")
-    Ok(views.html.login(loginForm))
-  }
-
-  def sendAuth(token:String) {
-    return 0 
-  }
-  
   def authenticated(token:String) = Action {
     println(token)
     Ok(views.html.login(loginForm))
   }
 
-  def authorize = Action {
-    Ok
+  /**
+   * signs up a new user
+   */
+  def registration = Action { implicit request =>
+  	newUserForm.bindFromRequest.fold(
+  	  formWithErrors => BadRequest(views.html.signup(formWithErrors)),
+  	  newUser => {
+  	    // TODO: insert password hasher
+  	  	val password = newUser.psw1
+  	  	// FIXME: insert proper university id
+        val user = User(newUser.myname, newUser.surname,
+          newUser.email, password, 0)
+        val userId = userStore.insert(user)
+        Redirect(routes.Application.index()).
+        	withSession("email" -> newUser.email)
+  	  }
+  	)
   }
 }
