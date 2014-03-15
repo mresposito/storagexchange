@@ -13,6 +13,9 @@ import anorm._
 import play.api.db.DB
 import java.util.UUID
 
+case class PostRequest(
+  description: String)
+
 case class SignupRequest(
   myname: String,
   surname: String,
@@ -46,6 +49,12 @@ object Application extends Controller {
       verifying ("Passwords must match", user => user match {
         case userData => userData.psw1 == userData.psw2
       })
+    )
+
+  val newPostForm = Form(
+    mapping(
+      "description" -> nonEmptyText(minLength = 4)
+      )(PostRequest.apply)(PostRequest.unapply)
     )
 
   def index = Action {
@@ -98,4 +107,12 @@ object Application extends Controller {
   	  }
   	)
   }
+
+  def newPost = Action {
+    Ok(views.html.newpost(newPostForm))
+  }
+
+  def postReceive = Action{ implicit => request
+    val postData = postingForm.bindFromRequest.get
+    }
 }
