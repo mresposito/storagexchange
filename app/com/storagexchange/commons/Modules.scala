@@ -10,17 +10,28 @@ trait CommodModule extends ScalaModule {
    */
   def configure = {
     bind[UserStore].to[UserDAL]
-    bind[PasswordHelper].to[PlayWithBCryptHelper]
     additionalConf
   }
   def additionalConf = {}
 }
 
 class ProdModule extends CommodModule {
+  override def additionalConf = {
+    bind[PasswordHelper].to[PlayWithBCryptHelper]
+    bind[IdHasher].to[Base64AES]
+  }
 }
 
 class DevModule extends CommodModule {
+  override def additionalConf = {
+    bind[PasswordHelper].to[PlayWithBCryptHelper]
+    bind[IdHasher].to[Base64AES]
+  }
 }
 
 class TestModule extends CommodModule {
+  override def additionalConf = {
+    bind[IdHasher].to[FakeIdHasher]
+    bind[PasswordHelper].to[FakePasswordHelper]
+  }
 }

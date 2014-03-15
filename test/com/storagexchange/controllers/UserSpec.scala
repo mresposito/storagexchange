@@ -4,24 +4,31 @@ import com.storagexchange.models._
 import com.storagexchange.utils._
 import play.api.test._
 import play.api.test.Helpers._
-import play.api.db._
 import play.api.Play.current
 import org.specs2.mutable._
-import play.api.libs.json.Json
 import play.api.test._
 import play.api.test.Helpers._
+import com.storagexchange.models.UserStore
 
 trait UserTest extends Specification {
     
+  val pswHasher = new FakePasswordHelper
+  val userStore: UserStore = new UserDAL(pswHasher)
+
   val SignUp = BeforeHook {
     createUser
   }
+  val id = 1
   val password = "12345678"
   val user = User("michele", "esposito", "m@e.com", password, 0)
+  val userId = user.copy(userId = Some(id))
 
   def createUser = {
     val Some(create) = route(requestWithSamePasswords(password))
     status(create) must equalTo(SEE_OTHER)
+  }
+  val CreateUser = BeforeHook {
+    createUser
   }
   def createUserRequest(user: User) = genericCreateRequest(user.password, user.password, user)
   def genericCreateRequest(psw1: String, psw2: String, user: User) = FakeRequest(
@@ -39,10 +46,6 @@ trait UserTest extends Specification {
 
 class UserSpec extends Specification with UserTest {
 
-  val RequestSamePassword = BeforeHook {
-    val Some(create) = route(requestWithSamePasswords(password))
-    status(create) must equalTo(SEE_OTHER)
-  }
   "User" should {
     /**
      * Refuse empty form
@@ -67,12 +70,12 @@ class UserSpec extends Specification with UserTest {
       /**
        * Avoid double sigup
        */
-      "refuse if user already exists" in RequestSamePassword {
+      "refuse if user already exists" in CreateUser {
         val Some(createAgain) = route(requestWithSamePasswords(password))
         status(createAgain) must equalTo(BAD_REQUEST)
         contentAsString(createAgain) must contain("Storage Exchange")
       }
-      "refuse should have all information" in RequestSamePassword {
+      "refuse should have all information" in CreateUser {
         val Some(createAgain) = route(requestWithSamePasswords(password))
         contentAsString(createAgain) must contain(user.name)
         contentAsString(createAgain) must contain(user.email)
@@ -83,7 +86,7 @@ class UserSpec extends Specification with UserTest {
           .withFormUrlEncodedBody("username" -> "michele"))
         status(create) must equalTo(BAD_REQUEST)
       }
-      "Sign up should redirect to home page" in RequestSamePassword {
+      "Sign up should redirect to home page" in CreateUser {
         val Some(home) = route(FakeRequest(GET, "/").withSession(("email", user.email)))
         contentAsString(home) must contain("Storage Exchange")
       }

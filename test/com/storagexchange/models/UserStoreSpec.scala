@@ -9,14 +9,9 @@ import play.api.db._
 import play.api.Play.{current => curr}
 import java.sql.Timestamp
 import org.h2.jdbc.JdbcSQLException
+import com.storagexchange.controllers.UserTest
 
-class UserStoreSpec extends Specification {
-  val pswHasher = new FakePasswordHelper
-  val userStore: UserStore = new UserDAL(pswHasher)
-
-  val password = "123456"
-  val user = User("michele", "esposito", "m@e.com", password, 0)
-  val userId = user.copy(userId = Some(1))
+class UserStoreSpec extends Specification with UserTest {
   
   val InsertUser = BeforeHook {
     DB.withConnection { implicit conn =>
