@@ -27,6 +27,7 @@ case class SignupRequest(
 object Application extends Controller {
   
   val userStore: UserStore = UserDAL
+  val postStore: PostStore = PostDAL
 
   val loginForm = Form(
     tuple(
@@ -114,7 +115,9 @@ object Application extends Controller {
 
   def postReceive = Action{ implicit request =>
     val postData = newPostForm.bindFromRequest.get
-    println(postData.description);
+    println(postData.description)
+    val newPost = Post(postData.description)
+    postStore.insert(newPost)
     Ok
   }
 }
