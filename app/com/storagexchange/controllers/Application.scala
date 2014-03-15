@@ -30,7 +30,7 @@ case class SignupRequest(
 
 @Singleton
 class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper) extends Controller {
-  
+    
   val postStore: PostStore = PostDAL
 
   val loginForm = Form(
@@ -88,8 +88,6 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
    * Serve the signup page
    */
   def signup = Action {
-    val u = User("michele", "esposito", "m@e.com", "12", 0)
-    userStore.insert(u)
     Ok(views.html.signup(newUserForm))
   }
  
