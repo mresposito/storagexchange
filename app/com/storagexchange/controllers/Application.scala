@@ -112,7 +112,8 @@ object Application extends Controller {
     Ok(views.html.newpost(newPostForm))
   }
 
-  def postReceive = Action{ implicit => request
+  def postReceive = Action{ implicit request =>
     val postData = postingForm.bindFromRequest.get
-    }
+    println(postData.description);
+  }
 }
