@@ -49,6 +49,9 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
       verifying ("Passwords must match", user => user match {
         case userData => userData.psw1 == userData.psw2
       })
+      verifying ("User already exists", user => user match {
+        case userData => ! userStore.getByEmail(user.email).isDefined  
+      })
     )
 
   def index = Action {
@@ -90,7 +93,6 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
   	newUserForm.bindFromRequest.fold(
   	  formWithErrors => BadRequest(views.html.signup(formWithErrors)),
   	  newUser => {
-  	    // TODO: insert password hasher
   	  	val password = passwordHasher.createPassword(newUser.psw1)
   	  	// FIXME: insert proper university id
         val user = User(newUser.myname, newUser.surname,
