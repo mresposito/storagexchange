@@ -1,0 +1,27 @@
+{ 
+  "University of Illinois at Urbana Champaign": {
+                                                  "website": "http://www.illinois.edu",
+                                                  "colors": "Illinois_Blue, Illinois_Orange",
+                                                  "logo": "http://upload.wikimedia.org/wikipedia/en/1/18/UIUC_seal.svg"
+                                                },
+  "Stanford University": {
+    "website": "http://www.stanford.edu",
+    "colors": "Cardinal, White",
+    "logo": "http://upload.wikimedia.org/wikipedia/en/b/b7/Stanford_University_seal_2003.svg"
+  }, 
+  "University of Michigan": {
+    "website": "http://www.umich.edu",
+    "colors": "Maize, Blue",
+    "logo": "http://upload.wikimedia.org/wikipedia/en/b/b8/Umichigan_color_seal.png"
+  },
+  "Indiana University": {
+    "website": "http://www.iub.edu",
+    "colors":"Cream, Crimson",
+    "logo": "http://upload.wikimedia.org/wikipedia/en/5/5d/Indiana_University_seal.svg"
+  },
+  "University of California, Berkeley": {
+    "website": "http://www.berkeley.edu",
+    "colors": "Yale Blue, California Gold",
+    "logo": "http://upload.wikimedia.org/wikipedia/commons/f/fc/The_University_of_California_1868.svg"
+  }
+}
