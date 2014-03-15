@@ -14,6 +14,7 @@ import play.api.db.DB
 import java.util.UUID
 
 case class PostRequest(
+  email: String,
   description: String)
 
 case class SignupRequest(
@@ -54,6 +55,7 @@ object Application extends Controller {
 
   val newPostForm = Form(
     mapping(
+      "email" -> nonEmptyText(minLength = 4),
       "description" -> nonEmptyText(minLength = 4)
       )(PostRequest.apply)(PostRequest.unapply)
     )
@@ -116,7 +118,7 @@ object Application extends Controller {
   def postReceive = Action{ implicit request =>
     val postData = newPostForm.bindFromRequest.get
     println(postData.description)
-    val newPost = Post(postData.description)
+    val newPost = Post(postData.email, postData.description)
     postStore.insert(newPost)
     Ok
   }
