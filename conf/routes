@@ -10,6 +10,7 @@ POST    /login                      com.storagexchange.controllers.Application.a
 POST    /users                      com.storagexchange.controllers.Application.registration
 GET     /confirm/:token             com.storagexchange.controllers.Application.authenticated(token:String)
 GET     /post                       com.storagexchange.controllers.Application.newPost
+POST    /post                       com.storagexchange.controllers.Application.postReceive
             
 
 # Map static resources from the /public folder to the /assets URL path
