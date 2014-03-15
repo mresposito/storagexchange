@@ -1,10 +1,14 @@
 package com.storagexchange.models
 
+import com.storagexchange.utils.PasswordHelper
 import java.sql.Timestamp
 import anorm._
 import anorm.SqlParser._
 import play.api.db._
 import play.api.Play.current
+
+import javax.inject.Singleton
+import javax.inject.Inject
 
 case class User(name: String,
   surname: String,
@@ -27,7 +31,8 @@ trait UserStore {
 }
 
 // Actual implementation of User Store method
-object UserDAL extends UserStore {
+@Singleton
+class UserDAL @Inject()(passwordHasher: PasswordHelper) extends UserStore {
   
   private[this] val createUserSql = {
     SQL("""
@@ -37,6 +42,39 @@ object UserDAL extends UserStore {
         ({name}, {surname}, {email}, {password}, {universityId}, {creationTime})
     """.stripMargin)
   }
+
+  private[this] val verifyUserSql = {
+    SQL("""
+      SELECT password
+      FROM User
+      WHERE email = {email}
+    """.stripMargin)
+  }
+  
+  private[this] val findUserByEmailSql = {
+    SQL("""
+       SELECT *
+       FROM User
+       WHERE email = {email}
+    """.stripMargin)
+  }
+
+  private[this] val findUserById = {
+    SQL("""
+       SELECT *
+       FROM User
+       WHERE userID = {id}
+    """.stripMargin)
+  }
+  implicit val userParser = str("name") ~
+    str("surname") ~
+    str("email") ~
+    str("password") ~
+    long("universityId") ~ 
+    long("userID").? map {
+      case name ~ surname ~ email ~ password ~ universityId ~ userId =>
+        User(name, surname, email, password, universityId, None, None, userId)
+    }
 
   def insert(user: User): Long = DB.withConnection { implicit conn =>
   	createUserSql.on(
@@ -49,7 +87,23 @@ object UserDAL extends UserStore {
 		).executeInsert(scalar[Long].single)
   }
 
-  def getById(id: Long): Option[User] = None
-  def getByEmail(email: String): Option[User] = None
-  def authenticate(email: String, password: String): Boolean = false
+  def getById(id: Long): Option[User] = DB.withConnection { implicit conn =>
+   findUserById.on(
+	   'id -> id
+   ).as(userParser.singleOpt)
+  }
+
+  def getByEmail(email: String): Option[User] = DB.withConnection { implicit conn =>
+   findUserByEmailSql.on(
+	   'email -> email
+   ).as(userParser.singleOpt)
+  }
+
+  def authenticate(email: String, password: String): Boolean = DB.withConnection { implicit conn =>
+    verifyUserSql.on(
+      'email -> email
+    ).as(scalar[String].singleOpt).map { hashedPassword => 
+      passwordHasher.checkPassword(password, hashedPassword) 
+    }.getOrElse(false)
+  }
 }

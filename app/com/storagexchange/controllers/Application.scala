@@ -3,6 +3,7 @@ package com.storagexchange.controllers
 import com.storagexchange.views
 import com.storagexchange.models._
 import com.storagexchange.mail._ 
+import com.storagexchange.utils._
 import play.api._
 import play.api.mvc._
 import play.api.data._
@@ -12,6 +13,8 @@ import play.api.Play.current
 import anorm._
 import play.api.db.DB
 import java.util.UUID
+import javax.inject.Singleton
+import javax.inject.Inject
 
 case class PostRequest(
   email: String,
@@ -25,9 +28,9 @@ case class SignupRequest(
   psw1: String,
   psw2: String)
 
-object Application extends Controller {
+@Singleton
+class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper) extends Controller {
   
-  val userStore: UserStore = UserDAL
   val postStore: PostStore = PostDAL
 
   val loginForm = Form(
@@ -50,6 +53,9 @@ object Application extends Controller {
     )(SignupRequest.apply)(SignupRequest.unapply)
       verifying ("Passwords must match", user => user match {
         case userData => userData.psw1 == userData.psw2
+      })
+      verifying ("User already exists", user => user match {
+        case userData => ! userStore.getByEmail(user.email).isDefined  
       })
     )
 
@@ -99,8 +105,7 @@ object Application extends Controller {
   	newUserForm.bindFromRequest.fold(
   	  formWithErrors => BadRequest(views.html.signup(formWithErrors)),
   	  newUser => {
-  	    // TODO: insert password hasher
-  	  	val password = newUser.psw1
+  	  	val password = passwordHasher.createPassword(newUser.psw1)
   	  	// FIXME: insert proper university id
         val user = User(newUser.myname, newUser.surname,
           newUser.email, password, 0)
