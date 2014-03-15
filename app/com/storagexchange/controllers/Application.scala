@@ -113,7 +113,8 @@ object Application extends Controller {
   }
 
   def postReceive = Action{ implicit request =>
-    val postData = postingForm.bindFromRequest.get
+    val postData = newPostForm.bindFromRequest.get
     println(postData.description);
+    Ok
   }
 }
