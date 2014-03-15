@@ -28,14 +28,14 @@ CREATE TABLE User (
   creationTime BIGINT NOT NULL,
   lastLogin BIGINT);
 
-CREATE VIEW VeridifedUser AS
+CREATE VIEW VerifiedUser AS
   SELECT * 
   FROM User
   WHERE verifiedEmail = 1;
 
 # --- !Downs
 
-DROP VIEW VeridifedUser;
+DROP VIEW VerifiedUser;
 DROP TABLE Messages;
 DROP TABLE Transactions;
 DROP TABLE User;
