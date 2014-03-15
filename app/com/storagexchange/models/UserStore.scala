@@ -79,7 +79,6 @@ class UserDAL @Inject()(passwordHasher: PasswordHelper) extends UserStore {
         User(name, surname, email, password, universityId, None, None, userId)
     }
 
-
   def insert(user: User): Long = DB.withConnection { implicit conn =>
   	createUserSql.on(
 	    'name -> user.name,

@@ -8,6 +8,7 @@ import play.api.test.Helpers._
 import play.api.db._
 import play.api.Play.{current => curr}
 import java.sql.Timestamp
+import org.h2.jdbc.JdbcSQLException
 
 class UserStoreSpec extends Specification {
   val pswHasher = new FakePasswordHelper
@@ -26,6 +27,9 @@ class UserStoreSpec extends Specification {
   "User Store" should {
     "insert a user" in RunningApp {
     	userStore.insert(user).toInt must beEqualTo(1)
+    }
+    "should trow an exception if inserting user twice" in InsertUser {
+    	userStore.insert(user).toInt must throwA[JdbcSQLException]
     }
     "authorize user" in InsertUser {
       userStore.authenticate(user.email, user.password) must beTrue

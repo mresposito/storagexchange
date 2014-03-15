@@ -20,7 +20,7 @@ CREATE TABLE User (
   userID BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR NOT NULL,
   surname VARCHAR NOT NULL,
-  email VARCHAR NOT NULL,
+  email VARCHAR NOT NULL UNIQUE,
   password VARCHAR NOT NULL,
   verifiedEmail SMALLINT DEFAULT 0,
   thumbnail VARCHAR,
@@ -28,8 +28,14 @@ CREATE TABLE User (
   creationTime BIGINT NOT NULL,
   lastLogin BIGINT);
 
+CREATE VIEW VeridifedUser AS
+  SELECT * 
+  FROM User
+  WHERE verifiedEmail = 1;
+
 # --- !Downs
 
+DROP VIEW VeridifedUser;
 DROP TABLE Messages;
 DROP TABLE Transactions;
 DROP TABLE User;

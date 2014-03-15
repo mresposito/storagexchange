@@ -49,6 +49,9 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
       verifying ("Passwords must match", user => user match {
         case userData => userData.psw1 == userData.psw2
       })
+      verifying ("User already exists", user => user match {
+        case userData => ! userStore.getByEmail(user.email).isDefined  
+      })
     )
 
   def index = Action {
