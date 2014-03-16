@@ -10,6 +10,7 @@ import javax.inject.Inject
 
 case class Post(email: String,
 	description: String,
+  storageSize: Int,
   postID: Option[Long] = None)
 
 /**
@@ -29,9 +30,9 @@ object PostDAL extends PostStore {
   private[this] val createPostSql = {
     SQL("""
       INSERT INTO Post
-        (email, description)
+        (email, description, storageSize)
       VALUES
-        ({email}, {description})
+        ({email}, {description},{storageSize})
     """.stripMargin)
   }
 
@@ -61,15 +62,17 @@ object PostDAL extends PostStore {
   implicit val postParser = 
     str("email") ~
     str("description") ~
+    int("storageSize") ~
     long("postID").? map {
-      case email ~ description ~ postID =>
-        Post(email, description, postID)
+      case email ~ description ~ storageSize ~ postID =>
+        Post(email, description, storageSize,postID)
     }
 
   def insert(post: Post): Long = DB.withConnection { implicit conn =>
   	createPostSql.on(
       'email -> post.email,
-	    'description -> post.description
+	    'description -> post.description,
+      'storageSize -> post.storageSize
 		).executeInsert(scalar[Long].single)
   }
 

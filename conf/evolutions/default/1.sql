@@ -31,7 +31,8 @@ CREATE TABLE User (
 CREATE TABLE Post (
   postID BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   email VARCHAR NOT NULL,
-  description VARCHAR NOT NULL);
+  description VARCHAR NOT NULL,
+  storageSize INT NOT NULL);
 
 CREATE VIEW VeridifedUser AS
   SELECT * 
