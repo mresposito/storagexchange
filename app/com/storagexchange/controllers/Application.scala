@@ -153,4 +153,9 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
     }
     
   }
+
+  def postViewAll = Action{request =>
+    val postList = postStore.getAll()
+    Ok(views.html.postboard(postList))
+  }
 }

@@ -22,6 +22,8 @@ trait PostStore {
   def getById(id: Long): Option[Post]
   def getByEmail(email: String): List[Post]
   def removeById(id: Long): Boolean
+  def getAll(): List[Post]
+  def getAllWithCondition(condition: String): List[Post]
 }
 
 // Actual implementation of Post Store method
@@ -49,6 +51,21 @@ object PostDAL extends PostStore {
        SELECT *
        FROM Post
        WHERE email = {email}
+    """.stripMargin)
+  }
+
+  private[this] val selectPost = {
+    SQL("""
+       SELECT *
+       FROM Post
+    """.stripMargin)
+  }
+
+  private[this] val selectPostWithSuffix = {
+    SQL("""
+       SELECT *
+       FROM Post
+       {suffix}
     """.stripMargin)
   }
 
@@ -93,6 +110,18 @@ object PostDAL extends PostStore {
       'postID -> id
     ).execute()
   }
+
+  def getAll(): List[Post] = DB.withConnection { implicit conn =>
+    selectPost.as(postParser *)
+  }
+
+
+  def getAllWithCondition(condtion: String): List[Post] = DB.withConnection { implicit conn =>
+    selectPostWithSuffix.on(
+      'condition -> condtion
+    ).as(postParser *)
+  }
+
 
   def authenticate(email: String, password: String): Boolean = false
 }
