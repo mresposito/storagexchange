@@ -2,7 +2,7 @@ package com.storagexchange.controllers
 
 import com.storagexchange.views
 import com.storagexchange.models._
-import com.storagexchange.mail._
+import com.storagexchange.mails._
 import com.storagexchange.utils._
 import play.api._
 import play.api.mvc._
@@ -26,7 +26,7 @@ case class SignupRequest(
   psw2: String)
 
 @Singleton
-class Application @Inject()(userStore: UserStore,
+class Application @Inject()(userStore: UserStore, mailSender: MailSender,
     passwordHasher: PasswordHelper, idHasher: IdHasher) extends Controller 
     with Logging {
   
@@ -78,8 +78,6 @@ class Application @Inject()(userStore: UserStore,
    * Serve the signup page
    */
   def signup = Action {
-    val u = User("michele", "esposito", "m@e.com", "12", 0)
-    userStore.insert(u)
     Ok(views.html.signup(newUserForm))
   }
   /**
@@ -101,7 +99,16 @@ class Application @Inject()(userStore: UserStore,
   	)
   }
   private def sendVerificationEmail(user: User): Unit = {
-
+    val root = Play.current.configuration.getString("website.root")
+    val hashedId = idHasher.encrypt(user.userId.get)
+    val url = root.getOrElse("http://localhost:9000/")
+    val verificationURL = url + "verify/" + hashedId
+    val body = views.html.verifyEmail(user.name, verificationURL)
+    val recipient = Recipient(user.name, user.email)
+    mailSender.send(Message(
+      body.toString(),
+      "Welcome to Storage Exchange",
+      List(recipient)))
   }
   /**
    * Verify a user's email adress
@@ -110,7 +117,12 @@ class Application @Inject()(userStore: UserStore,
     try {
       val id = idHasher.decryptLong(token)
       if(userStore.verify(id)) {
-        Ok(views.html.index())   
+        userStore.getById(id).map { user =>
+          Ok(views.html.thankYouForVerifying(user)).
+	        	withSession("email" -> user.email)
+        }. getOrElse {
+          Ok(views.html.index())   
+        }
       } else {
         BadRequest(views.html.error404())
       }

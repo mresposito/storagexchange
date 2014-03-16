@@ -32,7 +32,7 @@ trait UserTest extends Specification {
   }
   def createUserRequest(user: User) = genericCreateRequest(user.password, user.password, user)
   def genericCreateRequest(psw1: String, psw2: String, user: User) = FakeRequest(
-    POST,"/users").withFormUrlEncodedBody(
+    POST,"/signup").withFormUrlEncodedBody(
       "myname" -> user.name,
       "surname" -> user.surname,
       "email" -> user.email,
@@ -82,7 +82,7 @@ class UserSpec extends Specification with UserTest {
       }
 
       "not accept a signup form with only username " in RunningApp {
-        val Some(create) = route(FakeRequest(POST, "/users")
+        val Some(create) = route(FakeRequest(POST, "/signup")
           .withFormUrlEncodedBody("username" -> "michele"))
         status(create) must equalTo(BAD_REQUEST)
       }

@@ -3,6 +3,7 @@ package com.storagexchange.commons
 import com.tzavellas.sse.guice.ScalaModule
 import com.storagexchange.models._
 import com.storagexchange.utils._
+import com.storagexchange.mails._
 
 trait CommodModule extends ScalaModule {
   /**
@@ -17,6 +18,7 @@ trait CommodModule extends ScalaModule {
 
 class ProdModule extends CommodModule {
   override def additionalConf = {
+    bind[MailSender].to[MandrillSender]
     bind[PasswordHelper].to[PlayWithBCryptHelper]
     bind[IdHasher].to[Base64AES]
   }
@@ -24,13 +26,15 @@ class ProdModule extends CommodModule {
 
 class DevModule extends CommodModule {
   override def additionalConf = {
+    bind[MailSender].to[FakeSender]
+    bind[IdHasher].to[FakeIdHasher]
     bind[PasswordHelper].to[PlayWithBCryptHelper]
-    bind[IdHasher].to[Base64AES]
   }
 }
 
 class TestModule extends CommodModule {
   override def additionalConf = {
+    bind[MailSender].to[FakeSender]
     bind[IdHasher].to[FakeIdHasher]
     bind[PasswordHelper].to[FakePasswordHelper]
   }
