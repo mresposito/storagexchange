@@ -17,7 +17,6 @@ import javax.inject.Singleton
 import javax.inject.Inject
 
 case class PostRequest(
-  email: String,
   description: String)
 
 case class SignupRequest(
@@ -61,7 +60,6 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
 
   val newPostForm = Form(
     mapping(
-      "email" -> nonEmptyText(minLength = 4),
       "description" -> nonEmptyText(minLength = 4)
       )(PostRequest.apply)(PostRequest.unapply)
     )
@@ -121,7 +119,7 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
   def postReceive = Action{ implicit request =>
     val postData = newPostForm.bindFromRequest.get
     println(postData.description)
-    val newPost = Post(postData.email, postData.description)
+    val newPost = Post("test@test.com", postData.description)
     postStore.insert(newPost)
     Ok
   }
