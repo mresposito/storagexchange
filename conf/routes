@@ -13,6 +13,8 @@ GET     /post                       @com.storagexchange.controllers.Application.
 POST    /post                       @com.storagexchange.controllers.Application.postReceive
 GET     /myposts                    @com.storagexchange.controllers.Application.postMyRetreive
 GET     /postboard                  @com.storagexchange.controllers.Application.postViewAll
+GET     /modifypost                 @com.storagexchange.controllers.Application.postModifyInitial
+POST    /modifyPost                 @com.storagexchange.controllers.Application.postModify
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

@@ -20,6 +20,9 @@ case class PostRequest(
   description: String,
   storageSize: Int)
 
+case class PostIdRequest(
+  pid: Int)
+
 case class SignupRequest(
   myname: String,
   surname: String,
@@ -60,6 +63,19 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
     )
 
   val newPostForm = Form(
+    mapping(
+      "description" -> nonEmptyText(minLength = 4),
+      "storageSize" -> number(min=0)
+      )(PostRequest.apply)(PostRequest.unapply)
+    )
+
+  val postModifyInitialForm = Form(
+    mapping(
+      "pid" -> number(min=0)
+      )(PostIdRequest.apply)(PostIdRequest.unapply)
+    )
+
+  val postModifyForm = Form(
     mapping(
       "description" -> nonEmptyText(minLength = 4),
       "storageSize" -> number(min=0)
@@ -157,5 +173,23 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
   def postViewAll = Action{request =>
     val postList = postStore.getAll()
     Ok(views.html.postboard(postList))
+  }
+
+  def postModifyInitial = Action{ implicit request =>
+    postModifyInitialForm.bindFromRequest.fold(
+      formWithErrors => Ok,
+      modifyRequest=>{
+        val oldPostOption = postStore.getById(modifyRequest.pid)
+        println(oldPostOption)
+        oldPostOption match{
+          case Some(oldPost) => Ok(views.html.modifypost(newPostForm,oldPost))
+          case None => Ok
+        }
+      }
+    )
+  }
+
+  def postModify = Action{ implicit request =>
+    Ok
   }
 }
