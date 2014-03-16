@@ -2,13 +2,15 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# Home page
+# Front pages and login
 GET     /                           @com.storagexchange.controllers.Application.index
 GET     /login                      @com.storagexchange.controllers.Application.login
 POST    /login                      @com.storagexchange.controllers.Application.authorize
 GET     /signup                     @com.storagexchange.controllers.Application.signup
 POST    /signup                     @com.storagexchange.controllers.Application.registration
 GET     /verify/:token              @com.storagexchange.controllers.Application.verifyEmail(token:String)
+# Dynamic pages
+GET     /profile                    @com.storagexchange.controllers.Dynamic.profile
 
 
 # Map static resources from the /public folder to the /assets URL path
