@@ -12,7 +12,7 @@ import org.h2.jdbc.JdbcSQLException
 
 class PostStoreSpec extends Specification {
   val postStore: PostStore = PostDAL
-  val post = Post("user@test.com", "My post")
+  val post = Post("user@test.com", "My post", 95)
   val postID = post.copy(postID = Some(1))
   
   val InsertPost = BeforeHook {

@@ -139,6 +139,4 @@ object PostDAL extends PostStore {
     ).as(postParser *)
   }
 
-
-  def authenticate(email: String, password: String): Boolean = false
 }
