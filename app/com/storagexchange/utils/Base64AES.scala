@@ -6,21 +6,28 @@ import play.api.libs.Crypto
 import java.net.URLEncoder
 import java.net.URI
 
-object Base64AES {
+trait IdHasher {
 
-  def encrypt(id: Long): String = encrypt(id.toString)
-  def decryptLong(message: String): Long = {
+  def encrypt(id: Long): String
+  def decrypt(id: String): String
+
+  def decryptLong(id: String): Long = {
     val Digit = "(\\d+)".r
-    decrypt(message) match {
+    decrypt(id) match {
       case Digit(num) => num.toLong
       case msg => throw new Exception(s"The number ${msg} is not a long ")
     }
   }
+}
+
+class Base64AES extends IdHasher {
+
+  def encrypt(id: Long): String = encrypt(id.toString)
 
   def encrypt(message: String): String = {
     val aes = Crypto.encryptAES(message)
     val base64Encoded = new String(Base64.encodeBase64(aes.getBytes))
-    URLEncoder.encode(base64Encoded)
+    URLEncoder.encode(base64Encoded, "UTF-8")
   }
 
   def decrypt(message: String): String = {
@@ -28,4 +35,10 @@ object Base64AES {
     val aes = Base64.decodeBase64(urlDecoded.getBytes)
     Crypto.decryptAES(new String(aes))
   }
+}
+
+class FakeIdHasher extends IdHasher {
+  
+  def encrypt(id: Long): String = id.toString
+  def decrypt(id: String): String = id
 }
