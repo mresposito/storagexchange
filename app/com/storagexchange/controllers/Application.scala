@@ -127,12 +127,13 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
   }
 
   def postMyRetreive = Action{request =>
-    //val myPost = Post(request.session.get("email").("email"),NULL,NULL)
+    val myPost = Post("ujrav@yahoo.com","a",0)
     def email = request.session.get("email")
     email match{
-      case Some(emailstr) => println(emailstr)
+      case Some(emailstr) =>
       case None =>
     }
+    println(postStore.getByEmail("test@test.com").head)
     Ok
   }
 }
