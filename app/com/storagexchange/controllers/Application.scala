@@ -21,7 +21,12 @@ case class PostRequest(
   storageSize: Int)
 
 case class PostIdRequest(
-  pid: Int)
+  postID: Long)
+
+case class PostModifyRequest(
+  description: String,
+  storageSize: Int,
+  postID: Long)
 
 case class SignupRequest(
   myname: String,
@@ -71,15 +76,16 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
 
   val postModifyInitialForm = Form(
     mapping(
-      "pid" -> number(min=0)
+      "postID" -> longNumber(min=0)
       )(PostIdRequest.apply)(PostIdRequest.unapply)
     )
 
   val postModifyForm = Form(
     mapping(
       "description" -> nonEmptyText(minLength = 4),
-      "storageSize" -> number(min=0)
-      )(PostRequest.apply)(PostRequest.unapply)
+      "storageSize" -> number(min=0),
+      "postID" -> longNumber(min=0)
+      )(PostModifyRequest.apply)(PostModifyRequest.unapply)
     )
 
   def index = Action {
@@ -164,7 +170,6 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
         case None =>
       }
       val postList = postStore.getByEmail(myEmail)
-      println(postList)
       Ok(views.html.myposts(postList))
     }
     
@@ -179,8 +184,7 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
     postModifyInitialForm.bindFromRequest.fold(
       formWithErrors => Ok,
       modifyRequest=>{
-        val oldPostOption = postStore.getById(modifyRequest.pid)
-        println(oldPostOption)
+        val oldPostOption = postStore.getById(modifyRequest.postID)
         oldPostOption match{
           case Some(oldPost) => Ok(views.html.modifypost(newPostForm,oldPost))
           case None => Ok
@@ -190,6 +194,12 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
   }
 
   def postModify = Action{ implicit request =>
-    Ok
+    postModifyForm.bindFromRequest.fold(
+      formWithErrors => Redirect("myposts"),
+      updatedPost=>{
+        postStore.updateById(updatedPost.postID,updatedPost.description, updatedPost.storageSize)
+        Redirect("myposts")
+      }
+    )
   }
 }

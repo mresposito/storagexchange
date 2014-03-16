@@ -22,6 +22,7 @@ trait PostStore {
   def getById(id: Long): Option[Post]
   def getByEmail(email: String): List[Post]
   def removeById(id: Long): Boolean
+  def updateById(id: Long, description: String, storageSize: Int): Int
   def getAll(): List[Post]
   def getAllWithCondition(condition: String): List[Post]
 }
@@ -58,6 +59,14 @@ object PostDAL extends PostStore {
     SQL("""
        SELECT *
        FROM Post
+    """.stripMargin)
+  }
+
+  private[this] val updatePostById = {
+    SQL("""
+       Update Post
+       SET description={description}, storageSize={storageSize}
+       WHERE postID = {postID}
     """.stripMargin)
   }
 
@@ -109,6 +118,14 @@ object PostDAL extends PostStore {
     removePostByIdSql.on(
       'postID -> id
     ).execute()
+  }
+
+  def updateById(id: Long, description: String, storageSize: Int): Int = DB.withConnection{ implicit conn =>
+    updatePostById.on(
+        'postID->id,
+        'description->description,
+        'storageSize->storageSize
+      ).executeUpdate()
   }
 
   def getAll(): List[Post] = DB.withConnection { implicit conn =>
