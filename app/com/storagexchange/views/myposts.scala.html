@@ -8,9 +8,8 @@
         <h1>My Posts</h1>
         @for(post <- myPosts){
         <div class="well">
-          <li>@post.email</li>
-          <li>@post.description</li>
-          <li>@post.storageSize</li>
+          <li>Description: @post.description</li>
+          <li>Size: @post.storageSize</li>
         </div>
       }
       </div>

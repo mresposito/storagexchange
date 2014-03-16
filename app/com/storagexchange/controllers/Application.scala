@@ -120,20 +120,25 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
 
   def postReceive = Action{ implicit request =>
     val postData = newPostForm.bindFromRequest.get
-    println(postData.description)
-    val newPost = Post("test@test.com", postData.description, postData.storageSize)
+    val email = request.session.get("email")
+    var myEmail :String = ""
+    email match{
+      case Some(emailstr) => myEmail = emailstr
+      case None =>
+    }
+    val newPost = Post(myEmail, postData.description, postData.storageSize)
     postStore.insert(newPost)
     Ok(views.html.newpost(newPostForm))
   }
 
   def postMyRetreive = Action{request =>
-    val myPost = Post("ujrav@yahoo.com","a",0)
-    def email = request.session.get("email")
+    val email = request.session.get("email")
+    var myEmail :String = ""
     email match{
-      case Some(emailstr) =>
+      case Some(emailstr) => myEmail = emailstr
       case None =>
     }
-    val postList = postStore.getByEmail("test@test.com")
+    val postList = postStore.getByEmail(myEmail)
     println(postList)
     Ok(views.html.myposts(postList))
   }
