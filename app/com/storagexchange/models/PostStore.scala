@@ -20,6 +20,7 @@ trait PostStore {
   def insert(post: Post): Long
   def getById(id: Long): Option[Post]
   def getByEmail(email: String): List[Post]
+  def removeById(id: Long): Boolean
 }
 
 // Actual implementation of Post Store method
@@ -50,6 +51,13 @@ object PostDAL extends PostStore {
     """.stripMargin)
   }
 
+  private[this] val removePostByIdSql = {
+    SQL("""
+       DELETE FROM Post
+       WHERE postID = {postID}
+    """.stripMargin)
+  }
+
   implicit val postParser = 
     str("email") ~
     str("description") ~
@@ -75,6 +83,12 @@ object PostDAL extends PostStore {
     findPostByEmailSql.on(
       'email -> email
     ).as(postParser *)
+  }
+
+  def removeById(id: Long): Boolean = DB.withConnection { implicit conn =>
+    removePostByIdSql.on(
+      'postID -> id
+    ).execute()
   }
 
   def authenticate(email: String, password: String): Boolean = false

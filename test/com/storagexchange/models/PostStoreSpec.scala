@@ -37,5 +37,10 @@ class PostStoreSpec extends Specification {
     "not find a non-existent post by id" in InsertPost {
       postStore.getById(3049) must beNone
     }
+    "remove post by id" in InsertPost {
+      postStore.getById(1) must beSome(postID)
+      postStore.removeById(1)
+      postStore.getById(1) must beNone
+    }
   }
 }
