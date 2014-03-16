@@ -11,6 +11,7 @@ POST    /users                      @com.storagexchange.controllers.Application.
 GET     /confirm/:token             @com.storagexchange.controllers.Application.authenticated(token:String)
 GET     /post                       @com.storagexchange.controllers.Application.newPost
 POST    /post                       @com.storagexchange.controllers.Application.postReceive
+GET     /myposts                    @com.storagexchange.controllers.Application.postMyRetreive
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

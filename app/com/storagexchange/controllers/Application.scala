@@ -114,7 +114,7 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
   	)
   }
 
-  def newPost = Action {
+  def newPost = Action { request =>
     Ok(views.html.newpost(newPostForm))
   }
 
@@ -123,6 +123,16 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
     println(postData.description)
     val newPost = Post("test@test.com", postData.description, postData.storageSize)
     postStore.insert(newPost)
+    Ok
+  }
+
+  def postMyRetreive = Action{request =>
+    //val myPost = Post(request.session.get("email").("email"),NULL,NULL)
+    def email = request.session.get("email")
+    email match{
+      case Some(emailstr) => println(emailstr)
+      case None =>
+    }
     Ok
   }
 }
