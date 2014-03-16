@@ -14,49 +14,69 @@ trait PostTest extends Specification {
     
   val postStore: PostStore = PostDAL
 
-  val user = User("michele", "esposito", "m@e.com", "test123", 0)
-  val post = Post("user@test.com", "My post", 95)
-  val postCopy = post.copy(postID = Some(1))
+  val post1 = Post("m@e.com", "My post", 95, Some(1))
+  val post2 = Post("hsimpson@uis.edu", "Homer no function beer well without", 45, Some(2))
 
-  def createPost = {
-    val Some(create) = route(genericCreateRequest(post))
-    status(create) must equalTo(OK)
+  def createPosts = {
+    val Some(create1) = route(createRequest(post1))
+    status(create1) must equalTo(OK)
+    val Some(create2) = route(createRequest(post2))
+    status(create2) must equalTo(OK)
   }
-  val CreatePost = BeforeHook {
-    createPost
+  val CreatePosts = BeforeHook {
+    createPosts
   }
 
-  def genericCreateRequest(post: Post) = FakeRequest(POST,"/post").
-    withSession(("email", user.email)).withFormUrlEncodedBody(
+  def createRequest(post: Post) = FakeRequest(POST, "/post").
+    withSession(("email", post.email)).withFormUrlEncodedBody(
       "description" -> post.description,
       "storageSize" -> post.storageSize.toString)
 
-  def requestWithSession(route: String) = FakeRequest(GET, route).withSession(("email", user.email))
+  def modifyRequest(post: Post) = FakeRequest(POST, "/modifypost").
+    withSession(("email", post.email)).withFormUrlEncodedBody(
+      "description" -> post.description,
+      "storageSize" -> post.storageSize.toString,
+      "postID" -> post.postID.toString)
+
+  def requestWithSession(route: String) = FakeRequest(GET, route).withSession(("email", "m@e.com"))
 }
 
 class PostSpec extends Specification with PostTest {
 
   "Post" should {
 
-    "Create my post correctly" in {
-
-      "accept valid post" in RunningApp {
-        val Some(create) = route(genericCreateRequest(post))
-        status(create) must beEqualTo(OK)
-      }
-
-      "view my posts" in CreatePost {
-        val Some(myPosts) = route(requestWithSession("/myposts"))
-        status(myPosts) must beEqualTo(OK)
-        contentAsString(myPosts) must contain("Description: " + post.description)
-        contentAsString(myPosts) must contain("Size: " + post.storageSize.toString)
-      }
-
-      "not view my posts if not logged in" in CreatePost {
-        val Some(myPosts) = route(FakeRequest(GET, "/myposts"))
-        status(myPosts) must beEqualTo(SEE_OTHER)
-      }
+    "accept valid post" in RunningApp {
+      val Some(create) = route(createRequest(post1))
+      status(create) must beEqualTo(OK)
     }
 
+    "view my posts" in CreatePosts {
+      val Some(myPosts) = route(requestWithSession("/myposts"))
+      contentAsString(myPosts) must contain("Description: " + post1.description)
+      contentAsString(myPosts) must contain("Size: " + post1.storageSize.toString)
+      contentAsString(myPosts) must not contain("Description: " + post2.description)
+      contentAsString(myPosts) must not contain("Size: " + post2.storageSize.toString)
+    }
+
+    "not view my posts if not logged in" in CreatePosts {
+      // Redirect to login page
+      val Some(myPosts) = route(FakeRequest(GET, "/myposts"))
+      status(myPosts) must beEqualTo(SEE_OTHER)
+    }
+
+    "display all posts on post board" in CreatePosts {
+      val Some(allPosts) = route(requestWithSession("/postboard"))
+      contentAsString(allPosts) must contain("Description: " + post1.description)
+      contentAsString(allPosts) must contain("Size: " + post1.storageSize.toString)
+      contentAsString(allPosts) must contain("User: " + post1.email)
+      contentAsString(allPosts) must contain("Description: " + post2.description)
+      contentAsString(allPosts) must contain("Size: " + post2.storageSize.toString)
+      contentAsString(allPosts) must contain("User: " + post2.email)
+    }
+
+    // "modify post" in CreatePosts {
+    //   val updatedPost = Post("m@e.com", "My updated post", 102, Some(1))
+    //   route(modifyRequest(updatedPost))
+    // }
   }
 }

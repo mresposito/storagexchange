@@ -143,11 +143,11 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
     }
   }
 
-  def postReceive = Action{ implicit request =>
+  def postReceive = Action { implicit request =>
     val postData = newPostForm.bindFromRequest.get
     val email = request.session.get("email")
     var myEmail :String = ""
-    email match{
+    email match {
       case Some(emailstr) => myEmail = emailstr
       case None =>
     }
@@ -156,14 +156,14 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
     Ok(views.html.newpost(newPostForm))
   }
 
-  def postMyRetreive = Action{request =>
+  def postMyRetreive = Action { request =>
     if (request.session.isEmpty) {
       Redirect("/login")
     } 
     else {
       val email = request.session.get("email")
       var myEmail :String = ""
-      email match{
+      email match {
         case Some(emailstr) => myEmail = emailstr
         case None =>
       }
@@ -173,17 +173,17 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
     
   }
 
-  def postViewAll = Action{request =>
+  def postViewAll = Action { request =>
     val postList = postStore.getAll()
     Ok(views.html.postboard(postList))
   }
 
-  def postModifyInitial = Action{ implicit request =>
+  def postModifyInitial = Action { implicit request =>
     postModifyInitialForm.bindFromRequest.fold(
       formWithErrors => Ok,
-      modifyRequest=>{
+      modifyRequest => {
         val oldPostOption = postStore.getById(modifyRequest.postID)
-        oldPostOption match{
+        oldPostOption match {
           case Some(oldPost) => Ok(views.html.modifypost(newPostForm,oldPost))
           case None => Ok
         }
@@ -194,8 +194,8 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
   def postModify = Action{ implicit request =>
     postModifyForm.bindFromRequest.fold(
       formWithErrors => Redirect("myposts"),
-      updatedPost=>{
-        postStore.updateById(updatedPost.postID,updatedPost.description, updatedPost.storageSize)
+      updatedPost => {
+        postStore.updateById(updatedPost.postID, updatedPost.description, updatedPost.storageSize)
         Redirect("myposts")
       }
     )
