@@ -44,7 +44,7 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
 
   val postStore: PostStore = PostDAL
 
-    val loginForm = Form(
+  val loginForm = Form(
     tuple(
       "email" -> nonEmptyText(minLength = 4),
       "password" -> nonEmptyText(minLength = 6)

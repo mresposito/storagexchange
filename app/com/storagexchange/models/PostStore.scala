@@ -131,8 +131,7 @@ object PostDAL extends PostStore {
   def getAll(): List[Post] = DB.withConnection { implicit conn =>
     selectPost.as(postParser *)
   }
-
-
+  
   def getAllWithCondition(condtion: String): List[Post] = DB.withConnection { implicit conn =>
     selectPostWithSuffix.on(
       'condition -> condtion

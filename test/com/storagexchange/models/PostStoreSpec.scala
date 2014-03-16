@@ -13,11 +13,11 @@ import org.h2.jdbc.JdbcSQLException
 class PostStoreSpec extends Specification {
   val postStore: PostStore = PostDAL
   val post = Post("user@test.com", "My post", 95)
-  val postID = post.copy(postID = Some(1))
-  
+  val postCopy = post.copy(postID = Some(1))
+
   val InsertPost = BeforeHook {
     DB.withConnection { implicit conn =>
-        postStore.insert(post).toInt must beEqualTo(1)
+      postStore.insert(post).toInt must beEqualTo(1)
     }
   }
   
@@ -26,21 +26,26 @@ class PostStoreSpec extends Specification {
         postStore.insert(post).toInt must beEqualTo(1)
     }
     "find post by email" in InsertPost {
-      postStore.getByEmail(post.email) must beEqualTo(List(postID))
+      postStore.getByEmail(post.email) must beEqualTo(List(postCopy))
     }
     "not find a non-existent post by email" in InsertPost {
       postStore.getByEmail("hello@me") must beEqualTo(List())
     }
     "find post by id" in InsertPost {
-      postStore.getById(1) must beSome(postID)
+      postStore.getById(1) must beSome(postCopy)
     }
     "not find a non-existent post by id" in InsertPost {
       postStore.getById(3049) must beNone
     }
     "remove post by id" in InsertPost {
-      postStore.getById(1) must beSome(postID)
+      postStore.getById(1) must beSome(postCopy)
       postStore.removeById(1)
       postStore.getById(1) must beNone
+    }
+    "update post by id" in InsertPost {
+      val updatedPost = Post("user@test.com", "My updated post", 101, Some(1))
+      postStore.updateById(1, "My updated post", 101)
+      postStore.getById(1) must beSome(updatedPost)
     }
   }
 }
