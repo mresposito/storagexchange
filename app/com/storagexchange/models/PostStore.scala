@@ -22,8 +22,7 @@ trait PostStore {
   def getByEmail(email: String): List[Post]
 }
 
-
-// Actual implementation of User Store method
+// Actual implementation of Post Store method
 object PostDAL extends PostStore {
   
   private[this] val createPostSql = {
