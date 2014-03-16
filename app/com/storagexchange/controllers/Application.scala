@@ -115,7 +115,12 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
   }
 
   def newPost = Action { request =>
-    Ok(views.html.newpost(newPostForm))
+    if (request.session.isEmpty) {
+      Redirect("/login")
+    } 
+    else {
+      Ok(views.html.newpost(newPostForm))
+    }
   }
 
   def postReceive = Action{ implicit request =>
@@ -132,14 +137,20 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
   }
 
   def postMyRetreive = Action{request =>
-    val email = request.session.get("email")
-    var myEmail :String = ""
-    email match{
-      case Some(emailstr) => myEmail = emailstr
-      case None =>
+    if (request.session.isEmpty) {
+      Redirect("/login")
+    } 
+    else {
+      val email = request.session.get("email")
+      var myEmail :String = ""
+      email match{
+        case Some(emailstr) => myEmail = emailstr
+        case None =>
+      }
+      val postList = postStore.getByEmail(myEmail)
+      println(postList)
+      Ok(views.html.myposts(postList))
     }
-    val postList = postStore.getByEmail(myEmail)
-    println(postList)
-    Ok(views.html.myposts(postList))
+    
   }
 }
