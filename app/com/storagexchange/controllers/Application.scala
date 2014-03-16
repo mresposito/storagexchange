@@ -2,7 +2,7 @@ package com.storagexchange.controllers
 
 import com.storagexchange.views
 import com.storagexchange.models._
-import com.storagexchange.mail._ 
+import com.storagexchange.mails._
 import com.storagexchange.utils._
 import play.api._
 import play.api.mvc._
@@ -15,6 +15,7 @@ import play.api.db.DB
 import java.util.UUID
 import javax.inject.Singleton
 import javax.inject.Inject
+import com.typesafe.scalalogging.slf4j.Logging
 
 case class PostRequest(
   description: String,
@@ -37,11 +38,13 @@ case class SignupRequest(
   psw2: String)
 
 @Singleton
-class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper) extends Controller {
-    
+class Application @Inject()(userStore: UserStore, mailSender: MailSender,
+    passwordHasher: PasswordHelper, idHasher: IdHasher) extends Controller 
+    with Logging {
+
   val postStore: PostStore = PostDAL
 
-  val loginForm = Form(
+    val loginForm = Form(
     tuple(
       "email" -> nonEmptyText(minLength = 4),
       "password" -> nonEmptyText(minLength = 6)
@@ -112,12 +115,6 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
   def signup = Action {
     Ok(views.html.signup(newUserForm))
   }
- 
-  def authenticated(token:String) = Action {
-    println(token)
-    Ok(views.html.login(loginForm))
-  }
-
   /**
    * signs up a new user
    */
@@ -130,6 +127,7 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
         val user = User(newUser.myname, newUser.surname,
           newUser.email, password, 0)
         val userId = userStore.insert(user)
+        sendVerificationEmail(user.copy(userId = Some(userId)))
         Redirect(routes.Application.index()).
         	withSession("email" -> newUser.email)
   	  }
@@ -202,4 +200,41 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
       }
     )
   }
+
+  private def sendVerificationEmail(user: User): Unit = {
+    val root = Play.current.configuration.getString("website.root")
+    val hashedId = idHasher.encrypt(user.userId.get)
+    val url = root.getOrElse("http://localhost:9000/")
+    val verificationURL = url + "verify/" + hashedId
+    val body = views.html.verifyEmail(user.name, verificationURL)
+    val recipient = Recipient(user.name, user.email)
+    mailSender.send(Message(
+      body.toString(),
+      "Welcome to Storage Exchange",
+      List(recipient)))
+  }
+  /**
+   * Verify a user's email adress
+   */
+  def verifyEmail(token:String) = Action {
+    try {
+      val id = idHasher.decryptLong(token)
+      if(userStore.verify(id)) {
+        userStore.getById(id).map { user =>
+          Ok(views.html.thankYouForVerifying(user)).
+	        	withSession("email" -> user.email)
+        }. getOrElse {
+          Ok(views.html.index())   
+        }
+      } else {
+        BadRequest(views.html.error404())
+      }
+    } catch {
+      case e:Exception => {
+        logger.info(s"Invalid token: ${token}")
+        BadRequest(views.html.error404())
+      }
+    }
+  }
+
 }

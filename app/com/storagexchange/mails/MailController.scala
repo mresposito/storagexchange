@@ -1,6 +1,5 @@
-package com.storagexchange.mail
+package com.storagexchange.mails
 
-import play.api.templates.Html
 import play.api.Play
 import play.api.libs.json.Json
 import play.api.libs.json._
@@ -8,6 +7,7 @@ import play.api.libs.ws.WS
 import play.api.Play.current
 import play.api.libs.concurrent._
 import Execution.Implicits._
+import com.typesafe.scalalogging.slf4j.Logging
 
 //not sure why we use case classes
 case class Recipient(name: String, email: String)
@@ -21,7 +21,13 @@ trait MailSender {
   def send (message: Message)
 }
 
-class MandrillSender {
+class FakeSender extends MailSender with Logging {
+  def send(message: Message) = {
+    logger.info(s"Sending email to ${message.to}")
+  }
+}
+
+class MandrillSender extends MailSender {
   val mandrillKey = Play.current.configuration.getString("mandrill.key")
   val mandrillRoot = Play.current.configuration.getString("mandrill.apiURL")
 
@@ -42,16 +48,3 @@ class MandrillSender {
     WS.url(mandrillRoot.get + "/messages/send").post(Json.toJson(mandrill))
   }
 }
-
-class MailController(val mailSender: MandrillSender)  {
-  def sendVerificationEmail(recipient: Recipient, verificationURL: String) = {
-    mailSender.send(Message(
-      verificationURL,
-      "Welcome to StorageExchange",
-      List(recipient)))
-  }
-
-  def send(message: Message) = mailSender.send(message)
-      
-}
-
