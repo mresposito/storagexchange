@@ -123,7 +123,7 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
     println(postData.description)
     val newPost = Post("test@test.com", postData.description, postData.storageSize)
     postStore.insert(newPost)
-    Ok
+    Ok(views.html.newpost(newPostForm))
   }
 
   def postMyRetreive = Action{request =>
@@ -133,7 +133,8 @@ class Application @Inject()(userStore: UserStore, passwordHasher: PasswordHelper
       case Some(emailstr) =>
       case None =>
     }
-    println(postStore.getByEmail("test@test.com").head)
-    Ok
+    val postList = postStore.getByEmail("test@test.com")
+    println(postList)
+    Ok(views.html.myposts(postList))
   }
 }
