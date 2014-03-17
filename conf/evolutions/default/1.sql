@@ -53,14 +53,6 @@ CREATE TABLE University (
   FOREIGN KEY(locationID) REFERENCES Location(id) ON DELETE CASCADE,
   PRIMARY KEY (name, locationID));
 
---CREATE TABLE University (
-  --name VARCHAR NOT NULL,
-  --website VARCHAR(2083) NOT NULL, 
-  --logo VARCHAR NOT NULL,
-  --colors VARCHAR NOT NULL,
-  --PRIMARY_KEY(name,locationID),
-  --FOREIGN KEY(locationID) REFERENCES Location(locationID) ON DELETE CASCADE);
-
 # --- !Downs
 
 DROP VIEW VerifiedUser;
