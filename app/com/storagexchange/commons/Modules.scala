@@ -11,7 +11,6 @@ trait CommodModule extends ScalaModule {
    */
   def configure = {
     bind[UserStore].to[UserDAL]
-    bind[Clock].to[RealClock]
     additionalConf
   }
   def additionalConf = {}
@@ -22,6 +21,7 @@ class ProdModule extends CommodModule {
     bind[MailSender].to[MandrillSender]
     bind[PasswordHelper].to[PlayWithBCryptHelper]
     bind[IdHasher].to[Base64AES]
+    bind[Clock].to[RealClock]
   }
 }
 
@@ -30,6 +30,7 @@ class DevModule extends CommodModule {
     bind[MailSender].to[FakeSender]
     bind[IdHasher].to[FakeIdHasher]
     bind[PasswordHelper].to[PlayWithBCryptHelper]
+    bind[Clock].to[RealClock]
   }
 }
 
@@ -38,5 +39,6 @@ class TestModule extends CommodModule {
     bind[MailSender].to[FakeSender]
     bind[IdHasher].to[FakeIdHasher]
     bind[PasswordHelper].to[FakePasswordHelper]
+    bind[Clock].to[FakeClock]
   }
 }

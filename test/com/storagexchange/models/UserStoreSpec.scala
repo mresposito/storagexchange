@@ -25,10 +25,6 @@ class UserStoreSpec extends Specification with UserTest {
     	userStore.verify(1) must beTrue
     }
   }
-  val clockTwo = mock(classOf[Clock])
-  when(clockTwo.now).thenReturn(tomorrow)
-  val userStore2 = new UserDAL(pswHasher, clockTwo)
-  val tomorrowLong = tomorrow.getTime()
   
   "User Store" should {
     "insert a user" in RunningApp {
@@ -55,22 +51,7 @@ class UserStoreSpec extends Specification with UserTest {
     "not find an inexisting user by id should be none" in InsertUser {
       userStore.getById(3049) must beNone
     }
-    "authenticate should update login time" in InsertUser {
-      userStore2.authenticate(user.email, user.password)
-      userStore2.getByEmail(user.email).get.lastLogin must beSome(tomorrow)
-    }
-    "updateLoginTime shoud be true for existing user" in InsertUser {
-      userStore2.updateLoginTime(user.email, tomorrowLong) must beTrue
-    }
-    "updateLoginTime shoud be false for non existing user" in InsertUser {
-      userStore2.updateLoginTime("hello", tomorrowLong) must beFalse
-    }
-    "updateLoginTime shoud update the login time" in InsertUser {
-      userStore2.updateLoginTime(user.email, tomorrowLong)
-      userStore2.getByEmail(user.email).get.lastLogin must beSome(tomorrow)
-    }
   }
-  // reset clock
   
   "Verified User store" should {
     "not retrieve a not verified user by email" in InsertUser {

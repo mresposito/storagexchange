@@ -17,3 +17,8 @@ class RealClock extends Clock {
   
   def date = new Date()
 }
+
+class FakeClock extends Clock {
+  
+  def date = new Date(600)
+}
