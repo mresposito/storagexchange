@@ -9,9 +9,15 @@ POST    /login                      @com.storagexchange.controllers.Application.
 GET     /signup                     @com.storagexchange.controllers.Application.signup
 POST    /signup                     @com.storagexchange.controllers.Application.registration
 GET     /verify/:token              @com.storagexchange.controllers.Application.verifyEmail(token:String)
+GET     /post                       @com.storagexchange.controllers.Application.newPost
+POST    /post                       @com.storagexchange.controllers.Application.postReceive
+GET     /myposts                    @com.storagexchange.controllers.Application.postMyRetreive
+GET     /postboard                  @com.storagexchange.controllers.Application.postViewAll
+GET     /modifypost                 @com.storagexchange.controllers.Application.postModifyInitial
+POST    /modifypost                 @com.storagexchange.controllers.Application.postModify
+GET     /deletepost                 @com.storagexchange.controllers.Application.postDelete
 # Dynamic pages
 GET     /profile                    @com.storagexchange.controllers.Dynamic.profile
-
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

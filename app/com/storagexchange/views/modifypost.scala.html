@@ -1,0 +1,32 @@
+@(form: Form[com.storagexchange.controllers.PostRequest], oldPost: com.storagexchange.models.Post)
+@import helper.twitterBootstrap._
+
+@main("Storage Exchange") {
+ <div class="page loginPage">
+    <div class="container">
+      <div class="text-center">
+        <h1>Modify Post</h1>
+        @helper.form(controllers.routes.Application.postModify, 'class->"form-horizontal") {
+          <div class="form-group">
+            <label for="inputDescription3" class="col-sm-2 control-label">Description</label>
+            <div class="col-sm-9">
+              <input type="textfield" class="form-control" id="inputDescription" name="description" value="@form("description").value">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputStorageSize3" class="col-sm-2 control-label">Storage Size</label>
+            <div class="col-sm-9">
+              <input type="textfield" class="form-control" id="inputstorageSize" name="storageSize"  value="@form("storageSize").value">
+            </div>
+          </div>
+          <input type="hidden" name="postID" id="postID" value=@oldPost.postID />
+          <div class="form-group">
+            <div class="col-sm-offset-1 col-sm-10">
+              <button type="submit" class="btn btn-block btn-lg btn-flashy">Submit</button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

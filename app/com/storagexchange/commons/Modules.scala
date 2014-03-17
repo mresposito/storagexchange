@@ -11,6 +11,7 @@ trait CommodModule extends ScalaModule {
    */
   def configure = {
     bind[UserStore].to[UserDAL]
+    bind[PostStore].to[PostDAL]
     additionalConf
   }
   def additionalConf = {}

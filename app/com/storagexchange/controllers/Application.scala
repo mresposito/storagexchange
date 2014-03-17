@@ -17,6 +17,18 @@ import javax.inject.Singleton
 import javax.inject.Inject
 import com.typesafe.scalalogging.slf4j.Logging
 
+case class PostRequest(
+  description: String,
+  storageSize: Int)
+
+case class PostIdRequest(
+  postID: Long)
+
+case class PostModifyRequest(
+  description: String,
+  storageSize: Int,
+  postID: Long)
+
 case class SignupRequest(
   myname: String,
   surname: String,
@@ -26,10 +38,10 @@ case class SignupRequest(
   psw2: String)
 
 @Singleton
-class Application @Inject()(userStore: UserStore, mailSender: MailSender,
+class Application @Inject()(userStore: UserStore, postStore: PostStore, mailSender: MailSender,
     passwordHasher: PasswordHelper, idHasher: IdHasher) extends Controller 
-    with Logging {
-  
+    with Logging with Secured {
+
   val loginForm = Form(
     tuple(
       "email" -> nonEmptyText(minLength = 4),
@@ -54,6 +66,33 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
       verifying ("User already exists", user => user match {
         case userData => ! userStore.getByEmail(user.email).isDefined  
       })
+    )
+
+  val newPostForm = Form(
+    mapping(
+      "description" -> nonEmptyText(minLength = 4),
+      "storageSize" -> number(min=0)
+      )(PostRequest.apply)(PostRequest.unapply)
+    )
+
+  val postModifyInitialForm = Form(
+    mapping(
+      "postID" -> longNumber(min=0)
+      )(PostIdRequest.apply)(PostIdRequest.unapply)
+    )
+
+  val postModifyForm = Form(
+    mapping(
+      "description" -> nonEmptyText(minLength = 4),
+      "storageSize" -> number(min=0),
+      "postID" -> longNumber(min=0)
+      )(PostModifyRequest.apply)(PostModifyRequest.unapply)
+    )
+
+  val postDeleteForm = Form(
+    mapping(
+      "postID" -> longNumber(min=0)
+      )(PostIdRequest.apply)(PostIdRequest.unapply)
     )
 
   def index = Action { implicit request =>
@@ -105,6 +144,64 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
   	  }
   	)
   }
+
+  def newPost = IsAuthenticated { username => _ =>
+    Ok(views.html.newpost(newPostForm))
+  }
+
+  def postReceive = IsAuthenticated { username => implicit request =>
+    newPostForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(views.html.error404()),
+      postData => { 
+        postStore.insert(Post(username, postData.description, postData.storageSize))
+        Ok(views.html.newpost(newPostForm))
+      }
+    )
+  }
+
+  def postMyRetreive = IsAuthenticated { username => _ => 
+      val postList = postStore.getByEmail(username)
+      Ok(views.html.myposts(postList))
+  }
+
+  def postViewAll = Action { request =>
+    val postList = postStore.getAll()
+    Ok(views.html.postboard(postList))
+  }
+
+  def postModifyInitial = IsAuthenticated { username => implicit request =>
+    postModifyInitialForm.bindFromRequest.fold(
+      // Fix: should go to proper page with errors.
+      // Having issue with that however.
+      formWithErrors => BadRequest(views.html.error404()),
+      modifyRequest => {
+        postStore.getById(modifyRequest.postID).map { oldPost =>
+          Ok(views.html.modifypost(newPostForm, oldPost))  
+        }.getOrElse(Ok(views.html.index()))
+      }
+    )
+  }
+
+  def postModify = IsAuthenticated { username => implicit request =>
+    postModifyForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(views.html.error404()),
+      updatedPost => {
+        postStore.updateById(updatedPost.postID, updatedPost.description, updatedPost.storageSize)
+        Redirect("myposts")
+      }
+    )
+  }
+
+  def postDelete = IsAuthenticated{ username => implicit request =>
+    postDeleteForm.bindFromRequest.fold(
+      formWithErrors => Redirect("/myposts"),
+      deletedPost => {
+        postStore.removeById(deletedPost.postID)
+        Redirect("myposts")
+      }
+    )
+  }
+
   private def sendVerificationEmail(user: User): Unit = {
     val root = Play.current.configuration.getString("website.root")
     val hashedId = idHasher.encrypt(user.userId.get)
