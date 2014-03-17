@@ -12,7 +12,7 @@ import com.storagexchange.models.PostStore
 
 trait PostTest extends Specification {
     
-  val postStore: PostStore = PostDAL
+  val postStore: PostStore = new PostDAL
 
   val post1 = Post("m@e.com", "My post", 95, Some(1))
   val post2 = Post("hsimpson@uis.edu", "Homer no function beer well without", 45, Some(2))

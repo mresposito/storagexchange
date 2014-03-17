@@ -38,11 +38,9 @@ case class SignupRequest(
   psw2: String)
 
 @Singleton
-class Application @Inject()(userStore: UserStore, mailSender: MailSender,
+class Application @Inject()(userStore: UserStore, postStore: PostStore, mailSender: MailSender,
     passwordHasher: PasswordHelper, idHasher: IdHasher) extends Controller 
     with Logging {
-
-  val postStore: PostStore = PostDAL
 
   val loginForm = Form(
     tuple(

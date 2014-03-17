@@ -11,7 +11,7 @@ import java.sql.Timestamp
 import org.h2.jdbc.JdbcSQLException
 
 class PostStoreSpec extends Specification {
-  val postStore: PostStore = PostDAL
+  val postStore: PostStore = new PostDAL
   val post1 = Post("user@test.com", "My post", 95, Some(1))
   val post2 = Post("other@me.com", "Some other post", 42, Some(2))
   val post1Copy = post1.copy()

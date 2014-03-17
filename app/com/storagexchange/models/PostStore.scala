@@ -27,7 +27,8 @@ trait PostStore {
 }
 
 // Actual implementation of Post Store method
-object PostDAL extends PostStore {
+@Singleton
+class PostDAL extends PostStore {
   
   private[this] val createPostSql = {
     SQL("""
