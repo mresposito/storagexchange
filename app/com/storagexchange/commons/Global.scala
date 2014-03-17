@@ -8,6 +8,7 @@ import play.api.db.DB
 import play.api.Play.current
 import java.io.File
 import com.typesafe.config.ConfigFactory
+import play.api.Play.current
 
 object Global extends GlobalSettings with Logging {
 
@@ -29,6 +30,19 @@ object Global extends GlobalSettings with Logging {
    */
   override def getControllerInstance[A](clazz: Class[A]) = {
     injector.getInstance(clazz)
+  }
+
+
+  override def onStart(app: Application) {
+    Play.mode match {
+      case Mode.Dev => initialize_universities
+    }
+  }
+
+  private def initialize_universities = {
+    //val jsonLocation : String = "../../../../universities.json"
+    //println projectRoot
+    val jsonLocation : String = "../../../../universities.json"
   }
 
   /**
