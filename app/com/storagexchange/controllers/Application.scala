@@ -88,13 +88,25 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
   	  formWithErrors => BadRequest(views.html.signup(formWithErrors)),
   	  newUser => {
   	  	val password = passwordHasher.createPassword(newUser.psw1)
-  	  	// TODO: Make sure the commented statement below is correct. Write tests for it.
-        //val univID = universityStore.getIdByName(newUser.university)
+  	  	// TODO: Make sure the commented statement below is correct. Write tests for it. Change to map
+        val universityMatch = universityStore.getIdByName(newUser.university)
+        val univId = universityMatch match {
+                        case Some(elem)  => 
+                          elem match { 
+                            case University(locationId, name, website, logo, colors, id) => 
+                              id match {
+                                case Some(universityID) => universityID
+                                case None => sys.error("No valid ID")
+                              }
+                            case _ => sys.error("Invalid tuple")
+                          }
+                        case None => sys.error("Invalid tuple")
+                     }
         val user = User(newUser.myname, newUser.surname,
-          newUser.email, password, 0)
+          newUser.email, password, univId)
         val userId = userStore.insert(user)
         sendVerificationEmail(user.copy(userId = Some(userId)))
-        Redirect(routes.Application.index()).
+        Redirect(routes.Application.index()). 
         	withSession("email" -> newUser.email)
   	  }
   	)

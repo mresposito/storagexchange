@@ -13,7 +13,7 @@ case class University(locationID: Long,
   website: String,
   logo: String,
   colors: String,
-  universityID: Option[Long] = None)
+  id: Option[Long] = None)
 
 /**
  * Methods that we will be using from
@@ -24,6 +24,8 @@ trait UniversityStore {
   def insert(university: University): Option[Long]
   
   def getByCity(city: String): Option[University]
+
+  def getIdByName(name: String): Option[University]
 
   def getAll(): List[University]
 
@@ -51,7 +53,7 @@ class UniversityDAL extends UniversityStore {
   
   private[this] val getUniversityIdByName = {
     SQL(s"""
-        SELECT universityID
+        SELECT *
         FROM University
         WHERE name = {name}
       """.stripMargin)
@@ -70,9 +72,9 @@ class UniversityDAL extends UniversityStore {
     str("website") ~
     str("logo") ~
     str("colors") ~
-    long("universityID").? map {
-      case locationID ~ name ~ website ~ logo ~ colors ~ universityID =>
-        University(locationID, name, website, logo, colors, universityID)
+    long("id").? map {
+      case locationID ~ name ~ website ~ logo ~ colors ~ id =>
+        University(locationID, name, website, logo, colors, id)
     }
 
   def insert(university: University): Option[Long] = DB.withConnection { implicit conn =>
@@ -82,7 +84,7 @@ class UniversityDAL extends UniversityStore {
       'website -> university.website,
       'logo -> university.logo,
       'colors -> university.colors,
-      'universityID -> university.universityID
+      'id -> university.id
     ).executeInsert(scalar[Long].singleOpt)
   }
  

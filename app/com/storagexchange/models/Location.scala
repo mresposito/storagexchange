@@ -22,6 +22,7 @@ trait LocationStore {
   //TODO: add some more interesting and useful SQL queries
   def insert(location: Location): Long
 
+  def getAll(): List[Location]
 }
 
 @Singleton
@@ -35,7 +36,15 @@ class LocationDAL extends LocationStore {
         ({name}, {lat}, {lng}, {city}, {state}, {address}, {id})
     """.stripMargin)
   }
-    
+  
+  private[this] val selectLocation = {
+    SQL("""
+        SELECT * 
+        FROM Location
+      """.stripMargin)
+  }
+
+
   implicit val locationParser =
     str("name") ~
     long("lat") ~
@@ -59,5 +68,10 @@ class LocationDAL extends LocationStore {
       'id -> location.id
     ).executeInsert(scalar[Long].single)
   }
+
+  def getAll(): List[Location] = DB.withConnection { implicit conn =>
+    selectLocation.as(locationParser *)
+  } 
+
 
 }
