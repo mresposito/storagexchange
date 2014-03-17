@@ -1,5 +1,6 @@
 package com.storagexchange.controllers
 
+import org.mockito.Mockito.{mock, when}
 import com.storagexchange.models._
 import com.storagexchange.utils._
 import play.api.test._
@@ -9,18 +10,25 @@ import org.specs2.mutable._
 import play.api.test._
 import play.api.test.Helpers._
 import com.storagexchange.models.UserStore
+import java.sql.Timestamp
 
 trait UserTest extends Specification {
     
+  val today = new Timestamp(600)
+  val tomorrow = new Timestamp(100430600)
+  val clock = mock(classOf[Clock])
+  // mock the class
+  when(clock.now).thenReturn(today)
   val pswHasher = new FakePasswordHelper
-  val userStore: UserStore = new UserDAL(pswHasher)
+  val userStore: UserStore = new UserDAL(pswHasher, clock)
 
   val SignUp = BeforeHook {
     createUser
   }
   val id = 1
+  val now = Some(clock.now)
   val password = "12345678"
-  val user = User("michele", "esposito", "m@e.com", password, 0)
+  val user = User("michele", "esposito", "m@e.com", password, 0, now, now)
   val userId = user.copy(userId = Some(id))
 
   def createUser = {
@@ -32,7 +40,7 @@ trait UserTest extends Specification {
   }
   def createUserRequest(user: User) = genericCreateRequest(user.password, user.password, user)
   def genericCreateRequest(psw1: String, psw2: String, user: User) = FakeRequest(
-    POST,"/signup").withFormUrlEncodedBody(
+    POST, routes.Application.signup.url).withFormUrlEncodedBody(
       "myname" -> user.name,
       "surname" -> user.surname,
       "email" -> user.email,
