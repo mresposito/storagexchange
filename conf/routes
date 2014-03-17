@@ -2,7 +2,7 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# Home page
+# Front pages and login
 GET     /                           @com.storagexchange.controllers.Application.index
 GET     /login                      @com.storagexchange.controllers.Application.login
 POST    /login                      @com.storagexchange.controllers.Application.authorize
@@ -14,7 +14,9 @@ POST    /post                       @com.storagexchange.controllers.Application.
 GET     /myposts                    @com.storagexchange.controllers.Application.postMyRetreive
 GET     /postboard                  @com.storagexchange.controllers.Application.postViewAll
 GET     /modifypost                 @com.storagexchange.controllers.Application.postModifyInitial
-POST    /modifyPost                 @com.storagexchange.controllers.Application.postModify
+POST    /modifypost                 @com.storagexchange.controllers.Application.postModify
+# Dynamic pages
+GET     /profile                    @com.storagexchange.controllers.Dynamic.profile
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
