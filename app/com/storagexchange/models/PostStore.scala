@@ -9,7 +9,7 @@ import javax.inject.Singleton
 import javax.inject.Inject
 
 case class Post(email: String,
-	description: String,
+  description: String,
   storageSize: Int,
   postID: Option[Long] = None)
 
@@ -24,7 +24,6 @@ trait PostStore {
   def removeById(id: Long): Boolean
   def updateById(id: Long, description: String, storageSize: Int): Int
   def getAll(): List[Post]
-  def getAllWithCondition(condition: String): List[Post]
 }
 
 // Actual implementation of Post Store method
@@ -95,11 +94,11 @@ object PostDAL extends PostStore {
     }
 
   def insert(post: Post): Long = DB.withConnection { implicit conn =>
-  	createPostSql.on(
+    createPostSql.on(
       'email -> post.email,
-	    'description -> post.description,
+      'description -> post.description,
       'storageSize -> post.storageSize
-		).executeInsert(scalar[Long].single)
+    ).executeInsert(scalar[Long].single)
   }
 
   def getById(id: Long): Option[Post] = DB.withConnection { implicit conn =>
@@ -132,10 +131,4 @@ object PostDAL extends PostStore {
     selectPost.as(postParser *)
   }
   
-  def getAllWithCondition(condtion: String): List[Post] = DB.withConnection { implicit conn =>
-    selectPostWithSuffix.on(
-      'condition -> condtion
-    ).as(postParser *)
-  }
-
 }
