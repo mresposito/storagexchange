@@ -9,6 +9,7 @@ import play.api.Play.current
 import java.io.File
 import com.typesafe.config.ConfigFactory
 import play.api.Play.current
+import play.api.libs.json._
 
 object Global extends GlobalSettings with Logging {
 
@@ -35,14 +36,18 @@ object Global extends GlobalSettings with Logging {
 
   override def onStart(app: Application) {
     Play.mode match {
+      //we need to populate the table of universities everytime the app starts, be it dev or production
       case Mode.Dev => initialize_universities
+      case Mode.Prod => initialize_universities
     }
   }
 
   private def initialize_universities = {
-    //val jsonLocation : String = "../../../../universities.json"
-    //println projectRoot
-    val jsonLocation : String = "../../../../universities.json"
+    val jsonFile = Play.application.getFile("universities.json")
+    val filePath = jsonFile.toString()
+    val jsonContent = scala.io.Source.fromFile(filePath).mkString
+    val jsonObj: JsValue = Json.parse(jsonContent)
+    //insert json content into universities table
   }
 
   /**

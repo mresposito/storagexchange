@@ -49,7 +49,6 @@ CREATE TABLE University (
   website VARCHAR(2083) NOT NULL,
   logo VARCHAR NOT NULL,
   colors VARCHAR NOT NULL,
-  --CONSTRAINT pk_University PRIMARY_KEY (name,locationID)
   FOREIGN KEY(locationID) REFERENCES Location(id) ON DELETE CASCADE,
   PRIMARY KEY (name, locationID));
 
