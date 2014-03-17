@@ -88,6 +88,7 @@ class Application @Inject()(userStore: UserStore, postStore: PostStore, mailSend
       "postID" -> longNumber(min=0)
       )(PostModifyRequest.apply)(PostModifyRequest.unapply)
     )
+
   val postDeleteForm = Form(
     mapping(
       "postID" -> longNumber(min=0)
@@ -144,28 +145,23 @@ class Application @Inject()(userStore: UserStore, postStore: PostStore, mailSend
   	)
   }
 
-  def newPost = IsAuthenticated { username => implicit request =>
+  def newPost = IsAuthenticated { username => _ =>
     Ok(views.html.newpost(newPostForm))
   }
 
-  def postReceive = Action { implicit request =>
-    val postData = newPostForm.bindFromRequest.get
-    request.session.get("email").map { username =>
-      postStore.insert(Post(username, postData.description, 
-        postData.storageSize))
-      Ok(views.html.newpost(newPostForm))
-    }.getOrElse { 
-      Ok(views.html.index()) 
-    }
+  def postReceive = IsAuthenticated { username => implicit request =>
+    newPostForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(views.html.error404()),
+      postData => { 
+        postStore.insert(Post(username, postData.description, postData.storageSize))
+        Ok(views.html.newpost(newPostForm))
+      }
+    )
   }
 
-  def postMyRetreive = IsAuthenticated { username => implicit request =>
-    request.session.get("email").map { username =>
+  def postMyRetreive = IsAuthenticated { username => _ => 
       val postList = postStore.getByEmail(username)
       Ok(views.html.myposts(postList))
-    }.getOrElse { 
-      Ok(views.html.index()) 
-    }
   }
 
   def postViewAll = Action { request =>
@@ -173,7 +169,7 @@ class Application @Inject()(userStore: UserStore, postStore: PostStore, mailSend
     Ok(views.html.postboard(postList))
   }
 
-  def postModifyInitial = Action { implicit request =>
+  def postModifyInitial = IsAuthenticated { username => implicit request =>
     postModifyInitialForm.bindFromRequest.fold(
       // Fix: should go to proper page with errors.
       // Having issue with that however.
@@ -186,7 +182,7 @@ class Application @Inject()(userStore: UserStore, postStore: PostStore, mailSend
     )
   }
 
-  def postModify = Action{ implicit request =>
+  def postModify = IsAuthenticated { username => implicit request =>
     postModifyForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.error404()),
       updatedPost => {
@@ -196,14 +192,14 @@ class Application @Inject()(userStore: UserStore, postStore: PostStore, mailSend
     )
   }
 
-  def postDelete = Action{ implicit request =>
+  def postDelete = IsAuthenticated{ username => implicit request =>
     postDeleteForm.bindFromRequest.fold(
-        formWithErrors => Redirect("/myposts"),
-        deletedPost => {
-          postStore.removeById(deletedPost.postID)
-          Redirect("myposts")
-        }
-      )
+      formWithErrors => Redirect("/myposts"),
+      deletedPost => {
+        postStore.removeById(deletedPost.postID)
+        Redirect("myposts")
+      }
+    )
   }
 
   private def sendVerificationEmail(user: User): Unit = {

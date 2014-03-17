@@ -28,12 +28,14 @@ trait PostTest extends Specification {
   }
 
   def createRequest(post: Post) = FakeRequest(POST, "/post").
-    withSession(("email", post.email)).withFormUrlEncodedBody(
+    withSession(("email", post.email)).
+    withFormUrlEncodedBody(
       "description" -> post.description,
       "storageSize" -> post.storageSize.toString)
 
   def modifyRequest(post: Post) = FakeRequest(POST, "/modifypost").
-    withSession(("email", post.email)).withFormUrlEncodedBody(
+    withSession(("email", post.email)).
+    withFormUrlEncodedBody(
       "description" -> post.description,
       "storageSize" -> post.storageSize.toString,
       "postID" -> post.postID.toString)
@@ -67,6 +69,6 @@ class PostSpec extends Specification with PostTest {
       contentAsString(allPosts) must contain("User: " + post1.email)
       contentAsString(allPosts) must contain("User: " + post2.email)
     }
-
+    
   }
 }
