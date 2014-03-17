@@ -88,6 +88,11 @@ class Application @Inject()(userStore: UserStore, postStore: PostStore, mailSend
       "postID" -> longNumber(min=0)
       )(PostModifyRequest.apply)(PostModifyRequest.unapply)
     )
+  val postDeleteForm = Form(
+    mapping(
+      "postID" -> longNumber(min=0)
+      )(PostIdRequest.apply)(PostIdRequest.unapply)
+    )
 
   def index = Action { implicit request =>
     request.session.get("email").map { username =>
@@ -189,6 +194,16 @@ class Application @Inject()(userStore: UserStore, postStore: PostStore, mailSend
         Redirect("myposts")
       }
     )
+  }
+
+  def postDelete = Action{ implicit request =>
+    postDeleteForm.bindFromRequest.fold(
+        formWithErrors => Redirect("/myposts"),
+        deletedPost => {
+          postStore.removeById(deletedPost.postID)
+          Redirect("myposts")
+        }
+      )
   }
 
   private def sendVerificationEmail(user: User): Unit = {

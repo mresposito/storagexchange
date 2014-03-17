@@ -15,6 +15,7 @@ GET     /myposts                    @com.storagexchange.controllers.Application.
 GET     /postboard                  @com.storagexchange.controllers.Application.postViewAll
 GET     /modifypost                 @com.storagexchange.controllers.Application.postModifyInitial
 POST    /modifypost                 @com.storagexchange.controllers.Application.postModify
+GET     /deletepost                 @com.storagexchange.controllers.Application.postDelete
 # Dynamic pages
 GET     /profile                    @com.storagexchange.controllers.Dynamic.profile
 
