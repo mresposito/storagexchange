@@ -8,7 +8,8 @@ import javax.inject.Singleton
 import javax.inject.Inject
 import com.typesafe.scalalogging.slf4j.Logging
 
-case class University(name: String,
+case class University(locationID: Long, 
+  name: String,
   website: String,
   logo: String,
   colors: Option[String] = None)
@@ -31,9 +32,9 @@ class UniversityDAL extends UniversityStore {
   private[this] val createUniversitySql = {
     SQL("""
       INSERT INTO University
-        (name, website, logo, colors)
+        (locationID, name, website, logo, colors)
       VALUES
-        ({name}, {website}, {logo}, {colors})
+        ({locationID}, {name}, {website}, {logo}, {colors})
     """.stripMargin)
   }
 
@@ -46,16 +47,18 @@ class UniversityDAL extends UniversityStore {
   }
   
   implicit val universityParser = 
+    long("locationID") ~
     str("name") ~
     str("website") ~
     str("logo") ~
     str("colors").? map {
-      case name ~ website ~ logo ~ colors =>
-        University(name, website, logo, colors)
+      case locationID ~ name ~ website ~ logo ~ colors =>
+        University(locationID, name, website, logo, colors)
     }
 
   def insert(university: University): Long = DB.withConnection { implicit conn =>
     createUniversitySql.on(
+      'locationID -> university.locationID,
       'name -> university.name,
       'website -> university.website,
       'logo -> university.logo,

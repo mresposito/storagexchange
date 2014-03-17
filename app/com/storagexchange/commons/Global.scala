@@ -44,26 +44,32 @@ object Global extends GlobalSettings with Logging {
     }
   }
 
-  implicit val universityReader: Reads[(String,String,String,String)] = (
+  implicit val universityReader: Reads[(String,String,String,String,Long)] = (
     (__ \ "name").read[String] and
     (__ \ "website").read[String] and
     (__ \ "colors").read[String] and
-    (__ \ "logo").read[String] 
+    (__ \ "logo").read[String] and
+    (__ \ "locationID").read[Long]
   ).tupled
 
-  private def initialize_universities = {
-    val universityTable = injector.getInstance(classOf[UniversityStore]) 
+  private def getJsonList( ) : List[(String,String,String,String,Long)] = {
     val jsonFile = Play.application.getFile("universities.json")
     val filePath = jsonFile.toString()
     val jsonContent = scala.io.Source.fromFile(filePath).mkString
     val jsonObj: JsValue = Json.parse(jsonContent)
     val universityList = (jsonObj \ "universities")
-    val universities = universityList.as[List[(String,String,String,String)]]
+    val universities = universityList.as[List[(String,String,String,String,Long)]]
+    return universities
+  }
+
+  private def initialize_universities = {
+    val universityTable = injector.getInstance(classOf[UniversityStore]) 
+    val universities = getJsonList() 
     //TODO: Convert to map later on
     //insert json content into universities table
     universities.foreach(university => 
                             university match {
-                              case (name, website, colors, logo) => universityTable.insert(University(name,website,logo,Option(colors)))
+                              case (name, website, colors, logo, locationID) => universityTable.insert(University(locationID,name,website,logo,Option(colors)))
                               case _ => sys.error("Invalid JSON formatting")
                             }
                         )
