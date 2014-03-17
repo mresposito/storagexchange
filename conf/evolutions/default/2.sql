@@ -18,7 +18,6 @@ CREATE TABLE University (
   colors VARCHAR NOT NULL,
   FOREIGN KEY(locationID) REFERENCES Location(id) ON DELETE CASCADE,
   PRIMARY KEY (name, locationID));
-
 # --- !Downs
 
 DROP TABLE University;

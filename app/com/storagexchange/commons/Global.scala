@@ -10,6 +10,8 @@ import java.io.File
 import com.typesafe.config.ConfigFactory
 import play.api.Play.current
 import play.api.libs.json._
+import play.api.libs.functional.syntax._
+import com.storagexchange.models._
 
 object Global extends GlobalSettings with Logging {
 
@@ -42,12 +44,29 @@ object Global extends GlobalSettings with Logging {
     }
   }
 
+  implicit val universityReader: Reads[(String,String,String,String)] = (
+    (__ \ "name").read[String] and
+    (__ \ "website").read[String] and
+    (__ \ "colors").read[String] and
+    (__ \ "logo").read[String] 
+  ).tupled
+
   private def initialize_universities = {
+    val universityTable = injector.getInstance(classOf[UniversityStore]) 
     val jsonFile = Play.application.getFile("universities.json")
     val filePath = jsonFile.toString()
     val jsonContent = scala.io.Source.fromFile(filePath).mkString
     val jsonObj: JsValue = Json.parse(jsonContent)
+    val universityList = (jsonObj \ "universities")
+    val universities = universityList.as[List[(String,String,String,String)]]
+    //TODO: Convert to map later on
     //insert json content into universities table
+    universities.foreach(university => 
+                            university match {
+                              case (name, website, colors, logo) => universityTable.insert(University(name,website,logo,Option(colors)))
+                              case _ => sys.error("Invalid JSON formatting")
+                            }
+                        )
   }
 
   /**
