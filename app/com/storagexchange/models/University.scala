@@ -21,9 +21,11 @@ case class University(locationID: Long,
  */
 trait UniversityStore {
 
-  def insert(university: University): Long
+  def insert(university: University): Option[Long]
   
   def getByCity(city: String): Option[University]
+
+  def getAll(): List[University]
 
 }
 
@@ -42,7 +44,7 @@ class UniversityDAL extends UniversityStore {
   private[this] val getUniversitiesByCity = {
     SQL(s"""
        SELECT *
-       FROM UNIVERSITY
+       FROM University
        WHERE city = {city}
     """.stripMargin)
   }
@@ -50,8 +52,15 @@ class UniversityDAL extends UniversityStore {
   private[this] val getUniversityIdByName = {
     SQL(s"""
         SELECT universityID
-        FROM UNIVERSITY
+        FROM University
         WHERE name = {name}
+      """.stripMargin)
+  }
+
+  private[this] val selectUniversity = {
+    SQL("""
+        SELECT * 
+        FROM University
       """.stripMargin)
   }
 
@@ -66,7 +75,7 @@ class UniversityDAL extends UniversityStore {
         University(locationID, name, website, logo, colors, universityID)
     }
 
-  def insert(university: University): Long = DB.withConnection { implicit conn =>
+  def insert(university: University): Option[Long] = DB.withConnection { implicit conn =>
     createUniversitySql.on(
       'locationID -> university.locationID,
       'name -> university.name,
@@ -74,7 +83,7 @@ class UniversityDAL extends UniversityStore {
       'logo -> university.logo,
       'colors -> university.colors,
       'universityID -> university.universityID
-    ).executeInsert(scalar[Long].single)
+    ).executeInsert(scalar[Long].singleOpt)
   }
  
   def getByCity(city: String): Option[University] = DB.withConnection { implicit conn =>
@@ -88,5 +97,9 @@ class UniversityDAL extends UniversityStore {
           'name -> name
         ).as(universityParser.singleOpt)
   }
+
+  def getAll(): List[University] = DB.withConnection { implicit conn =>
+    selectUniversity.as(universityParser *)
+  } 
 
 }
