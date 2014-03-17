@@ -8,11 +8,12 @@ import javax.inject.Singleton
 import javax.inject.Inject
 import com.typesafe.scalalogging.slf4j.Logging
 
-case class University(locationID: Long, 
+case class University(locationID: Long,
   name: String,
   website: String,
   logo: String,
-  colors: Option[String] = None)
+  colors: String,
+  universityID: Option[Long] = None)
 
 /**
  * Methods that we will be using from
@@ -46,14 +47,23 @@ class UniversityDAL extends UniversityStore {
     """.stripMargin)
   }
   
+  private[this] val getUniversityIdByName = {
+    SQL(s"""
+        SELECT universityID
+        FROM UNIVERSITY
+        WHERE name = {name}
+      """.stripMargin)
+  }
+
   implicit val universityParser = 
     long("locationID") ~
     str("name") ~
     str("website") ~
     str("logo") ~
-    str("colors").? map {
-      case locationID ~ name ~ website ~ logo ~ colors =>
-        University(locationID, name, website, logo, colors)
+    str("colors") ~
+    long("universityID").? map {
+      case locationID ~ name ~ website ~ logo ~ colors ~ universityID =>
+        University(locationID, name, website, logo, colors, universityID)
     }
 
   def insert(university: University): Long = DB.withConnection { implicit conn =>
@@ -62,7 +72,8 @@ class UniversityDAL extends UniversityStore {
       'name -> university.name,
       'website -> university.website,
       'logo -> university.logo,
-      'colors -> university.colors
+      'colors -> university.colors,
+      'universityID -> university.universityID
     ).executeInsert(scalar[Long].single)
   }
  
@@ -70,6 +81,12 @@ class UniversityDAL extends UniversityStore {
         getUniversitiesByCity.on(
           'city -> city
         ).as(universityParser.singleOpt)
-  }  
+  } 
+
+  def getIdByName(name: String): Option[University] = DB.withConnection { implicit conn =>
+        getUniversityIdByName.on(
+          'name -> name
+        ).as(universityParser.singleOpt)
+  }
 
 }

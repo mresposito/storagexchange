@@ -5,35 +5,60 @@
             "website": "http://www.illinois.edu",
             "colors": "Illinois_Blue, Illinois_Orange",
             "logo": "http://upload.wikimedia.org/wikipedia/en/1/18/UIUC_seal.svg",
-            "locationID": 0
+            "locationID": 1,
+            "lat": 40,
+            "lng": -88,
+            "city": "Champaign",
+            "state": "Illinois",
+            "address": "Admissions and Records, 901 West Illinois Street" 
           },
           {     
             "name": "Stanford University",
             "website": "http://www.stanford.edu",
             "colors": "Cardinal, White",
             "logo": "http://upload.wikimedia.org/wikipedia/en/b/b7/Stanford_University_seal_2003.svg",
-            "locationID": 1
+            "locationID": 2,
+            "lat": 37,
+            "lng": 122,
+            "city": "Stanford",
+            "state": "California",
+            "address": "450 Serra Mall"
           }, 
           {
             "name": "University of Michigan, Ann Arbor",
             "website": "http://www.umich.edu",
             "colors": "Maize, Blue",
             "logo": "http://upload.wikimedia.org/wikipedia/en/b/b8/Umichigan_color_seal.png",
-            "locationID": 2
+            "locationID": 3,
+            "lat": 42,
+            "lng": 83,
+            "city": "Ann Arbor",
+            "state": "Michigan",
+            "address": "500 S State Street"
           },
           {
             "name": "Indiana University",
             "website": "http://www.iub.edu",
             "colors":"Cream, Crimson",
             "logo": "http://upload.wikimedia.org/wikipedia/en/5/5d/Indiana_University_seal.svg",
-            "locationID": 3
+            "locationID": 4,
+            "lat": 39,
+            "lng": 86,
+            "city": "Bloomington",
+            "state": "Indiana",
+            "address": "107 S Indiana Ave"
           },
           {
             "name": "University of California, Berkeley", 
             "website": "http://www.berkeley.edu",
             "colors": "Yale Blue, California Gold",
             "logo": "http://upload.wikimedia.org/wikipedia/commons/f/fc/The_University_of_California_1868.svg", 
-            "locationID": 4
+            "locationID": 4,
+            "lat": 37,
+            "lng": 122,
+            "city": "Berkeley",
+            "state": "California",
+            "address": "103 Sproul Hall" 
           }
   ]
 }

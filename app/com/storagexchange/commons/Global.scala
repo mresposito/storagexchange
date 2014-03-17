@@ -44,32 +44,40 @@ object Global extends GlobalSettings with Logging {
     }
   }
 
-  implicit val universityReader: Reads[(String,String,String,String,Long)] = (
+  implicit val universityReader: Reads[(String,String,String,String,Long,Long,Long,String,String,String)] = (
     (__ \ "name").read[String] and
     (__ \ "website").read[String] and
     (__ \ "colors").read[String] and
     (__ \ "logo").read[String] and
-    (__ \ "locationID").read[Long]
+    (__ \ "locationID").read[Long] and
+    (__ \ "lat").read[Long] and
+    (__ \ "lng").read[Long] and
+    (__ \ "city").read[String] and
+    (__ \ "state").read[String] and
+    (__ \ "address").read[String] 
   ).tupled
 
-  private def getJsonList( ) : List[(String,String,String,String,Long)] = {
+  private def getJsonList( ) : List[(String,String,String,String,Long,Long,Long,String,String,String)] = {
     val jsonFile = Play.application.getFile("universities.json")
     val filePath = jsonFile.toString()
     val jsonContent = scala.io.Source.fromFile(filePath).mkString
     val jsonObj: JsValue = Json.parse(jsonContent)
     val universityList = (jsonObj \ "universities")
-    val universities = universityList.as[List[(String,String,String,String,Long)]]
+    val universities = universityList.as[List[(String,String,String,String,Long,Long,Long,String,String,String)]]
     return universities
   }
 
   private def initialize_universities = {
-    val universityTable = injector.getInstance(classOf[UniversityStore]) 
+    val universityTable = injector.getInstance(classOf[UniversityStore])
+    val locationTable = injector.getInstance(classOf[LocationStore])
     val universities = getJsonList() 
     //TODO: Convert to map later on
     //insert json content into universities table
     universities.foreach(university => 
                             university match {
-                              case (name, website, colors, logo, locationID) => universityTable.insert(University(locationID,name,website,logo,Option(colors)))
+                              case (name, website, colors, logo, locationID, lat, lng, city, state, address) =>
+                                locationTable.insert(Location(name,lat,lng,city,state,address,None))
+                                universityTable.insert(University(locationID,name,website,logo,colors,None))
                               case _ => sys.error("Invalid JSON formatting")
                             }
                         )

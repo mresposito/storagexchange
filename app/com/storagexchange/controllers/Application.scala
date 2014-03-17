@@ -27,7 +27,7 @@ case class SignupRequest(
 
 @Singleton
 class Application @Inject()(userStore: UserStore, mailSender: MailSender,
-    passwordHasher: PasswordHelper, idHasher: IdHasher) extends Controller 
+    passwordHasher: PasswordHelper, idHasher: IdHasher, universityStore: UniversityStore) extends Controller 
     with Logging {
   
   val loginForm = Form(
@@ -88,7 +88,8 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
   	  formWithErrors => BadRequest(views.html.signup(formWithErrors)),
   	  newUser => {
   	  	val password = passwordHasher.createPassword(newUser.psw1)
-  	  	// FIXME: insert proper university id
+  	  	// TODO: Make sure the commented statement below is correct. Write tests for it.
+        //val univID = universityStore.getIdByName(newUser.university)
         val user = User(newUser.myname, newUser.surname,
           newUser.email, password, 0)
         val userId = userStore.insert(user)
