@@ -53,9 +53,7 @@ class PostSpec extends Specification with PostTest {
     "view my posts" in CreatePosts {
       val Some(myPosts) = route(requestWithSession("/myposts"))
       contentAsString(myPosts) must contain("Description: " + post1.description)
-      contentAsString(myPosts) must contain("Size: " + post1.storageSize.toString)
       contentAsString(myPosts) must not contain("Description: " + post2.description)
-      contentAsString(myPosts) must not contain("Size: " + post2.storageSize.toString)
     }
 
     "not view my posts if not logged in" in CreatePosts {
@@ -66,17 +64,9 @@ class PostSpec extends Specification with PostTest {
 
     "display all posts on post board" in CreatePosts {
       val Some(allPosts) = route(requestWithSession("/postboard"))
-      contentAsString(allPosts) must contain("Description: " + post1.description)
-      contentAsString(allPosts) must contain("Size: " + post1.storageSize.toString)
       contentAsString(allPosts) must contain("User: " + post1.email)
-      contentAsString(allPosts) must contain("Description: " + post2.description)
-      contentAsString(allPosts) must contain("Size: " + post2.storageSize.toString)
       contentAsString(allPosts) must contain("User: " + post2.email)
     }
 
-    // "modify post" in CreatePosts {
-    //   val updatedPost = Post("m@e.com", "My updated post", 102, Some(1))
-    //   route(modifyRequest(updatedPost))
-    // }
   }
 }

@@ -24,10 +24,12 @@ case class User(name: String,
  * the interface to the database
  */
 trait UserStore {
-  
+
   def insert(user: User): Long
+  
   def getById(id: Long): Option[User]
   def getByEmail(email: String): Option[User]
+  
   def authenticate(email: String, password: String): Boolean
   def verify(id: Long): Boolean
 
