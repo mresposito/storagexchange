@@ -28,12 +28,6 @@ CREATE TABLE User (
   creationTime BIGINT NOT NULL,
   lastLogin BIGINT);
 
-CREATE TABLE Post (
-  postID BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  email VARCHAR NOT NULL,
-  description VARCHAR NOT NULL,
-  storageSize INT NOT NULL);
-
 CREATE VIEW VerifiedUser AS
   SELECT * 
   FROM User
@@ -45,4 +39,3 @@ DROP VIEW VerifiedUser;
 DROP TABLE Messages;
 DROP TABLE Transactions;
 DROP TABLE User;
-DROP TABLE Post;
