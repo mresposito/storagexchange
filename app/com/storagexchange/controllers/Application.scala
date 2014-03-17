@@ -40,7 +40,7 @@ case class SignupRequest(
 @Singleton
 class Application @Inject()(userStore: UserStore, postStore: PostStore, mailSender: MailSender,
     passwordHasher: PasswordHelper, idHasher: IdHasher) extends Controller 
-    with Logging {
+    with Logging with Secured {
 
   val loginForm = Form(
     tuple(
@@ -139,43 +139,28 @@ class Application @Inject()(userStore: UserStore, postStore: PostStore, mailSend
   	)
   }
 
-  def newPost = Action { request =>
-    if (request.session.isEmpty) {
-      Redirect("/login")
-    } 
-    else {
-      Ok(views.html.newpost(newPostForm))
-    }
+  def newPost = IsAuthenticated { username => implicit request =>
+    Ok(views.html.newpost(newPostForm))
   }
 
   def postReceive = Action { implicit request =>
     val postData = newPostForm.bindFromRequest.get
-    val email = request.session.get("email")
-    var myEmail :String = ""
-    email match {
-      case Some(emailstr) => myEmail = emailstr
-      case None =>
+    request.session.get("email").map { username =>
+      postStore.insert(Post(username, postData.description, 
+        postData.storageSize))
+      Ok(views.html.newpost(newPostForm))
+    }.getOrElse { 
+      Ok(views.html.index()) 
     }
-    val newPost = Post(myEmail, postData.description, postData.storageSize)
-    postStore.insert(newPost)
-    Ok(views.html.newpost(newPostForm))
   }
 
-  def postMyRetreive = Action { request =>
-    if (request.session.isEmpty) {
-      Redirect("/login")
-    } 
-    else {
-      val email = request.session.get("email")
-      var myEmail :String = ""
-      email match {
-        case Some(emailstr) => myEmail = emailstr
-        case None =>
-      }
-      val postList = postStore.getByEmail(myEmail)
+  def postMyRetreive = IsAuthenticated { username => implicit request =>
+    request.session.get("email").map { username =>
+      val postList = postStore.getByEmail(username)
       Ok(views.html.myposts(postList))
+    }.getOrElse { 
+      Ok(views.html.index()) 
     }
-    
   }
 
   def postViewAll = Action { request =>
@@ -185,20 +170,20 @@ class Application @Inject()(userStore: UserStore, postStore: PostStore, mailSend
 
   def postModifyInitial = Action { implicit request =>
     postModifyInitialForm.bindFromRequest.fold(
-      formWithErrors => Ok,
+      // Fix: should go to proper page with errors.
+      // Having issue with that however.
+      formWithErrors => BadRequest(views.html.error404()),
       modifyRequest => {
-        val oldPostOption = postStore.getById(modifyRequest.postID)
-        oldPostOption match {
-          case Some(oldPost) => Ok(views.html.modifypost(newPostForm,oldPost))
-          case None => Ok
-        }
+        postStore.getById(modifyRequest.postID).map { oldPost =>
+          Ok(views.html.modifypost(newPostForm, oldPost))  
+        }.getOrElse(Ok(views.html.index()))
       }
     )
   }
 
   def postModify = Action{ implicit request =>
     postModifyForm.bindFromRequest.fold(
-      formWithErrors => Redirect("myposts"),
+      formWithErrors => BadRequest(views.html.error404()),
       updatedPost => {
         postStore.updateById(updatedPost.postID, updatedPost.description, updatedPost.storageSize)
         Redirect("myposts")

@@ -70,14 +70,6 @@ class PostDAL extends PostStore {
     """.stripMargin)
   }
 
-  private[this] val selectPostWithSuffix = {
-    SQL("""
-       SELECT *
-       FROM Post
-       {suffix}
-    """.stripMargin)
-  }
-
   private[this] val removePostByIdSql = {
     SQL("""
        DELETE FROM Post
