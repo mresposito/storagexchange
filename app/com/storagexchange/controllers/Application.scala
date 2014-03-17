@@ -56,8 +56,15 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
       })
     )
 
-  def index = Action {
-    Ok(views.html.index())
+  def index = Action { implicit request =>
+    request.session.get("email").map { username =>
+      userStore.getByEmail(username).map { user =>
+        Ok(views.html.userIndex(user))
+      }.getOrElse(Ok(views.html.index()))
+    }.getOrElse {
+      // serve home page
+      Ok(views.html.index())
+    }
   }
   /**
    * Get login page
@@ -66,7 +73,7 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
     Ok(views.html.login(loginForm))
   }
   /**
-   * Authorize a user if cas a good form
+   * Authorize a user if has a good form
    */
   def authorize = Action { implicit request =>
     loginForm.bindFromRequest.fold(

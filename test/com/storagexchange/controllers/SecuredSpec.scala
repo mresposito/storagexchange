@@ -25,10 +25,10 @@ class SecuredSpec extends Specification with UserTest {
       val Some(page) = route(FakeRequest(GET, "/profile"))
       status(page) must beEqualTo(SEE_OTHER)
     }
-    "Non existing user with session should get profile page" in RunningApp {
+    "Non existing user with session should not get profile page" in RunningApp {
       val Some(page) = route(FakeRequest(GET, "/profile").
           withSession("email"-> "mah"))
-      status(page) must beEqualTo(OK)
+      status(page) must beEqualTo(SEE_OTHER)
     }
     "Existing user should get profile page" in CreateUser {
       val Some(page) = route(FakeRequest(GET, "/profile").
