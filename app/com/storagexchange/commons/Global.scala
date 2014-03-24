@@ -12,6 +12,7 @@ import play.api.Play.current
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import com.storagexchange.models._
+import java.math.BigDecimal
 
 object Global extends GlobalSettings with Logging {
 
@@ -41,46 +42,50 @@ object Global extends GlobalSettings with Logging {
       //we need to populate the table of universities everytime the app starts, be it dev or production
       case Mode.Dev => initialize_universities
       case Mode.Prod => initialize_universities
+      case Mode.Test => initialize_universities
     }
   }
 
-  implicit val universityReader: Reads[(String,String,String,String,Long,Long,Long,String,String,String)] = (
+  implicit val universityReader: Reads[(String,String,String,String,Long,BigDecimal,BigDecimal,String,String,String,String)] = (
     (__ \ "name").read[String] and
     (__ \ "website").read[String] and
     (__ \ "colors").read[String] and
     (__ \ "logo").read[String] and
     (__ \ "locationID").read[Long] and
-    (__ \ "lat").read[Long] and
-    (__ \ "lng").read[Long] and
+    (__ \ "lat").read[BigDecimal] and
+    (__ \ "lng").read[BigDecimal] and
     (__ \ "city").read[String] and
     (__ \ "state").read[String] and
-    (__ \ "address").read[String] 
+    (__ \ "address").read[String] and
+    (__ \ "zip").read[String] 
   ).tupled
 
-  private def getJsonList( ) : List[(String,String,String,String,Long,Long,Long,String,String,String)] = {
+  private def getJsonList( ) : List[(String,String,String,String,Long,BigDecimal,BigDecimal,String,String,String,String)] = {
     val jsonFile = Play.application.getFile("universities.json")
     val filePath = jsonFile.toString()
     val jsonContent = scala.io.Source.fromFile(filePath).mkString
     val jsonObj: JsValue = Json.parse(jsonContent)
     val universityList = (jsonObj \ "universities")
-    val universities = universityList.as[List[(String,String,String,String,Long,Long,Long,String,String,String)]]
+    val universities = universityList.as[List[(String,String,String,String,Long,BigDecimal,BigDecimal,String,String,String,String)]]
     return universities
   }
 
   private def initialize_universities = {
     val universityTable = injector.getInstance(classOf[UniversityStore])
     val locationTable = injector.getInstance(classOf[LocationStore])
+    val locList:List[Location] = locationTable.getAll()
     val universities = getJsonList() 
     //TODO: Convert to map later on
     //insert json content into universities table
     universities.foreach(university => 
                             university match {
-                              case (name, website, colors, logo, locationID, lat, lng, city, state, address) =>
-                                locationTable.insert(Location(name,lat,lng,city,state,address,None))
+                              case (name, website, colors, logo, locationID, lat, lng, city, state, address, zip) =>
+                                locationTable.insert(Location(name,lat,lng,city,state,address,zip,None))
                                 universityTable.insert(University(locationID,name,website,logo,colors,None))
                               case _ => sys.error("Invalid JSON formatting")
                             }
                         )
+
   }
 
   /**

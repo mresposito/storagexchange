@@ -33,6 +33,8 @@ trait UserStore {
   def authenticate(email: String, password: String): Boolean
   def verify(id: Long): Boolean
 
+  def getAll(): List[User]
+
   trait SelectQueries {
     def getById(id: Long): Option[User]
     def getByEmail(email: String): Option[User]
@@ -94,6 +96,13 @@ trait UserSQLQueries {
        WHERE userID = {id}
     """.stripMargin)
   }
+
+  lazy private[models] val selectUser = {
+    SQL(s"""
+        SELECT * 
+        FROM User
+        """.stripMargin)
+  }
 }
 
 // Actual implementation of User Store method
@@ -136,6 +145,11 @@ class UserDAL @Inject()(passwordHasher: PasswordHelper) extends UserStore with U
 
   def getById(id: Long): Option[User] = all.getById(id)
   def getByEmail(email: String): Option[User] = all.getByEmail(email) 
+
+  def getAll(): List[User] = DB.withConnection { implicit conn =>
+    selectUser.as(userParser *)
+  } 
+
 
   def insert(user: User): Long = DB.withConnection { implicit conn =>
     createUserSql.on(

@@ -100,16 +100,18 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
                               }
                             case _ => sys.error("Invalid tuple")
                           }
-                        case None => sys.error("Invalid tuple")
+                        case None => sys.error("Invalid tuple 2")
                      }
         val user = User(newUser.myname, newUser.surname,
           newUser.email, password, univId)
         val userId = userStore.insert(user)
         sendVerificationEmail(user.copy(userId = Some(userId)))
+        
         Redirect(routes.Application.index()). 
         	withSession("email" -> newUser.email)
   	  }
   	)
+       
   }
   private def sendVerificationEmail(user: User): Unit = {
     val root = Play.current.configuration.getString("website.root")

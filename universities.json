@@ -10,7 +10,8 @@
             "lng": -88,
             "city": "Champaign",
             "state": "Illinois",
-            "address": "Admissions and Records, 901 West Illinois Street" 
+            "address": "Admissions and Records, 901 West Illinois Street",
+            "zip": "61801"  
           },
           {     
             "name": "Stanford University",
@@ -22,7 +23,8 @@
             "lng": 122,
             "city": "Stanford",
             "state": "California",
-            "address": "450 Serra Mall"
+            "address": "450 Serra Mall",
+            "zip": "94305"
           }, 
           {
             "name": "University of Michigan, Ann Arbor",
@@ -34,7 +36,8 @@
             "lng": 83,
             "city": "Ann Arbor",
             "state": "Michigan",
-            "address": "500 S State Street"
+            "address": "500 S State Street",
+            "zip": "48109"
           },
           {
             "name": "Indiana University",
@@ -46,7 +49,8 @@
             "lng": 86,
             "city": "Bloomington",
             "state": "Indiana",
-            "address": "107 S Indiana Ave"
+            "address": "107 S Indiana Ave",
+            "zip": "47405"
           },
           {
             "name": "University of California, Berkeley", 
@@ -58,7 +62,8 @@
             "lng": 122,
             "city": "Berkeley",
             "state": "California",
-            "address": "103 Sproul Hall" 
+            "address": "103 Sproul Hall",
+            "zip": "94720"
           }
   ]
 }

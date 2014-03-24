@@ -20,7 +20,7 @@ trait UserTest extends Specification {
   }
   val id = 1
   val password = "12345678"
-  val user = User("michele", "esposito", "m@e.com", password, 0)
+  val user = User("michele", "esposito", "m@e.com", password, 2)
   val userId = user.copy(userId = Some(id))
 
   def createUser = {
@@ -36,7 +36,7 @@ trait UserTest extends Specification {
       "myname" -> user.name,
       "surname" -> user.surname,
       "email" -> user.email,
-      "university" -> user.universityId.toString,
+      "university" -> "Stanford University",
       "psw1" -> psw1,
       "psw2" -> psw2)
   def requestWithSamePasswords(psw1: String) = requestWithDifferentPasswords(psw1, psw1)
