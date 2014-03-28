@@ -17,14 +17,11 @@ trait PostTest extends Specification {
   val post1 = Post("m@e.com", "My post", 95, Some(1))
   val post2 = Post("hsimpson@uis.edu", "Homer no function beer well without", 45, Some(2))
 
-  def createPosts = {
+  val CreatePosts = BeforeHook {
     val Some(create1) = route(createRequest(post1))
     status(create1) must equalTo(OK)
     val Some(create2) = route(createRequest(post2))
     status(create2) must equalTo(OK)
-  }
-  val CreatePosts = BeforeHook {
-    createPosts
   }
 
   def createRequest(post: Post) = FakeRequest(POST, "/post").

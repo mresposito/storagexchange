@@ -1,0 +1,41 @@
+@(title: String, javascript: Html = Html(""))(content: Html)
+
+<!DOCTYPE html>
+<html lang="en_us">
+@views.html._head(title) {
+<link rel="stylesheet" media="screen" href="@routes.Assets.at("css/user/main.min.css")">
+}
+
+<body>
+<!-- Navbar ================================================== -->
+<div id="bodyWrap">
+  <div class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+  <div class="text-center header navbar-header">
+    <a class="nounderline" href="@controllers.routes.Application.index()"><h1>Storage Exchange</h1></a>
+  </div>
+      <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li class="active"><a href="@controllers.routes.Application.index()">Home</a></li>
+          <li><a href="/posts">My posts</a></li>
+          <li><a href="/profile">Profile</a></li>
+          <li><a href="@controllers.routes.Application.logout()">Logout</a></li>
+        </ul>
+      </div><!--/.nav-collapse -->
+    </div><!--/.container-fluid -->
+  </div>
+
+  <!-- end navbar -->
+
+  <div class="realBody">
+    @content
+  </div>
+</div> <!-- end bodyWrap -->
+
+@views.html._footer()
+</body>
+
+<!-- Le Javascript ================================================== -->
+
+@views.html._jsLibraries(javascript)
+</html>

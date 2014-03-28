@@ -6,6 +6,7 @@
 GET     /                           @com.storagexchange.controllers.Application.index
 GET     /login                      @com.storagexchange.controllers.Application.login
 POST    /login                      @com.storagexchange.controllers.Application.authorize
+GET     /logout                     @com.storagexchange.controllers.Application.logout
 GET     /signup                     @com.storagexchange.controllers.Application.signup
 POST    /signup                     @com.storagexchange.controllers.Application.registration
 GET     /verify/:token              @com.storagexchange.controllers.Application.verifyEmail(token:String)

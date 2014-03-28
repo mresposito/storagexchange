@@ -103,6 +103,12 @@ class UserSpec extends Specification with UserTest {
           withFormUrlEncodedBody("email" -> user.email, "password" -> password))
         status(login) must beEqualTo(SEE_OTHER)
       }
+      "Log out should have no session" in SignUp {
+        val Some(login) = route(FakeRequest(GET, routes.Application.logout.url).
+          withFormUrlEncodedBody("email" -> user.email, "password" -> password))
+        status(login) must beEqualTo(SEE_OTHER)
+        session(login).isEmpty must beTrue
+      }
     }
     "Get pages correctly" in {
       "show error on a wrong login from" in RunningApp {

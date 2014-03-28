@@ -57,7 +57,7 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
   def index = Action { implicit request =>
     request.session.get("email").map { username =>
       userStore.getByEmail(username).map { user =>
-        Ok(views.html.userIndex(user))
+        Ok(views.html.user.index(user))
       }.getOrElse(Ok(views.html.index()))
     }.getOrElse {
       // serve home page
@@ -69,6 +69,9 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
    */
   def login = Action {
     Ok(views.html.login(loginForm))
+  }
+  def logout = Action {
+    Redirect(routes.Application.index).withNewSession
   }
   /**
    * Authorize a user if has a good form
