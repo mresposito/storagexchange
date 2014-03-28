@@ -68,9 +68,9 @@ class PostBoard @Inject()(postStore: PostStore)
     )
   }
 
-  def postMyRetreive = IsAuthenticated { username => _ => 
+  def myPosts = IsAuthenticated { username => _ => 
       val postList = postStore.getByEmail(username)
-      Ok(views.html.myposts(postList))
+      Ok(views.html.post.myposts(postList))
   }
 
   def postViewAll = Action { request =>

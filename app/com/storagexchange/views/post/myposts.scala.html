@@ -1,8 +1,8 @@
-@(myPosts : List[com.storagexchange.models.Post])
+@(myPosts : List[models.Post])
 @import helper.twitterBootstrap._
 
-@main("Storage Exchange") {
- <div class="page loginPage">
+@views.html.user.main("Storage Exchange", "My Posts") {
+ <div class="page">
     <div class="container">
       <div class="text-center">
         <h1>My Posts</h1>

@@ -50,22 +50,15 @@ class PostSpec extends Specification with PostTest {
     }
 
     "view my posts" in CreatePosts {
-      val Some(myPosts) = route(requestWithSession("/myposts"))
+      val Some(myPosts) = route(requestWithSession(routes.PostBoard.myPosts.url))
       contentAsString(myPosts) must contain("Description: " + post1.description)
       contentAsString(myPosts) must not contain("Description: " + post2.description)
     }
 
     "not view my posts if not logged in" in CreatePosts {
       // Redirect to login page
-      val Some(myPosts) = route(FakeRequest(GET, "/myposts"))
+      val Some(myPosts) = route(FakeRequest(GET, routes.PostBoard.myPosts.url))
       status(myPosts) must beEqualTo(SEE_OTHER)
     }
-
-    "display all posts on post board" in CreatePosts {
-      val Some(allPosts) = route(requestWithSession("/postboard"))
-      contentAsString(allPosts) must contain("User: " + post1.email)
-      contentAsString(allPosts) must contain("User: " + post2.email)
-    }
-    
   }
 }

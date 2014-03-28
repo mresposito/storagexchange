@@ -1,9 +1,23 @@
-@(title: String, javascript: Html = Html(""))(content: Html)
+@(title: String, tab: String, javascript: Html = Html(""))(content: Html)
 
 <!DOCTYPE html>
 <html lang="en_us">
 @views.html._head(title) {
 <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/user/main.min.css")">
+}
+
+@makeLinks = {
+  @Seq(
+    (controllers.routes.Application.index(), "Home"),
+    (controllers.routes.PostBoard.myPosts(), "My Posts"),
+    (controllers.routes.Dynamic.profile(), "Profile"),
+    (controllers.routes.Application.logout(), "Logout")).map { case(link, name) =>
+    @if(name == tab) {
+    <li class="active"><a href="@link">@name</a></li>
+    } else {
+    <li><a href="@link">@name</a> </li>
+    }
+  }
 }
 
 <body>
@@ -16,10 +30,11 @@
   </div>
       <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav navbar-right">
-          <li class="active"><a href="@controllers.routes.Application.index()">Home</a></li>
-          <li><a href="/posts">My posts</a></li>
-          <li><a href="/profile">Profile</a></li>
-          <li><a href="@controllers.routes.Application.logout()">Logout</a></li>
+          @makeLinks
+          <!-- <li class="active"><a href="@controllers.routes.Application.index()">Home</a></li> -->
+          <!-- <li><a href="(@controllers.routes.PostBoard.myPosts()">My posts</a></li> -->
+          <!-- <li><a href="@controllers.routes.Dynamic.profile()">Profile</a></li> -->
+          <!-- <li><a href="@controllers.routes.Application.logout()">Logout</a></li> -->
         </ul>
       </div><!--/.nav-collapse -->
     </div><!--/.container-fluid -->

@@ -11,10 +11,10 @@ GET     /signup                     @com.storagexchange.controllers.Application.
 POST    /signup                     @com.storagexchange.controllers.Application.registration
 GET     /verify/:token              @com.storagexchange.controllers.Application.verifyEmail(token:String)
 # Posting urls
-GET     /post                       @com.storagexchange.controllers.PostBoard.newPost
+GET     /post                       @com.storagexchange.controllers.PostBoard.myPosts
 POST    /post                       @com.storagexchange.controllers.PostBoard.postReceive
-GET     /myposts                    @com.storagexchange.controllers.PostBoard.postMyRetreive
-GET     /postboard                  @com.storagexchange.controllers.PostBoard.postViewAll
+
+# GET     /postboard                  @com.storagexchange.controllers.PostBoard.postViewAll
 GET     /modifypost                 @com.storagexchange.controllers.PostBoard.postModifyInitial
 POST    /modifypost                 @com.storagexchange.controllers.PostBoard.postModify
 GET     /deletepost                 @com.storagexchange.controllers.PostBoard.postDelete
