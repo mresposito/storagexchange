@@ -15,14 +15,6 @@ case class PostRequest(
   description: String,
   storageSize: Int)
 
-case class PostIdRequest(
-  postID: Long)
-
-case class PostModifyRequest(
-  description: String,
-  storageSize: Int,
-  postID: Long)
-
 @Singleton
 class PostBoard @Inject()(postStore: PostStore) 
   extends Controller with Secured {
@@ -34,28 +26,8 @@ class PostBoard @Inject()(postStore: PostStore)
       )(PostRequest.apply)(PostRequest.unapply)
     )
 
-  val postModifyInitialForm = Form(
-    mapping(
-      "postID" -> longNumber(min=0)
-      )(PostIdRequest.apply)(PostIdRequest.unapply)
-    )
-
-  val postModifyForm = Form(
-    mapping(
-      "description" -> nonEmptyText(minLength = 4),
-      "storageSize" -> number(min=0),
-      "postID" -> longNumber(min=0)
-      )(PostModifyRequest.apply)(PostModifyRequest.unapply)
-    )
-
-  val postDeleteForm = Form(
-    mapping(
-      "postID" -> longNumber(min=0)
-      )(PostIdRequest.apply)(PostIdRequest.unapply)
-    )
-
   def newPost = IsAuthenticated { username => _ =>
-    Ok(views.html.newpost(newPostForm))
+    Ok(views.html.post.newpost(newPostForm))
   }
 
   def postReceive = IsAuthenticated { username => implicit request =>
@@ -63,50 +35,35 @@ class PostBoard @Inject()(postStore: PostStore)
       formWithErrors => BadRequest(views.html.error404()),
       postData => { 
         postStore.insert(Post(username, postData.description, postData.storageSize))
-        Ok(views.html.newpost(newPostForm))
+        Redirect(routes.PostBoard.myPosts)
       }
     )
   }
 
-  def postMyRetreive = IsAuthenticated { username => _ => 
+  def myPosts = IsAuthenticated { username => _ => 
       val postList = postStore.getByEmail(username)
-      Ok(views.html.myposts(postList))
+      Ok(views.html.post.myposts(postList))
   }
 
-  def postViewAll = Action { request =>
-    val postList = postStore.getAll()
-    Ok(views.html.postboard(postList))
+  def delete(id: Long) = IsAuthenticated { username => _ => 
+    if(postStore.removeById(id, username)) {
+	    Redirect(routes.PostBoard.myPosts) 
+    } else {
+      BadRequest(views.html.error404())  
+    }
   }
-
-  def postModifyInitial = IsAuthenticated { username => implicit request =>
-    postModifyInitialForm.bindFromRequest.fold(
-      // Fix: should go to proper page with errors.
-      // Having issue with that however.
-      formWithErrors => BadRequest(views.html.error404()),
-      modifyRequest => {
-        postStore.getById(modifyRequest.postID).map { oldPost =>
-          Ok(views.html.modifypost(newPostForm, oldPost))  
-        }.getOrElse(Ok(views.html.index()))
-      }
-    )
-  }
-
-  def postModify = IsAuthenticated { username => implicit request =>
-    postModifyForm.bindFromRequest.fold(
+  
+  def modify(id: Long) = IsAuthenticated { username => implicit request =>
+    newPostForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.error404()),
       updatedPost => {
-        postStore.updateById(updatedPost.postID, updatedPost.description, updatedPost.storageSize)
-        Redirect("myposts")
-      }
-    )
-  }
-
-  def postDelete = IsAuthenticated{ username => implicit request =>
-    postDeleteForm.bindFromRequest.fold(
-      formWithErrors => Redirect("/myposts"),
-      deletedPost => {
-        postStore.removeById(deletedPost.postID)
-        Redirect("myposts")
+        val rows = postStore.updateById(id, username,
+            updatedPost.description, updatedPost.storageSize)
+        if(rows > 0) {
+	        Redirect(routes.PostBoard.myPosts)
+        } else {
+          BadRequest(views.html.error404())
+        }
       }
     )
   }

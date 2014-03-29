@@ -40,17 +40,25 @@ class PostStoreSpec extends Specification {
     "not find a non-existent post by id" in InsertPost {
       postStore.getById(3049) must beNone
     }
-    "remove post by id" in InsertPost {
-      postStore.removeById(1)
-      postStore.getById(1) must beNone
+    "Remove post" in {
+	    "remove extisting post by id should be true" in InsertPost {
+	      postStore.removeById(1, post1.email) must beTrue
+	    }
+	    "Can't get the post by id after deleting it" in InsertPost {
+	      postStore.removeById(1, post1.email)
+	      postStore.getById(1) must beNone
+	    }
+	    "Deleting a not existing post must be false" in InsertPost {
+	      postStore.removeById(4902, post1.email) must beFalse
+	    }
+	    "Deleting a post that is not mine should be false" in InsertPost {
+	      postStore.removeById(1, "myfakeemal") must beFalse
+	    }
     }
     "update post by id" in InsertPost {
       val updatedPost = Post("user@test.com", "My updated post", 101, Some(1))
-      postStore.updateById(1, "My updated post", 101)
+      postStore.updateById(1, post1.email, "My updated post", 101)
       postStore.getById(1) must beSome(updatedPost)
-    }
-    "get all posts" in InsertPost {
-      postStore.getAll() must beEqualTo(List(post1Copy, post2Copy))
     }
   }
 }

@@ -6,17 +6,16 @@
 GET     /                           @com.storagexchange.controllers.Application.index
 GET     /login                      @com.storagexchange.controllers.Application.login
 POST    /login                      @com.storagexchange.controllers.Application.authorize
+GET     /logout                     @com.storagexchange.controllers.Application.logout
 GET     /signup                     @com.storagexchange.controllers.Application.signup
 POST    /signup                     @com.storagexchange.controllers.Application.registration
-GET     /verify/:token              @com.storagexchange.controllers.Application.verifyEmail(token:String)
+GET     /verify/:token              @com.storagexchange.controllers.Application.verifyEmail(token: String)
 # Posting urls
-GET     /post                       @com.storagexchange.controllers.PostBoard.newPost
-POST    /post                       @com.storagexchange.controllers.PostBoard.postReceive
-GET     /myposts                    @com.storagexchange.controllers.PostBoard.postMyRetreive
-GET     /postboard                  @com.storagexchange.controllers.PostBoard.postViewAll
-GET     /modifypost                 @com.storagexchange.controllers.PostBoard.postModifyInitial
-POST    /modifypost                 @com.storagexchange.controllers.PostBoard.postModify
-GET     /deletepost                 @com.storagexchange.controllers.PostBoard.postDelete
+GET     /post                       @com.storagexchange.controllers.PostBoard.myPosts
+PUT     /post                       @com.storagexchange.controllers.PostBoard.postReceive
+DELETE  /post/:id                   @com.storagexchange.controllers.PostBoard.delete(id: Long)
+POST    /post/:id                   @com.storagexchange.controllers.PostBoard.modify(id: Long)
+
 # Dynamic pages
 GET     /profile                    @com.storagexchange.controllers.Dynamic.profile
 

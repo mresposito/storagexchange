@@ -11,7 +11,7 @@ class Dynamic @Inject()(userStore: UserStore) extends Secured with Logging {
   
   def profile = IsAuthenticated { username => _ =>
     userStore.getByEmail(username).map { user =>
-	    Ok(views.html.profile(user))
+	    Ok(views.html.dynamic.profile(user))
     }.getOrElse {
       Redirect(routes.Application.signup)
     }
