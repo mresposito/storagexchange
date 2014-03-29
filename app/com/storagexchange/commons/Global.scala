@@ -24,6 +24,19 @@ object Global extends GlobalSettings with Logging {
     }
   }
 
+  override def onStart(app: Application) {
+    // refresh everything
+    Play.mode match {
+      case Mode.Dev => injectData
+      case _ => Unit
+    }
+  }
+  
+  private def injectData = {
+    val generator = injector.getInstance(classOf[DataGenerator])
+    generator.createFakeData
+  }
+
   /**
    * overrides the default injector
    */
