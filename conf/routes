@@ -9,15 +9,13 @@ POST    /login                      @com.storagexchange.controllers.Application.
 GET     /logout                     @com.storagexchange.controllers.Application.logout
 GET     /signup                     @com.storagexchange.controllers.Application.signup
 POST    /signup                     @com.storagexchange.controllers.Application.registration
-GET     /verify/:token              @com.storagexchange.controllers.Application.verifyEmail(token:String)
+GET     /verify/:token              @com.storagexchange.controllers.Application.verifyEmail(token: String)
 # Posting urls
 GET     /post                       @com.storagexchange.controllers.PostBoard.myPosts
-POST    /post                       @com.storagexchange.controllers.PostBoard.postReceive
+PUT     /post                       @com.storagexchange.controllers.PostBoard.postReceive
+DELETE  /post/:id                   @com.storagexchange.controllers.PostBoard.delete(id: Long)
+POST    /post/:id                   @com.storagexchange.controllers.PostBoard.modify(id: Long)
 
-# GET     /postboard                  @com.storagexchange.controllers.PostBoard.postViewAll
-GET     /modifypost                 @com.storagexchange.controllers.PostBoard.postModifyInitial
-POST    /modifypost                 @com.storagexchange.controllers.PostBoard.postModify
-GET     /deletepost                 @com.storagexchange.controllers.PostBoard.postDelete
 # Dynamic pages
 GET     /profile                    @com.storagexchange.controllers.Dynamic.profile
 

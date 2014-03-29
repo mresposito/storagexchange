@@ -21,9 +21,9 @@ trait PostStore {
   def insert(post: Post): Long
   def getById(id: Long): Option[Post]
   def getByEmail(email: String): List[Post]
-  def removeById(id: Long): Boolean
-  def updateById(id: Long, description: String, storageSize: Int): Int
-  def getAll(): List[Post]
+
+  def removeById(id: Long, email: String): Boolean
+  def updateById(id: Long, email: String, description: String, storageSize: Int): Int
 }
 
 // Actual implementation of Post Store method
@@ -55,25 +55,20 @@ class PostDAL extends PostStore {
     """.stripMargin)
   }
 
-  private[this] val selectPost = {
-    SQL("""
-       SELECT *
-       FROM Post
-    """.stripMargin)
-  }
-
   private[this] val updatePostById = {
     SQL("""
        Update Post
        SET description={description}, storageSize={storageSize}
-       WHERE postID = {postID}
+       WHERE postID = {postID} AND
+        email = {email}
     """.stripMargin)
   }
 
   private[this] val removePostByIdSql = {
     SQL("""
        DELETE FROM Post
-       WHERE postID = {postID}
+       WHERE postID = {postID} AND
+        email = {email}
     """.stripMargin)
   }
 
@@ -106,22 +101,20 @@ class PostDAL extends PostStore {
     ).as(postParser *)
   }
 
-  def removeById(id: Long): Boolean = DB.withConnection { implicit conn =>
+  def removeById(id: Long, email: String): Boolean = DB.withConnection { implicit conn =>
     removePostByIdSql.on(
-      'postID -> id
-    ).execute()
+      'postID -> id,
+      'email -> email
+    ).executeUpdate() > 0
   }
 
-  def updateById(id: Long, description: String, storageSize: Int): Int = DB.withConnection{ implicit conn =>
+  def updateById(id: Long, email: String, description: String,
+      storageSize: Int): Int = DB.withConnection{ implicit conn =>
     updatePostById.on(
-        'postID->id,
-        'description->description,
-        'storageSize->storageSize
+        'postID-> id,
+        'description-> description,
+        'storageSize-> storageSize,
+        'email -> email
       ).executeUpdate()
   }
-
-  def getAll(): List[Post] = DB.withConnection { implicit conn =>
-    selectPost.as(postParser *)
-  }
-  
 }
