@@ -30,7 +30,7 @@ class PostBoard @Inject()(postStore: PostStore)
     Ok(views.html.post.newpost(newPostForm))
   }
 
-  def postReceive = IsAuthenticated { username => implicit request =>
+  def recieveNewPost = IsAuthenticated { username => implicit request =>
     newPostForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.error404()),
       postData => { 
@@ -47,7 +47,7 @@ class PostBoard @Inject()(postStore: PostStore)
 
   def delete(id: Long) = IsAuthenticated { username => _ => 
     if(postStore.removeById(id, username)) {
-	    Redirect(routes.PostBoard.myPosts) 
+	    Ok
     } else {
       BadRequest(views.html.error404())  
     }

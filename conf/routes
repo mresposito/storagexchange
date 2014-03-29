@@ -12,9 +12,10 @@ POST    /signup                     @com.storagexchange.controllers.Application.
 GET     /verify/:token              @com.storagexchange.controllers.Application.verifyEmail(token: String)
 # Posting urls
 GET     /post                       @com.storagexchange.controllers.PostBoard.myPosts
-PUT     /post                       @com.storagexchange.controllers.PostBoard.postReceive
+POST    /post                       @com.storagexchange.controllers.PostBoard.recieveNewPost
 DELETE  /post/:id                   @com.storagexchange.controllers.PostBoard.delete(id: Long)
 POST    /post/:id                   @com.storagexchange.controllers.PostBoard.modify(id: Long)
+GET     /newpost                    @com.storagexchange.controllers.PostBoard.newPost
 
 # Dynamic pages
 GET     /profile                    @com.storagexchange.controllers.Dynamic.profile

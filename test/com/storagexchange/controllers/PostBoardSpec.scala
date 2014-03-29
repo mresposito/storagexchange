@@ -21,7 +21,7 @@ trait PostTest extends Specification {
     val Some(create2) = route(createRequest(post2))
   }
 
-  def createRequest(post: Post) = FakeRequest(PUT, "/post").
+  def createRequest(post: Post) = FakeRequest(POST, "/post").
     withSession(("email", post.email)).
     withFormUrlEncodedBody(
       "description" -> post.description,
@@ -72,7 +72,7 @@ class PostBoardSpec extends Specification with PostTest {
 			}
 			"delete my post should be successful" in CreatePosts {
 				val Some(delete) = route(deletePost(1))
-						status(delete) must beEqualTo(SEE_OTHER)
+						status(delete) must beEqualTo(OK)
 			}
 			"can't see my post after deleting" in CreatePosts {
 				val Some(delete) = route(deletePost(1))

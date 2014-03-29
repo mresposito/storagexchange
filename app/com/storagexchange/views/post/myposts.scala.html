@@ -1,20 +1,74 @@
 @(myPosts : List[models.Post])
 @import helper.twitterBootstrap._
 
-@views.html.user.main("Storage Exchange", "My Posts") {
- <div class="page">
+@js = {
+  <script>
+    var descriptionHtml = '<input type="textfield" class="form-control" id="inputDescription" name="description" value="">';
+    var areaHtml = '<input type="textfield" class="form-control" id="inputstorageSize" name="storageSize" value="">';
+
+    $(".delete").click(function(event) {
+      var well = $(event.target).closest(".well");
+      var id = well.data("id");
+      $.ajax({
+        url: "/post/" + id,
+        type: "DELETE",
+      }).done(function(deleted) {
+        well.remove();
+      });
+    });
+    var swapInput = function($el, html) {
+      console.log("hello");
+      var input = $el.text();
+      $el.html(html);
+      $el.find("input").attr("value", input);
+    };
+    var save = function(event) {
+     var $well = $(event.target).closest(".well"); 
+     $well.find("form").submit();
+    }
+   $(".edit").click(function(event) {
+     var $well = $(event.target).closest(".well"); 
+     var id = $well.data("id");
+     var description = $well.find(".description");
+     var area = $well.find(".area");
+     swapInput(description, descriptionHtml)
+     swapInput(area, areaHtml);
+     var wellHtml = $well.html();
+     $well.html("");
+     $well.prepend('<form method="POST" action="/post/' + id + '" ></form>');
+     $well.find("form").html(wellHtml);
+
+     $well.find(".actions").prepend(
+       '<a href="#" class="save"><i class="fa fa-floppy-o"></i></a>');
+     $well.find(".edit").remove();
+     $well.find(".save").click(save);
+    });
+  </script>
+}
+
+@views.html.user.main("Storage Exchange", "My Posts", js) {
+ <div class="post">
     <div class="container">
-      <div class="text-center">
-        <h1>My Posts</h1>
         @myPosts.map { post =>
-        <div class="well">
-          <li>Description: @post.description</li>
-          <li>Size: @post.storageSize</li>
-          <a href="modifypost?postID=@post.postID"><button>Modify</button></a>
-          <a href="deletepost?postID=@post.postID"><button>Delete</button></a>
+        <div class="row well"  data-id="@post.postID.get">
+          <div class="col-md-8">
+            <b>Description</b><br>
+            <span class="description">@post.description</span>
+          </div>
+          <div class="col-md-2">
+            <b>Size: </b><span class="area">@post.storageSize</span> sq/ft
+          </div>
+          <div class="col-md-2 actions">
+            <a href="#" class="edit"><i class="fa fa-pencil-square-o"></i></a>
+            <a href="#" class="delete"><i class="fa fa-trash-o"></i></a>
+          </div>
         </div>
       }
-      </div>
+      @if(myPosts.isEmpty) {
+        <h3>You have no posts</h3>
+        <b>Create a new one!</b>
+      }
+      <button type="btn" class="btn btn-block btn-lg btn-transparent" onclick="location.href='@controllers.routes.PostBoard.newPost';">Create new post</button>
     </div>
   </div>
 }
