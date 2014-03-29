@@ -1,5 +1,4 @@
 @(title: String, tab: String, javascript: Html = Html(""))(content: Html)
-
 <!DOCTYPE html>
 <html lang="en_us">
 @views.html._head(title) {
@@ -31,15 +30,10 @@
       <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav navbar-right">
           @makeLinks
-          <!-- <li class="active"><a href="@controllers.routes.Application.index()">Home</a></li> -->
-          <!-- <li><a href="(@controllers.routes.PostBoard.myPosts()">My posts</a></li> -->
-          <!-- <li><a href="@controllers.routes.Dynamic.profile()">Profile</a></li> -->
-          <!-- <li><a href="@controllers.routes.Application.logout()">Logout</a></li> -->
         </ul>
       </div><!--/.nav-collapse -->
     </div><!--/.container-fluid -->
   </div>
-
   <!-- end navbar -->
 
   <div class="realBody">
