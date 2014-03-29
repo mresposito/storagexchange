@@ -54,6 +54,9 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
       verifying ("User already exists", user => user match {
         case userData => ! userStore.getByEmail(user.email).isDefined  
       })
+      verifying ("Enter a valid university", user => user match {
+        case userData => universityStore.getIdByName(user.university).isDefined
+      })
     )
 
   def index = Action {

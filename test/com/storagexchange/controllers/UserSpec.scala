@@ -22,7 +22,8 @@ trait UserTest extends Specification {
   val password = "12345678"
   val user = User("michele", "esposito", "m@e.com", password, 2)
   val userId = user.copy(userId = Some(id))
-
+  val univ = "Stanford University"
+  val invalidUniv = "UIUC"
   def createUser = {
     val Some(create) = route(requestWithSamePasswords(password))
     status(create) must equalTo(SEE_OTHER)
@@ -30,17 +31,18 @@ trait UserTest extends Specification {
   val CreateUser = BeforeHook {
     createUser
   }
-  def createUserRequest(user: User) = genericCreateRequest(user.password, user.password, user)
-  def genericCreateRequest(psw1: String, psw2: String, user: User) = FakeRequest(
+  def createUserRequest(user: User) = genericCreateRequest(user.password, user.password, user, univ)
+  def genericCreateRequest(psw1: String, psw2: String, user: User, university: String) = FakeRequest(
     POST,"/signup").withFormUrlEncodedBody(
       "myname" -> user.name,
       "surname" -> user.surname,
       "email" -> user.email,
-      "university" -> "Stanford University",
+      "university" -> university,
       "psw1" -> psw1,
-      "psw2" -> psw2)
+      "psw2" -> psw2) 
   def requestWithSamePasswords(psw1: String) = requestWithDifferentPasswords(psw1, psw1)
-  def requestWithDifferentPasswords(psw1: String, psw2: String) = genericCreateRequest(psw1, psw2, user)
+  def requestWithDifferentPasswords(psw1: String, psw2: String) = genericCreateRequest(psw1, psw2, user, univ)
+  def requestWithInvalidUniversity(university: String) = genericCreateRequest(password, password, user, university)
   def requestWithSession(route: String) = FakeRequest(GET, route).withSession(("email", user.email))
 }
 
@@ -66,6 +68,14 @@ class UserSpec extends Specification with UserTest {
         status(create) must equalTo(BAD_REQUEST)
         contentAsString(create) must contain("Passwords must match")
         contentAsString(create) must contain("Storage Exchange")
+      }
+      /**
+        * Check request with an invalid university (UIUC instead of University of Illinois, Urbana Champaign)
+        */
+      "refuse if invalid university" in RunningApp {
+        val Some(create) = route(requestWithInvalidUniversity(invalidUniv))
+        status(create) must equalTo(BAD_REQUEST)
+        contentAsString(create) must contain("Enter a valid university")
       }
       /**
        * Avoid double sigup
