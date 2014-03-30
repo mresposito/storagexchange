@@ -8,6 +8,7 @@ import play.api.db.DB
 import play.api.Play.current
 import java.io.File
 import com.typesafe.config.ConfigFactory
+import com.storagexchange.search.DataSearch
 
 object Global extends GlobalSettings with Logging {
 
@@ -25,7 +26,10 @@ object Global extends GlobalSettings with Logging {
   }
 
   override def onStart(app: Application) {
+  	val search = getControllerInstance(classOf[DataSearch])
     // refresh everything
+  	search.deleteIndices
+  	search.createIndices
     Play.mode match {
       case Mode.Dev => injectData
       case _ => Unit

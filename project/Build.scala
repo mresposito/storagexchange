@@ -18,7 +18,7 @@ object ApplicationBuild extends Build {
     "com.google.inject" % "guice" % "3.0",
     "com.tzavellas" % "sse-guice" % "0.7.1",
     "org.mindrot" % "jbcrypt" % "0.3m",
-    "com.sksamuel.elastic4s" %% "elastic4s" % "0.90.10.0",
+    "com.sksamuel.elastic4s" %% "elastic4s" % "1.0.1.1",
     "com.github.javafaker" % "javafaker" % "0.3",
     // test libraries
     "org.specs2" %% "specs2" % "2.3.3" % "test",

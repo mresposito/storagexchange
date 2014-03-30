@@ -30,7 +30,7 @@ class JavaFakerDataGenerator @Inject()(userStore: UserStore,
       passwordHasher.createPassword("123456"), 0)
 
   def createFakeData = for {
-    user <- generateUsers(numberOfUsers)
+    user <- (generateUsers(numberOfUsers) ++ List(michele))
   } yield {
     insertUser(user)
     createPosts(user)
@@ -51,7 +51,7 @@ class JavaFakerDataGenerator @Inject()(userStore: UserStore,
   /**
    * Generating methods
    */
-  private def generateUsers(limit: Int) = for(i <- 1 to limit) yield generateUser
+  private def generateUsers(limit: Int): Seq[User] = for(i <- 1 to limit) yield generateUser
   private def generateUser = User(faker.firstName,
      faker.lastName,
      emailAddress,
