@@ -9,6 +9,7 @@ import scala.slick.session.{Database, Session}
 import play.api.db.DB
 import play.api.Play.current
 import com.storagexchange.utils.PasswordHelper
+import com.storagexchange.search.DataSearch
 
 trait DataGenerator {
   def createFakeData: Unit
@@ -16,7 +17,7 @@ trait DataGenerator {
 
 @Singleton
 class JavaFakerDataGenerator @Inject()(userStore: UserStore,
-    postStore: PostStore,
+    postStore: PostStore, search: DataSearch,
     passwordHasher: PasswordHelper) extends DataGenerator {
   
   private val maxStorage = 3000
@@ -43,10 +44,13 @@ class JavaFakerDataGenerator @Inject()(userStore: UserStore,
   }
 
 	private def insertPost(post: Post) = {
-	  postStore.insert(post)
+	  val id = postStore.insert(post)
+	  search.insertPost(post.copy(postID = Some(id)))
 	}
-  private def insertUser(user: User) = {
+  private def insertUser(user: User) = try { 
 	  val userId = userStore.insert(user)
+  } catch {
+    case e: Exception => Unit
   }
   /**
    * Generating methods

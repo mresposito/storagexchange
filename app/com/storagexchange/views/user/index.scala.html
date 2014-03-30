@@ -1,12 +1,28 @@
 @(user: com.storagexchange.models.User)
 
-@main("Storage Exchange", "Home") {
+@js = {
+
+  @helper.requireJs(core = routes.Assets.at("js/require.js").url, module = routes.Assets.at("js/postSearch.js").url)
+}
+
+@main("Storage Exchange", "Home", js) {
   <div class="index-trade">
     <div class="container">
       <h2>Welcome, @user.name.</h2>
       <div class="index row">
-        <div class="col-sm-4 sidebar well">
-          What up with your posts?
+        <div class="col-sm-3 sidebar well">
+          <h4>Storage size</h4>
+          <a href="#">Under 100 ftsq</a><br>
+          <a href="#">100 ftsq to 300 ftsq</a><br>
+          <a href="#">300 ftsq to 1000 ftsq</a><br>
+          <div class="row">
+            <div class="col-sm-6">
+              Form: <input type="text" class="col-sm-1"> ftsq
+            </div>
+            <div class="col-sm-6">
+              To: <input type="text" class="col-sm-1"> ftsq
+            </div>
+          </div>
         </div>
         <div class="col-sm-8 content">
           Hellooo
