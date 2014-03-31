@@ -14,15 +14,19 @@ import java.math.BigDecimal
 class UniversityStoreSpec extends Specification {
   
   val universityStore: UniversityStore = new UniversityDAL()
-
-  val testUniversity = University(5,"University of California, Berkeley", "http://www.berkeley.edu", 
+  val locationStore: LocationStore = new LocationDAL()
+  val testUniversity = University(1,"University of California, Berkeley", "http://www.berkeley.edu", 
                                   "http://upload.wikimedia.org/wikipedia/commons/f/fc/The_University_of_California_1868.svg",
-                                  "Yale Blue, California Gold", Option(5)) 
+                                  "Yale Blue, California Gold", None) 
+  val x = new BigDecimal(37.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
+  val y = new BigDecimal(122.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
+  val testLocation = Location("University of California, Berkeley", x, y, "Berkeley", "California", "103 Sproul Hall", "94720")
 
   "University Store" should {
-    "contain universities on start" in RunningApp {
-      val universityList: List[University] = universityStore.getAll()
-      universityList(4) must beEqualTo(testUniversity)
+    "insert university properly" in RunningApp {
+      //for ref. integrity insert location first
+      locationStore.insert(testLocation) 
+      universityStore.insert(testUniversity) must beEqualTo(Option(1))
     }
   }
 }

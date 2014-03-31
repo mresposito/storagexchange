@@ -14,6 +14,7 @@ import java.math.BigDecimal
 class LocationStoreSpec extends Specification  {
 
   val locationStore: LocationStore = new LocationDAL()
+  val universityStore: UniversityStore = new UniversityDAL()
 
   val x= new BigDecimal(15.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
 
@@ -22,22 +23,25 @@ class LocationStoreSpec extends Specification  {
   val y = new BigDecimal(37.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
   val z = new BigDecimal(122.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
 
-  val loc1 = Location("Stanford University", y, z, "Stanford", "California", "450 Serra Mall", "94305", Some(2))
-
-
-  val InsertLocation = BeforeHook {
+  val testLoc = Location("Stanford University", y, z, "Stanford", "California", "450 Serra Mall", "94305", Some(1))
+  val testUniv = University(1,"Stanford University", "http://www.stanford.edu", 
+                            "http://upload.wikimedia.org/wikipedia/en/b/b7/Stanford_University_seal_2003.svg",
+                            "Cardinal, White", None)
+    
+  val InsertUniversity = BeforeHook {
     DB.withConnection { implicit conn =>
-    	locationStore.insert(location).toInt must beEqualTo(6)
+      locationStore.insert(testLoc)
+      universityStore.insert(testUniv)
     }
   }
-  
+
   "Location Store" should {
     "insert a location" in RunningApp {
       //is 6 because there will be 5 other locations inserted on startup
-      locationStore.insert(location).toInt must beEqualTo(6)
+      locationStore.insert(location).toInt must beEqualTo(1)
     }
-    "get location id from city name" in RunningApp {
-      locationStore.getById(2) must beSome(loc1)
+    "get location id from city name" in InsertUniversity {
+      locationStore.getById(1) must beSome(testLoc)
     }
   }
 }

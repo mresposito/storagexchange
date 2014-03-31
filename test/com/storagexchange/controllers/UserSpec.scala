@@ -11,6 +11,8 @@ import play.api.test._
 import play.api.test.Helpers._
 import com.storagexchange.models.UserStore
 import java.sql.Timestamp
+import play.api.db._
+import java.math.BigDecimal
 
 trait UserTest extends Specification {
     
@@ -21,6 +23,8 @@ trait UserTest extends Specification {
   when(clock.now).thenReturn(today)
   val pswHasher = new FakePasswordHelper
   val userStore: UserStore = new UserDAL(pswHasher, clock)
+  val universityStore: UniversityStore = new UniversityDAL()
+  val locationStore: LocationStore = new LocationDAL()
 
   val SignUp = BeforeHook {
     createUser
@@ -28,17 +32,34 @@ trait UserTest extends Specification {
   val id = 1
   val now = Some(clock.now)
   val password = "12345678"
-  val user = User("michele", "esposito", "m@e.com", password, 2, now, now)
+  val user = User("michele", "esposito", "m@e.com", password, 1, now, now)
   val userId = user.copy(userId = Some(id))
   val univ = "Stanford University"
-  val invalidUniv = "UIUC"
+  val invalidUniv = "Stanford"
+  val y = new BigDecimal(37.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
+  val z = new BigDecimal(122.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
+  val testLoc = Location("Stanford University", y, z, "Stanford", "California", "450 Serra Mall", "94305", None)
+  val testUniv = University(1,"Stanford University", "http://www.stanford.edu", 
+                            "http://upload.wikimedia.org/wikipedia/en/b/b7/Stanford_University_seal_2003.svg",
+                            "Cardinal, White", None)
+  def insertUniversityLocation = {
+    locationStore.insert(testLoc)
+    universityStore.insert(testUniv)
+  }
+  val InsertUniversityLocation = BeforeHook {
+    DB.withConnection { implicit conn =>
+      insertUniversityLocation
+    }
+  }
   def createUser = {
+    insertUniversityLocation
     val Some(create) = route(requestWithSamePasswords(password))
     status(create) must beEqualTo(SEE_OTHER)
   }
   val CreateUser = BeforeHook {
     createUser
   }
+
   def createUserRequest(user: User) = genericCreateRequest(user.password, user.password, user, univ)
   def genericCreateRequest(psw1: String, psw2: String, user: User, university: String) = FakeRequest(
     POST,routes.Application.signup.url).withFormUrlEncodedBody(
@@ -55,6 +76,8 @@ trait UserTest extends Specification {
 }
 
 class UserSpec extends Specification with UserTest {
+  
+  //createUser
 
   "User" should {
     /**
@@ -64,14 +87,14 @@ class UserSpec extends Specification with UserTest {
       /**
        * Good form!
        */
-      "accept valid user" in RunningApp {
+      "accept valid user" in InsertUniversityLocation {
         val Some(create) = route(requestWithSamePasswords(password))
         status(create) must equalTo(SEE_OTHER)
       }
       /**
        * Check request with 2 different passwords
        */
-      "refuse if different passwords" in RunningApp {
+      "refuse if different passwords" in InsertUniversityLocation {
         val Some(create) = route(requestWithDifferentPasswords(password, password.reverse))
         status(create) must equalTo(BAD_REQUEST)
         contentAsString(create) must contain("Passwords must match")
@@ -80,7 +103,7 @@ class UserSpec extends Specification with UserTest {
       /**
         * Check request with an invalid university (UIUC instead of University of Illinois, Urbana Champaign)
         */
-      "refuse if invalid university" in RunningApp {
+      "refuse if invalid university" in InsertUniversityLocation {
         val Some(create) = route(requestWithInvalidUniversity(invalidUniv))
         status(create) must equalTo(BAD_REQUEST)
         contentAsString(create) must contain("Enter a valid university")
@@ -99,7 +122,7 @@ class UserSpec extends Specification with UserTest {
         contentAsString(createAgain) must contain(user.email)
       }
 
-      "not accept a signup form with only username " in RunningApp {
+      "not accept a signup form with only username " in InsertUniversityLocation {
         val Some(create) = route(FakeRequest(POST, routes.Application.signup.url)
           .withFormUrlEncodedBody("username" -> "michele"))
         status(create) must equalTo(BAD_REQUEST)
@@ -121,7 +144,7 @@ class UserSpec extends Specification with UserTest {
       }
     }
     "Get pages correctly" in {
-      "show error on a wrong login from" in RunningApp {
+      "show error on a wrong login from" in InsertUniversityLocation {
         val Some(login) = route(FakeRequest(POST, routes.Application.login.url).
           withFormUrlEncodedBody("email" -> user.email, "password" -> "iaosnte"))
         status(login) must beEqualTo(BAD_REQUEST)

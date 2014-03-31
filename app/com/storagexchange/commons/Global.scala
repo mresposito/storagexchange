@@ -40,9 +40,9 @@ object Global extends GlobalSettings with Logging {
   override def onStart(app: Application) {
     Play.mode match {
       //we need to populate the table of universities everytime the app starts, be it dev or production
-      case Mode.Dev => initialize_universities
-      case Mode.Prod => initialize_universities
-      case Mode.Test => initialize_universities
+      case Mode.Dev => initializeUniversities
+      case Mode.Prod => initializeUniversities
+      case Mode.Test => Unit
     }
   }
 
@@ -70,19 +70,17 @@ object Global extends GlobalSettings with Logging {
     return universities
   }
 
-  private def initialize_universities = {
+  private def initializeUniversities = {
     val universityTable = injector.getInstance(classOf[UniversityStore])
     val locationTable = injector.getInstance(classOf[LocationStore])
-    val locList:List[Location] = locationTable.getAll()
     val universities = getJsonList() 
-    //TODO: Convert to map later on
     //insert json content into universities table
     universities.foreach(university => 
                             university match {
                               case (name, website, colors, logo, locationID, lat, lng, city, state, address, zip) =>
                                 locationTable.insert(Location(name,lat,lng,city,state,address,zip,None))
                                 universityTable.insert(University(locationID,name,website,logo,colors,None))
-                              case _ => sys.error("Invalid JSON formatting")
+                              case _ => logger.info("Invalid JSON formatting")
                             }
                         )
 
