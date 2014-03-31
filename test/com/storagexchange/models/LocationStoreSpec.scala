@@ -9,11 +9,22 @@ import play.api.db._
 import play.api.Play.{current => curr}
 import java.sql.Timestamp
 import org.h2.jdbc.JdbcSQLException
-import com.storagexchange.controllers.LocationTest
 import java.math.BigDecimal
 
-class LocationStoreSpec extends Specification with LocationTest {
-  
+class LocationStoreSpec extends Specification  {
+
+  val locationStore: LocationStore = new LocationDAL()
+
+  val x= new BigDecimal(15.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
+
+  val location = Location("Home", x, x, "Cerritos", "California", "12640 Misty Place", "90703")
+
+  val y = new BigDecimal(37.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
+  val z = new BigDecimal(122.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
+
+  val loc1 = Location("Stanford University", y, z, "Stanford", "California", "450 Serra Mall", "94305", Some(2))
+
+
   val InsertLocation = BeforeHook {
     DB.withConnection { implicit conn =>
     	locationStore.insert(location).toInt must beEqualTo(6)

@@ -9,11 +9,16 @@ import play.api.db._
 import play.api.Play.{current => curr}
 import java.sql.Timestamp
 import org.h2.jdbc.JdbcSQLException
-import com.storagexchange.controllers.UniversityTest
 import java.math.BigDecimal
 
-class UniversityStoreSpec extends Specification with UniversityTest {
+class UniversityStoreSpec extends Specification {
   
+  val universityStore: UniversityStore = new UniversityDAL()
+
+  val testUniversity = University(5,"University of California, Berkeley", "http://www.berkeley.edu", 
+                                  "http://upload.wikimedia.org/wikipedia/commons/f/fc/The_University_of_California_1868.svg",
+                                  "Yale Blue, California Gold", Option(5)) 
+
   "University Store" should {
     "contain universities on start" in RunningApp {
       val universityList: List[University] = universityStore.getAll()
