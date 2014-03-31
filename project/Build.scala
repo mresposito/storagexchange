@@ -13,12 +13,10 @@ object ApplicationBuild extends Build {
     jdbc,
     anorm,
     "com.typesafe" %% "scalalogging-slf4j" % "1.0.1",
-    "com.typesafe.slick" %% "slick" % "1.0.1",
-    "postgresql" % "postgresql" % "9.1-901-1.jdbc4", 
+    "mysql" % "mysql-connector-java" % "5.1.6",
     "com.typesafe.play" %% "play-slick" % "0.5.0.8",
     "com.google.inject" % "guice" % "3.0",
     "com.tzavellas" % "sse-guice" % "0.7.1",
-    "com.javadocmd" % "simplelatlng" % "1.3.0",
     "org.mindrot" % "jbcrypt" % "0.3m",
     "com.sksamuel.elastic4s" %% "elastic4s" % "0.90.10.0",
     "com.github.javafaker" % "javafaker" % "0.3",
@@ -28,6 +26,7 @@ object ApplicationBuild extends Build {
 
   val main = play.Project(appName, appVersion, appDependencies).
     settings(templatesImport += "com.storagexchange.controllers").
-    //settings(templatesImport += "com.storagexchange.models").
+    settings(templatesImport += "com.storagexchange.models").
+    settings(templatesImport += "com.storagexchange.views").
     settings(ScalaStyleSettings :_ *)
 }

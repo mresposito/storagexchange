@@ -1,5 +1,6 @@
 package com.storagexchange.controllers
 
+import org.mockito.Mockito.{mock, when}
 import com.storagexchange.models._
 import com.storagexchange.utils._
 import play.api.test._
@@ -9,31 +10,48 @@ import org.specs2.mutable._
 import play.api.test._
 import play.api.test.Helpers._
 import com.storagexchange.models.UserStore
+import java.sql.Timestamp
 
 trait UserTest extends Specification {
     
+  val today = new Timestamp(600)
+  val tomorrow = new Timestamp(100430600)
+  val clock = mock(classOf[Clock])
+  // mock the class
+  when(clock.now).thenReturn(today)
   val pswHasher = new FakePasswordHelper
-  val userStore: UserStore = new UserDAL(pswHasher)
+  val userStore: UserStore = new UserDAL(pswHasher, clock)
 
   val SignUp = BeforeHook {
     createUser
   }
   val id = 1
+  val now = Some(clock.now)
   val password = "12345678"
+<<<<<<< HEAD
   val user = User("michele", "esposito", "m@e.com", password, 2)
+=======
+  val user = User("michele", "esposito", "m@e.com", password, 0, now, now)
+>>>>>>> origin/master
   val userId = user.copy(userId = Some(id))
   val univ = "Stanford University"
   val invalidUniv = "UIUC"
   def createUser = {
     val Some(create) = route(requestWithSamePasswords(password))
-    status(create) must equalTo(SEE_OTHER)
+    status(create) must beEqualTo(SEE_OTHER)
   }
   val CreateUser = BeforeHook {
     createUser
   }
+<<<<<<< HEAD
   def createUserRequest(user: User) = genericCreateRequest(user.password, user.password, user, univ)
   def genericCreateRequest(psw1: String, psw2: String, user: User, university: String) = FakeRequest(
     POST,"/signup").withFormUrlEncodedBody(
+=======
+  def createUserRequest(user: User) = genericCreateRequest(user.password, user.password, user)
+  def genericCreateRequest(psw1: String, psw2: String, user: User) = FakeRequest(
+    POST, routes.Application.signup.url).withFormUrlEncodedBody(
+>>>>>>> origin/master
       "myname" -> user.name,
       "surname" -> user.surname,
       "email" -> user.email,
@@ -92,26 +110,45 @@ class UserSpec extends Specification with UserTest {
       }
 
       "not accept a signup form with only username " in RunningApp {
-        val Some(create) = route(FakeRequest(POST, "/signup")
+        val Some(create) = route(FakeRequest(POST, routes.Application.signup.url)
           .withFormUrlEncodedBody("username" -> "michele"))
         status(create) must equalTo(BAD_REQUEST)
       }
       "Sign up should redirect to home page" in CreateUser {
-        val Some(home) = route(FakeRequest(GET, "/").withSession(("email", user.email)))
+        val Some(home) = route(FakeRequest(GET, routes.Application.index.url).withSession(("email", user.email)))
         contentAsString(home) must contain("Storage Exchange")
       }
       "Sign up and login" in SignUp {
-        val Some(login) = route(FakeRequest(POST, "/login").
+        val Some(login) = route(FakeRequest(POST, routes.Application.login.url).
           withFormUrlEncodedBody("email" -> user.email, "password" -> password))
         status(login) must beEqualTo(SEE_OTHER)
+      }
+      "Log out should have no session" in SignUp {
+        val Some(login) = route(FakeRequest(GET, routes.Application.logout.url).
+          withFormUrlEncodedBody("email" -> user.email, "password" -> password))
+        status(login) must beEqualTo(SEE_OTHER)
+        session(login).isEmpty must beTrue
       }
     }
     "Get pages correctly" in {
       "show error on a wrong login from" in RunningApp {
-        val Some(login) = route(FakeRequest(POST, "/login").
+        val Some(login) = route(FakeRequest(POST, routes.Application.login.url).
           withFormUrlEncodedBody("email" -> user.email, "password" -> "iaosnte"))
         status(login) must beEqualTo(BAD_REQUEST)
         contentAsString(login) must contain("Invalid email or password")
+      }
+      "Get user home after sigin up" in CreateUser {
+        val Some(home) = route(FakeRequest(GET, routes.Application.index.url).
+          withSession("email" -> user.email))
+        status(home) must beEqualTo(OK)
+        contentAsString(home) must contain(user.name)
+      }
+      "Get user profile after sigin up" in CreateUser {
+        val Some(profile) = route(FakeRequest(GET, routes.Dynamic.profile.url).
+          withSession("email" -> user.email))
+        status(profile) must beEqualTo(OK)
+        contentAsString(profile) must contain(user.name)
+        contentAsString(profile) must contain("Profile")
       }
     }
   }

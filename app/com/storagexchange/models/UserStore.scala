@@ -9,6 +9,7 @@ import play.api.Play.current
 import javax.inject.Singleton
 import javax.inject.Inject
 import com.typesafe.scalalogging.slf4j.Logging
+import com.storagexchange.utils.Clock
 
 case class User(name: String,
   surname: String,
@@ -57,9 +58,9 @@ trait UserSQLQueries {
   private[models] val createUserSql = {
     SQL("""
       INSERT INTO User
-        (name, surname, email, password, universityID, creationTime)
+        (name, surname, email, password, universityID, creationTime, lastLogin)
       VALUES
-        ({name}, {surname}, {email}, {password}, {universityId}, {creationTime})
+        ({name}, {surname}, {email}, {password}, {universityId}, {creationTime}, {lastLogin})
     """.stripMargin)
   }
 
@@ -75,6 +76,13 @@ trait UserSQLQueries {
       UPDATE User
       SET verifiedEmail=1
       WHERE userID = {id}
+    """.stripMargin)
+  }
+  private[models] val updateLoginTimeSql = {
+    SQL("""
+      UPDATE User
+      SET lastLogin={lastLogin}
+      WHERE email={email}
     """.stripMargin)
   }
   
@@ -107,16 +115,21 @@ trait UserSQLQueries {
 
 // Actual implementation of User Store method
 @Singleton
-class UserDAL @Inject()(passwordHasher: PasswordHelper) extends UserStore with UserSQLQueries with Logging {
+class UserDAL @Inject()(passwordHasher: PasswordHelper,
+    clock: Clock) extends UserStore with UserSQLQueries with Logging {
   
   implicit val userParser = str("name") ~
     str("surname") ~
     str("email") ~
     str("password") ~
     long("universityId") ~ 
-    long("userID").? map {
-      case name ~ surname ~ email ~ password ~ universityId ~ userId =>
-        User(name, surname, email, password, universityId, None, None, userId)
+    long("userID").? ~
+    long("creationTime") ~
+    long("lastLogin") map {
+      case name ~ surname ~ email ~ password ~ universityId ~ userId ~ created ~ lastLogin => {
+        User(name, surname, email, password, universityId,
+          Some(new Timestamp(created)), Some(new Timestamp(lastLogin)), userId)
+      }
     }
 
   trait SelectQueriesImp extends SelectQueries {
@@ -158,16 +171,34 @@ class UserDAL @Inject()(passwordHasher: PasswordHelper) extends UserStore with U
       'email -> user.email,
       'password -> user.password,
       'universityId -> user.universityId,
-      'creationTime -> 0 // FIXME: user clock
+      'creationTime -> clock.now.getTime(),
+      'lastLogin -> clock.now.getTime()
     ).executeInsert(scalar[Long].single)
   }
 
-  def authenticate(email: String, password: String): Boolean = DB.withConnection { implicit conn =>
+  def authenticate(email: String, password: String): Boolean = {
+    val valid = validateUser(email, password)
+    if(valid) {
+      updateLoginTime(email, clock.now.getTime())
+    }
+    valid
+  }
+  
+  private def validateUser(email: String,
+      password: String): Boolean = DB.withConnection { implicit conn =>
     getUserPasswordSql.on(
       'email -> email
     ).as(scalar[String].singleOpt).map { hashedPassword => 
       passwordHasher.checkPassword(password, hashedPassword) 
-    }.getOrElse(false)
+    }
+  }.getOrElse(false)
+  
+  private [models] def updateLoginTime(email: String,
+      time: Long): Boolean =  DB.withConnection { implicit conn =>
+    updateLoginTimeSql.on(
+       'email -> email,
+       'lastLogin -> time
+    ).executeUpdate() > 0
   }
 
   def verify(id: Long): Boolean = DB.withConnection { implicit conn =>

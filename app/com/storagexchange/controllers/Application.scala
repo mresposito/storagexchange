@@ -12,7 +12,6 @@ import play.api.db._
 import play.api.Play.current
 import anorm._
 import play.api.db.DB
-import java.util.UUID
 import javax.inject.Singleton
 import javax.inject.Inject
 import com.typesafe.scalalogging.slf4j.Logging
@@ -30,6 +29,9 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
     passwordHasher: PasswordHelper, idHasher: IdHasher, universityStore: UniversityStore) extends Controller 
     with Logging {
   
+    passwordHasher: PasswordHelper, idHasher: IdHasher) extends Controller 
+    with Logging with Secured {
+
   val loginForm = Form(
     tuple(
       "email" -> nonEmptyText(minLength = 4),
@@ -59,8 +61,15 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
       })
     )
 
-  def index = Action {
-    Ok(views.html.index())
+  def index = Action { implicit request =>
+    request.session.get("email").map { username =>
+      userStore.getByEmail(username).map { user =>
+        Ok(views.html.user.index(user))
+      }.getOrElse(Ok(views.html.index()))
+    }.getOrElse {
+      // serve home page
+      Ok(views.html.index())
+    }
   }
   /**
    * Get login page
@@ -68,8 +77,11 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
   def login = Action {
     Ok(views.html.login(loginForm))
   }
+  def logout = Action {
+    Redirect(routes.Application.index).withNewSession
+  }
   /**
-   * Authorize a user if cas a good form
+   * Authorize a user if has a good form
    */
   def authorize = Action { implicit request =>
     loginForm.bindFromRequest.fold(
@@ -116,6 +128,7 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
   	)
        
   }
+
   private def sendVerificationEmail(user: User): Unit = {
     val root = Play.current.configuration.getString("website.root")
     val hashedId = idHasher.encrypt(user.userId.get)

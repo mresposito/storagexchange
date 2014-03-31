@@ -1,5 +1,6 @@
 package com.storagexchange.models
 
+import org.mockito.Mockito.{mock, when}
 import com.storagexchange.utils._
 import org.specs2.mutable._
 import org.specs2.execute.AsResult

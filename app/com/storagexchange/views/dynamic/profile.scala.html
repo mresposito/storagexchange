@@ -1,0 +1,13 @@
+@(user: models.User)
+
+@views.html.user.main("Storage Exchange", "Profile") {
+
+  <div class="page">
+    <div class="container">
+      <div class="text-center">
+        <h1>@user.name's Profile</h1>
+        This is my profile
+      </div>
+    </div>
+  </div>
+}
