@@ -33,7 +33,7 @@ seq(jasmineSettings : _*)
 // Jasmine settings
 (test in Test) <<= (test in Test) dependsOn (jasmine)
 
-appJsDir <+= sourceDirectory { src => src / "assets" / "js" }
+appJsDir <+= baseDirectory { src => src / "app" / "assets" / "js" }
 
 appJsLibDir <+= baseDirectory { src => src / "public" / "js" }
 
