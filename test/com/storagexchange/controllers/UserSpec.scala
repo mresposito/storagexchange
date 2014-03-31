@@ -28,11 +28,7 @@ trait UserTest extends Specification {
   val id = 1
   val now = Some(clock.now)
   val password = "12345678"
-<<<<<<< HEAD
-  val user = User("michele", "esposito", "m@e.com", password, 2)
-=======
-  val user = User("michele", "esposito", "m@e.com", password, 0, now, now)
->>>>>>> origin/master
+  val user = User("michele", "esposito", "m@e.com", password, 2, now, now)
   val userId = user.copy(userId = Some(id))
   val univ = "Stanford University"
   val invalidUniv = "UIUC"
@@ -43,15 +39,9 @@ trait UserTest extends Specification {
   val CreateUser = BeforeHook {
     createUser
   }
-<<<<<<< HEAD
   def createUserRequest(user: User) = genericCreateRequest(user.password, user.password, user, univ)
   def genericCreateRequest(psw1: String, psw2: String, user: User, university: String) = FakeRequest(
-    POST,"/signup").withFormUrlEncodedBody(
-=======
-  def createUserRequest(user: User) = genericCreateRequest(user.password, user.password, user)
-  def genericCreateRequest(psw1: String, psw2: String, user: User) = FakeRequest(
-    POST, routes.Application.signup.url).withFormUrlEncodedBody(
->>>>>>> origin/master
+    POST,routes.Application.signup.url).withFormUrlEncodedBody(
       "myname" -> user.name,
       "surname" -> user.surname,
       "email" -> user.email,

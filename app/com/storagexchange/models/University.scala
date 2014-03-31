@@ -44,7 +44,7 @@ class UniversityDAL extends UniversityStore {
   }
 
   private[this] val getUniversitiesByCity = {
-    SQL(s"""
+    SQL("""
        SELECT *
        FROM University
        WHERE city = {city}
@@ -52,7 +52,7 @@ class UniversityDAL extends UniversityStore {
   }
   
   private[this] val getUniversityIdByName = {
-    SQL(s"""
+    SQL("""
         SELECT *
         FROM University
         WHERE name = {name}

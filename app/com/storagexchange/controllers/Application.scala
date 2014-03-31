@@ -101,20 +101,22 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
   	  formWithErrors => BadRequest(views.html.signup(formWithErrors)),
   	  newUser => {
   	  	val password = passwordHasher.createPassword(newUser.psw1)
-  	  	// TODO: Make sure the commented statement below is correct. Write tests for it. Change to map
         val universityMatch = universityStore.getIdByName(newUser.university)
-        val univId = universityMatch match {
-                        case Some(elem)  => 
-                          elem match { 
+        val defaultRetval: Long = 0L
+        val univId = universityMatch.map {
+                        university =>
+                          university match {
                             case University(locationId, name, website, logo, colors, id) => 
-                              id match {
-                                case Some(universityID) => universityID
-                                case None => sys.error("No valid ID")
-                              }
-                            case _ => sys.error("Invalid tuple")
+                              id.getOrElse(defaultRetval) //0L will never be successful since university id starts at 1. verification done above 
+                            case _ => 
+                              logger.info("A value was found, but it is not of proper form")
+                              defaultRetval
                           }
-                        case None => sys.error("Invalid tuple 2")
+                     }.getOrElse {
+                        logger.info("A university could not be found. Check the inputted name again")
+                        defaultRetval
                      }
+                        
         val user = User(newUser.myname, newUser.surname,
           newUser.email, password, univId)
         val userId = userStore.insert(user)
