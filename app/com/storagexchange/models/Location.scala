@@ -10,7 +10,9 @@ import com.typesafe.scalalogging.slf4j.Logging
 import java.math.BigDecimal
 
 case class Location(name: String,
-  //TODO: obviously should be double primitive type. figure out how to use within locationParser as double("lat")
+  // We use BigDecimal because when you try to retrieve
+  // Location by id, anorm cannot convert from BigDecimal
+  // to Double
   lat: BigDecimal,
   lng: BigDecimal,
   city: String,
@@ -21,10 +23,7 @@ case class Location(name: String,
 
 
 trait LocationStore {
-  //TODO: add some more interesting and useful SQL queries
   def insert(location: Location): Long
-
-  def getAll(): List[Location]
 
   def getById(id: Long): Option[Location]
 }
@@ -41,13 +40,6 @@ class LocationDAL extends LocationStore {
     """.stripMargin)
   }
   
-  private[this] val selectLocation = {
-    SQL("""
-        SELECT * 
-        FROM Location
-      """.stripMargin)
-  }
-
   private[this] val selectById = {
     SQL("""
       SELECT *
@@ -80,10 +72,6 @@ class LocationDAL extends LocationStore {
       'zip -> location.zip,
       'id -> location.id
     ).executeInsert(scalar[Long].single)
-  }
-
-  def getAll(): List[Location] = DB.withConnection { implicit conn =>
-    selectLocation.as(locationParser *)
   }
 
   def getById(id: Long): Option[Location] = DB.withConnection { implicit conn =>

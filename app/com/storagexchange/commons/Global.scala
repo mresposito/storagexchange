@@ -45,7 +45,7 @@ object Global extends GlobalSettings with Logging {
       case Mode.Test => Unit
     }
   }
-
+  
   implicit val universityReader: Reads[(String,String,String,String,Long,BigDecimal,BigDecimal,String,String,String,String)] = (
     (__ \ "name").read[String] and
     (__ \ "website").read[String] and

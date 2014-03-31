@@ -25,9 +25,7 @@ trait UniversityStore {
   
   def getByCity(city: String): Option[University]
 
-  def getIdByName(name: String): Option[University]
-
-  def getAll(): List[University]
+  def getUniversitiesByName(name: String): Option[University]
 
 }
 
@@ -51,18 +49,11 @@ class UniversityDAL extends UniversityStore {
     """.stripMargin)
   }
   
-  private[this] val getUniversityIdByName = {
+  private[this] val getUnivByName = {
     SQL("""
         SELECT *
         FROM University
         WHERE name = {name}
-      """.stripMargin)
-  }
-
-  private[this] val selectUniversity = {
-    SQL("""
-        SELECT * 
-        FROM University
       """.stripMargin)
   }
 
@@ -94,14 +85,10 @@ class UniversityDAL extends UniversityStore {
         ).as(universityParser.singleOpt)
   } 
 
-  def getIdByName(name: String): Option[University] = DB.withConnection { implicit conn =>
-        getUniversityIdByName.on(
+  def getUniversitiesByName(name: String): Option[University] = DB.withConnection { implicit conn =>
+        getUnivByName.on(
           'name -> name
         ).as(universityParser.singleOpt)
   }
-
-  def getAll(): List[University] = DB.withConnection { implicit conn =>
-    selectUniversity.as(universityParser *)
-  } 
 
 }

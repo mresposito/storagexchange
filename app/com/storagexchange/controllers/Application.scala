@@ -55,7 +55,7 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
         case userData => ! userStore.getByEmail(user.email).isDefined  
       })
       verifying ("Enter a valid university", user => user match {
-        case userData => universityStore.getIdByName(user.university).isDefined
+        case userData => universityStore.getUniversitiesByName(user.university).isDefined
       })
     )
 
@@ -101,7 +101,7 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
   	  formWithErrors => BadRequest(views.html.signup(formWithErrors)),
   	  newUser => {
   	  	val password = passwordHasher.createPassword(newUser.psw1)
-        val universityMatch = universityStore.getIdByName(newUser.university)
+        val universityMatch = universityStore.getUniversitiesByName(newUser.university)
         val defaultRetval: Long = 0L
         val univId = universityMatch.map {
                         university =>

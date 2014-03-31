@@ -15,8 +15,8 @@ class LocationStoreSpec extends Specification  {
 
   val locationStore: LocationStore = new LocationDAL()
   val universityStore: UniversityStore = new UniversityDAL()
-
-  val x= new BigDecimal(15.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
+  
+  val x = new BigDecimal(15.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
 
   val location = Location("Home", x, x, "Cerritos", "California", "12640 Misty Place", "90703")
 
@@ -40,7 +40,7 @@ class LocationStoreSpec extends Specification  {
       //is 6 because there will be 5 other locations inserted on startup
       locationStore.insert(location).toInt must beEqualTo(1)
     }
-    "get location id from city name" in InsertUniversity {
+    "get location from id" in InsertUniversity {
       locationStore.getById(1) must beSome(testLoc)
     }
   }
