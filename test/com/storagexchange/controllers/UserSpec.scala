@@ -77,8 +77,6 @@ trait UserTest extends Specification {
 
 class UserSpec extends Specification with UserTest {
   
-  //createUser
-
   "User" should {
     /**
      * Refuse empty form
