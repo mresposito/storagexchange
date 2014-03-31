@@ -26,12 +26,10 @@ case class SignupRequest(
 
 @Singleton
 class Application @Inject()(userStore: UserStore, mailSender: MailSender,
-    passwordHasher: PasswordHelper, idHasher: IdHasher, universityStore: UniversityStore) extends Controller 
-    with Logging {
-  
-    passwordHasher: PasswordHelper, idHasher: IdHasher) extends Controller 
+    passwordHasher: PasswordHelper, idHasher: IdHasher, universityStore: UniversityStore) extends Controller  
     with Logging with Secured {
-
+  
+  
   val loginForm = Form(
     tuple(
       "email" -> nonEmptyText(minLength = 4),
