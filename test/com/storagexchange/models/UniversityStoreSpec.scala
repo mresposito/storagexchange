@@ -11,16 +11,13 @@ import java.sql.Timestamp
 import org.h2.jdbc.JdbcSQLException
 import java.math.BigDecimal
 
-class UniversityStoreSpec extends Specification {
-  
-  val universityStore: UniversityStore = new UniversityDAL()
-  val locationStore: LocationStore = new LocationDAL()
+trait UniversityTest extends Specification with LocationTest {
   val testUniversity = University(1,"University of California, Berkeley", "http://www.berkeley.edu", 
                                   "http://upload.wikimedia.org/wikipedia/commons/f/fc/The_University_of_California_1868.svg",
                                   "Yale Blue, California Gold", None)
-  val x = new BigDecimal(37.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
-  val y = new BigDecimal(122.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
-  val testLocation = Location("University of California, Berkeley", x, y, "Berkeley", "California", "103 Sproul Hall", "94720")
+  val cal_x = new BigDecimal(37.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
+  val cal_y = new BigDecimal(122.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
+  val testLocation = Location("University of California, Berkeley", cal_x, cal_y, "Berkeley", "California", "103 Sproul Hall", "94720")
   
   def insertLocation = {
     locationStore.insert(testLocation)
@@ -31,6 +28,9 @@ class UniversityStoreSpec extends Specification {
       insertLocation
     }
   }
+}
+
+class UniversityStoreSpec extends Specification with UniversityTest {
   
   "University Store" should {
     "insert university properly" in InsertLocation {
@@ -38,6 +38,12 @@ class UniversityStoreSpec extends Specification {
     }
     "catch exception if ref. integrity violated" in RunningApp {
       universityStore.insert(testUniversity) must throwA[Exception]
+    }
+    "get universities by name" in InsertUniversityLocation {
+      universityStore.getUniversityByName("Stanford University") must beSome(testUniv)
+    }
+    "get universities by city" in InsertUniversityLocation {
+      universityStore.getByCity("Stanford") must beSome(testUniv)
     }
   }
 }

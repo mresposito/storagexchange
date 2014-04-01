@@ -14,7 +14,7 @@ import java.sql.Timestamp
 import play.api.db._
 import java.math.BigDecimal
 
-trait UserTest extends Specification {
+trait UserTest extends Specification with LocationTest {
     
   val today = new Timestamp(600)
   val tomorrow = new Timestamp(100430600)
@@ -23,9 +23,6 @@ trait UserTest extends Specification {
   when(clock.now).thenReturn(today)
   val pswHasher = new FakePasswordHelper
   val userStore: UserStore = new UserDAL(pswHasher, clock)
-  val universityStore: UniversityStore = new UniversityDAL()
-  val locationStore: LocationStore = new LocationDAL()
-
   val SignUp = BeforeHook {
     createUser
   }
@@ -36,21 +33,7 @@ trait UserTest extends Specification {
   val userId = user.copy(userId = Some(id))
   val univ = "Stanford University"
   val invalidUniv = "Stanford"
-  val y = new BigDecimal(37.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
-  val z = new BigDecimal(122.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
-  val testLoc = Location("Stanford University", y, z, "Stanford", "California", "450 Serra Mall", "94305", None)
-  val testUniv = University(1,"Stanford University", "http://www.stanford.edu", 
-                            "http://upload.wikimedia.org/wikipedia/en/b/b7/Stanford_University_seal_2003.svg",
-                            "Cardinal, White", None)
-  def insertUniversityLocation = {
-    locationStore.insert(testLoc)
-    universityStore.insert(testUniv)
-  }
-  val InsertUniversityLocation = BeforeHook {
-    DB.withConnection { implicit conn =>
-      insertUniversityLocation
-    }
-  }
+
   def createUser = {
     insertUniversityLocation
     val Some(create) = route(requestWithSamePasswords(password))
@@ -75,7 +58,7 @@ trait UserTest extends Specification {
   def requestWithSession(route: String) = FakeRequest(GET, route).withSession(("email", user.email))
 }
 
-class UserSpec extends Specification with UserTest {
+class UserSpec extends Specification with UserTest  {
   
   "User" should {
     /**
@@ -92,7 +75,7 @@ class UserSpec extends Specification with UserTest {
       /**
        * Check request with 2 different passwords
        */
-      "refuse if different passwords" in InsertUniversityLocation {
+      "refuse if different passwords" in RunningApp {
         val Some(create) = route(requestWithDifferentPasswords(password, password.reverse))
         status(create) must equalTo(BAD_REQUEST)
         contentAsString(create) must contain("Passwords must match")
@@ -127,7 +110,7 @@ class UserSpec extends Specification with UserTest {
         contentAsString(createAgain) must contain(user.email)
       }
 
-      "not accept a signup form with only username " in InsertUniversityLocation {
+      "not accept a signup form with only username " in RunningApp {
         val Some(create) = route(FakeRequest(POST, routes.Application.signup.url)
           .withFormUrlEncodedBody("username" -> "michele"))
         status(create) must equalTo(BAD_REQUEST)
@@ -155,13 +138,13 @@ class UserSpec extends Specification with UserTest {
         status(login) must beEqualTo(BAD_REQUEST)
         contentAsString(login) must contain("Invalid email or password")
       }
-      "Get user home after sigin up" in CreateUser {
+      "Get user home after sign up" in CreateUser {
         val Some(home) = route(FakeRequest(GET, routes.Application.index.url).
           withSession("email" -> user.email))
         status(home) must beEqualTo(OK)
         contentAsString(home) must contain(user.name)
       }
-      "Get user profile after sigin up" in CreateUser {
+      "Get user profile after sign up" in CreateUser {
         val Some(profile) = route(FakeRequest(GET, routes.Dynamic.profile.url).
           withSession("email" -> user.email))
         status(profile) must beEqualTo(OK)

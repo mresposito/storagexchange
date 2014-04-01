@@ -10,9 +10,11 @@ import com.typesafe.scalalogging.slf4j.Logging
 import java.math.BigDecimal
 
 case class Location(name: String,
-  // We use BigDecimal because when you try to retrieve
-  // Location by id, anorm cannot convert from BigDecimal
-  // to Double
+ /** 
+  * We use BigDecimal because when you try to retrieve
+  * Location by id, anorm cannot convert from BigDecimal
+  * to Double
+  */
   lat: BigDecimal,
   lng: BigDecimal,
   city: String,
@@ -48,8 +50,7 @@ class LocationDAL extends LocationStore {
       """.stripMargin)
   }
 
-  implicit val locationParser =
-    str("name") ~
+  implicit val locationParser = str("name") ~
     get[BigDecimal]("lat") ~
     get[BigDecimal]("lng") ~
     str("city") ~

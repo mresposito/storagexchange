@@ -40,8 +40,7 @@ object Global extends GlobalSettings with Logging {
   override def onStart(app: Application) {
     Play.mode match {
       case Mode.Dev => initializeUniversities
-      case Mode.Prod => initializeUniversities
-      case Mode.Test => Unit
+      case _ => Unit
     }
   }
 
@@ -91,7 +90,7 @@ object Global extends GlobalSettings with Logging {
                               case UniversityInformation(name, website, colors, logo, locationID, lat, lng, city, state, address, zip) =>
                                 locationTable.insert(Location(name,lat,lng,city,state,address,zip,None))
                                 universityTable.insert(University(locationID,name,website,logo,colors,None))
-                              case _ => logger.info("Invalid JSON formatting")
+                              case _ => logger.error("Invalid JSON formatting")
                             }
                         )
 

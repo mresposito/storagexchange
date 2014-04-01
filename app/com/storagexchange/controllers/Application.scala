@@ -55,7 +55,7 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
         case userData => ! userStore.getByEmail(user.email).isDefined  
       })
       verifying ("Enter a valid university", user => user match {
-        case userData => universityStore.getUniversitiesByName(user.university).isDefined
+        case userData => universityStore.getUniversityByName(user.university).isDefined
       })
     )
 
@@ -101,19 +101,20 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
   	  formWithErrors => BadRequest(views.html.signup(formWithErrors)),
   	  newUser => {
   	  	val password = passwordHasher.createPassword(newUser.psw1)
-        val universityMatch = universityStore.getUniversitiesByName(newUser.university)
+        val universityMatch = universityStore.getUniversityByName(newUser.university)
         val defaultRetval: Long = 0L
-        val univId = universityMatch.map {
-                        university =>
-                          university match {
-                            case University(locationId, name, website, logo, colors, id) => 
-                              id.getOrElse(defaultRetval) //0L will never be successful since university id starts at 1. verification done above 
-                            case _ => 
-                              logger.info("A value was found, but it is not of proper form")
-                              defaultRetval
+        //retrieve university id by name.  
+        val univId = universityMatch.map { university =>
+                        university match {
+                          case University(locationId, name, website, logo, colors, id) => 
+                            id.getOrElse(defaultRetval) //0L will never be successful since university id starts at 1. verification done above 
+                          case _ => { 
+                            logger.error("A value was found, but it is not of proper form")
+                            defaultRetval
                           }
+                        }
                      }.getOrElse {
-                        logger.info("A university could not be found. Check the inputted name again")
+                        logger.error("A university could not be found. Check the inputted name again")
                         defaultRetval
                      }
                         
@@ -126,7 +127,6 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
         	withSession("email" -> newUser.email)
   	  }
   	)
-       
   }
 
   private def sendVerificationEmail(user: User): Unit = {

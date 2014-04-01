@@ -25,7 +25,7 @@ trait UniversityStore {
   
   def getByCity(city: String): Option[University]
 
-  def getUniversitiesByName(name: String): Option[University]
+  def getUniversityByName(name: String): Option[University]
 
 }
 
@@ -43,9 +43,9 @@ class UniversityDAL extends UniversityStore with Logging {
 
   private[this] val getUniversitiesByCity = {
     SQL("""
-       SELECT *
-       FROM University
-       WHERE city = {city}
+       SELECT * 
+       FROM University, (SELECT * FROM Location WHERE city = {city}) AS UniversitiesInCity 
+       WHERE UniversitiesInCity.id = University.locationID
     """.stripMargin)
   }
   
@@ -68,23 +68,16 @@ class UniversityDAL extends UniversityStore with Logging {
         University(locationID, name, website, logo, colors, id)
     }
 
+  @throws(classOf[Exception])
   def insert(university: University): Long  = DB.withConnection { implicit conn =>
-    try { 
-      createUniversitySql.on(
-        'locationID -> university.locationID,
-        'name -> university.name,
-        'website -> university.website,
-        'logo -> university.logo,
-        'colors -> university.colors,
-        'id -> university.id
-      ).executeInsert(scalar[Long].single)
-    } catch {
-        case e: Exception => {
-          logger.debug(e.getMessage())
-          println(e.getMessage())
-          throw e
-        }
-    }
+        createUniversitySql.on(
+          'locationID -> university.locationID,
+          'name -> university.name,
+          'website -> university.website,
+          'logo -> university.logo,
+          'colors -> university.colors,
+          'id -> university.id
+        ).executeInsert(scalar[Long].single)
   }
  
   def getByCity(city: String): Option[University] = DB.withConnection { implicit conn =>
@@ -93,7 +86,7 @@ class UniversityDAL extends UniversityStore with Logging {
         ).as(universityParser.singleOpt)
   } 
 
-  def getUniversitiesByName(name: String): Option[University] = DB.withConnection { implicit conn =>
+  def getUniversityByName(name: String): Option[University] = DB.withConnection { implicit conn =>
         getUnivByName.on(
           'name -> name
         ).as(universityParser.singleOpt)
