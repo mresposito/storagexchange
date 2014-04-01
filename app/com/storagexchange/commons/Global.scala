@@ -39,14 +39,25 @@ object Global extends GlobalSettings with Logging {
 
   override def onStart(app: Application) {
     Play.mode match {
-      //we need to populate the table of universities everytime the app starts, be it dev or production
       case Mode.Dev => initializeUniversities
       case Mode.Prod => initializeUniversities
       case Mode.Test => Unit
     }
   }
-  
-  implicit val universityReader: Reads[(String,String,String,String,Long,BigDecimal,BigDecimal,String,String,String,String)] = (
+
+  case class UniversityInformation(name: String,
+    website: String,
+    colors: String,
+    logo: String,
+    locationID: Long,
+    lat: BigDecimal,
+    lng: BigDecimal,
+    city: String,
+    state: String,
+    address: String,
+    zip: String)
+
+  implicit val universityReader: Reads[UniversityInformation] = (
     (__ \ "name").read[String] and
     (__ \ "website").read[String] and
     (__ \ "colors").read[String] and
@@ -58,15 +69,15 @@ object Global extends GlobalSettings with Logging {
     (__ \ "state").read[String] and
     (__ \ "address").read[String] and
     (__ \ "zip").read[String] 
-  ).tupled
+  )(UniversityInformation)
 
-  private def getJsonList( ) : List[(String,String,String,String,Long,BigDecimal,BigDecimal,String,String,String,String)] = {
+  private def getJsonList( ) : List[UniversityInformation] = {
     val jsonFile = Play.application.getFile("universities.json")
     val filePath = jsonFile.toString()
     val jsonContent = scala.io.Source.fromFile(filePath).mkString
     val jsonObj: JsValue = Json.parse(jsonContent)
     val universityList = (jsonObj \ "universities")
-    val universities = universityList.as[List[(String,String,String,String,Long,BigDecimal,BigDecimal,String,String,String,String)]]
+    val universities = universityList.as[List[UniversityInformation]]
     return universities
   }
 
@@ -77,7 +88,7 @@ object Global extends GlobalSettings with Logging {
     //insert json content into universities table
     universities.foreach(university => 
                             university match {
-                              case (name, website, colors, logo, locationID, lat, lng, city, state, address, zip) =>
+                              case UniversityInformation(name, website, colors, logo, locationID, lat, lng, city, state, address, zip) =>
                                 locationTable.insert(Location(name,lat,lng,city,state,address,zip,None))
                                 universityTable.insert(University(locationID,name,website,logo,colors,None))
                               case _ => logger.info("Invalid JSON formatting")

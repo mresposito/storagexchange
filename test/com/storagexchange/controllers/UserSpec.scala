@@ -107,6 +107,13 @@ class UserSpec extends Specification with UserTest {
         contentAsString(create) must contain("Enter a valid university")
       }
       /**
+        * Check request with a valid university (Stanford University)
+        */
+      "accept if valid university" in InsertUniversityLocation {
+        val Some(create) = route(requestWithSamePasswords(password))
+        status(create) must equalTo(SEE_OTHER)
+      }
+      /**
        * Avoid double sigup
        */
       "refuse if user already exists" in CreateUser {

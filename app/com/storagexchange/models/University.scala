@@ -21,7 +21,7 @@ case class University(locationID: Long,
  */
 trait UniversityStore {
 
-  def insert(university: University): Option[Long]
+  def insert(university: University): Long
   
   def getByCity(city: String): Option[University]
 
@@ -30,7 +30,7 @@ trait UniversityStore {
 }
 
 @Singleton
-class UniversityDAL extends UniversityStore {
+class UniversityDAL extends UniversityStore with Logging {
   
   private[this] val createUniversitySql = {
     SQL("""
@@ -68,15 +68,23 @@ class UniversityDAL extends UniversityStore {
         University(locationID, name, website, logo, colors, id)
     }
 
-  def insert(university: University): Option[Long] = DB.withConnection { implicit conn =>
-    createUniversitySql.on(
-      'locationID -> university.locationID,
-      'name -> university.name,
-      'website -> university.website,
-      'logo -> university.logo,
-      'colors -> university.colors,
-      'id -> university.id
-    ).executeInsert(scalar[Long].singleOpt)
+  def insert(university: University): Long  = DB.withConnection { implicit conn =>
+    try { 
+      createUniversitySql.on(
+        'locationID -> university.locationID,
+        'name -> university.name,
+        'website -> university.website,
+        'logo -> university.logo,
+        'colors -> university.colors,
+        'id -> university.id
+      ).executeInsert(scalar[Long].single)
+    } catch {
+        case e: Exception => {
+          logger.debug(e.getMessage())
+          println(e.getMessage())
+          throw e
+        }
+    }
   }
  
   def getByCity(city: String): Option[University] = DB.withConnection { implicit conn =>

@@ -21,12 +21,23 @@ class UniversityStoreSpec extends Specification {
   val x = new BigDecimal(37.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
   val y = new BigDecimal(122.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
   val testLocation = Location("University of California, Berkeley", x, y, "Berkeley", "California", "103 Sproul Hall", "94720")
-
+  
+  def insertLocation = {
+    locationStore.insert(testLocation)
+  }
+  
+  val InsertLocation = BeforeHook {
+    DB.withConnection { implicit conn =>
+      insertLocation
+    }
+  }
+  
   "University Store" should {
-    "insert university properly" in RunningApp {
-      //for ref. integrity insert location first
-      locationStore.insert(testLocation) 
-      universityStore.insert(testUniversity) must beEqualTo(Option(1))
+    "insert university properly" in InsertLocation {
+      universityStore.insert(testUniversity) must beEqualTo(1)
+    }
+    "catch exception if ref. integrity violated" in RunningApp {
+      universityStore.insert(testUniversity) must throwA[Exception]
     }
   }
 }
