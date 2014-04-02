@@ -102,6 +102,7 @@ trait UserSQLQueries {
        WHERE userID = {id}
     """.stripMargin)
   }
+
 }
 
 // Actual implementation of User Store method

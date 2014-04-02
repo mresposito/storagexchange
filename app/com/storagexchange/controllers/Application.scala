@@ -10,6 +10,7 @@ import play.api.data._
 import play.api.data.Forms._
 import play.api.db._
 import play.api.Play.current
+import anorm._
 import play.api.db.DB
 import javax.inject.Singleton
 import javax.inject.Inject
@@ -25,9 +26,10 @@ case class SignupRequest(
 
 @Singleton
 class Application @Inject()(userStore: UserStore, mailSender: MailSender,
-    passwordHasher: PasswordHelper, idHasher: IdHasher) extends Controller 
+    passwordHasher: PasswordHelper, idHasher: IdHasher, universityStore: UniversityStore) extends Controller  
     with Logging with Secured {
-
+  
+  
   val loginForm = Form(
     tuple(
       "email" -> nonEmptyText(minLength = 4),
@@ -51,6 +53,9 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
       })
       verifying ("User already exists", user => user match {
         case userData => ! userStore.getByEmail(user.email).isDefined  
+      })
+      verifying ("Enter a valid university", user => user match {
+        case userData => universityStore.getUniversityByName(user.university).isDefined
       })
     )
 
@@ -96,12 +101,29 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
   	  formWithErrors => BadRequest(views.html.signup(formWithErrors)),
   	  newUser => {
   	  	val password = passwordHasher.createPassword(newUser.psw1)
-  	  	// FIXME: insert proper university id
+        val universityMatch = universityStore.getUniversityByName(newUser.university)
+        val defaultRetval: Long = 0L
+        //retrieve university id by name.  
+        val univId = universityMatch.map { university =>
+                        university match {
+                          case University(locationId, name, website, logo, colors, id) => 
+                            id.getOrElse(defaultRetval) //0L will never be successful since university id starts at 1. verification done above 
+                          case _ => { 
+                            logger.error("A value was found, but it is not of proper form")
+                            defaultRetval
+                          }
+                        }
+                     }.getOrElse {
+                        logger.error("A university could not be found. Check the inputted name again")
+                        defaultRetval
+                     }
+                        
         val user = User(newUser.myname, newUser.surname,
-          newUser.email, password, 0)
+          newUser.email, password, univId)
         val userId = userStore.insert(user)
         sendVerificationEmail(user.copy(userId = Some(userId)))
-        Redirect(routes.Application.index()).
+        
+        Redirect(routes.Application.index()). 
         	withSession("email" -> newUser.email)
   	  }
   	)
