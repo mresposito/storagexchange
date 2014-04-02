@@ -10,7 +10,7 @@ define ([
 
   return {
     getPosts: function() {
-      return [{description: "hello", storageSize: "mah"}];
+      return [{description: "hello", size: "mah"}];
     }
   }
 });

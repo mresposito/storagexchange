@@ -9,7 +9,9 @@ import com.sksamuel.elastic4s.mapping.FieldType._
 import javax.inject.Inject
 import javax.inject.Singleton
 import scala.concurrent.Future
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.index.IndexResponse
+import org.elasticsearch.action.search.SearchResponse
 
 trait ElasticClientInjector {
   val client: ElasticClient
@@ -35,8 +37,9 @@ class EmbeddedElasticClient extends ElasticClientInjector {
 trait DataSearch {
 
   def insertPost(post: Post): Future[IndexResponse]
+  def getPosts: Future[SearchResponse]
 
-  def createIndices: Unit
+  def createIndices: Future[CreateIndexResponse]
   def deleteIndices: Unit
 }
 
@@ -51,7 +54,7 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector) extends Da
       "storageSize" -> post.storageSize)
   }
 
-  def createIndices = client execute {
+  def createIndices: Future[CreateIndexResponse] = client execute {
     create index "posts" mappings (
       "post" as (
         "id" typed IntegerType,
@@ -67,5 +70,9 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector) extends Da
   }
   def deleteIndices = client execute {
     delete index "posts"
+  }
+  
+  def getPosts: Future[SearchResponse] = client execute {
+    search in "posts" -> "post"
   }
 }

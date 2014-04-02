@@ -2,8 +2,9 @@ define ([
   "jquery",
   "underscore",
   "backbone",
-  "search/elastic"
-], function($, _, Backbone, elastic) {
+  "search/elastic",
+  "views/post.html"
+], function($, _, Backbone, elastic, postHTML) {
 
   return Backbone.View.extend({
 
@@ -13,8 +14,9 @@ define ([
     },
 
     renderPosts: function(posts) {
+      var $el = this.$el;
       _.map(posts, function(post) {
-        console.log(post);
+        $el.find(".content").append(postHTML(post));
       });
     }
   });
