@@ -36,7 +36,6 @@ object Global extends GlobalSettings with Logging {
     injector.getInstance(clazz)
   }
 
-
   override def onStart(app: Application) {
     Play.mode match {
       case Mode.Dev => initializeUniversities
@@ -85,14 +84,16 @@ object Global extends GlobalSettings with Logging {
     val locationTable = injector.getInstance(classOf[LocationStore])
     val universities = getJsonList() 
     //insert json content into universities table
-    universities.foreach(university => 
-                            university match {
-                              case UniversityInformation(name, website, colors, logo, locationID, lat, lng, city, state, address, zip) =>
-                                locationTable.insert(Location(name,lat,lng,city,state,address,zip,None))
-                                universityTable.insert(University(locationID,name,website,logo,colors,None))
-                              case _ => logger.error("Invalid JSON formatting")
-                            }
-                        )
+    universities.map{ university => university match {
+      case UniversityInformation(name, website, colors,
+          logo, locationID, lat,
+          lng, city, state, address, zip) => {
+          locationTable.insert(Location(name,lat,lng,city,state,address,zip,None))
+          universityTable.insert(University(locationID,name,website,logo,colors,None))
+        }
+        case _ => logger.error("Invalid JSON formatting")
+      } 
+    }
 
   }
 

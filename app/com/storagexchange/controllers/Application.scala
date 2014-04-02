@@ -99,34 +99,26 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
   def registration = Action { implicit request =>
   	newUserForm.bindFromRequest.fold(
   	  formWithErrors => BadRequest(views.html.signup(formWithErrors)),
-  	  newUser => {
-  	  	val password = passwordHasher.createPassword(newUser.psw1)
-        val universityMatch = universityStore.getUniversityByName(newUser.university)
-        val defaultRetval: Long = 0L
-        //retrieve university id by name.  
-        val univId = universityMatch.map { university =>
-                        university match {
-                          case University(locationId, name, website, logo, colors, id) => 
-                            id.getOrElse(defaultRetval) //0L will never be successful since university id starts at 1. verification done above 
-                          case _ => { 
-                            logger.error("A value was found, but it is not of proper form")
-                            defaultRetval
-                          }
-                        }
-                     }.getOrElse {
-                        logger.error("A university could not be found. Check the inputted name again")
-                        defaultRetval
-                     }
-                        
-        val user = User(newUser.myname, newUser.surname,
-          newUser.email, password, univId)
-        val userId = userStore.insert(user)
-        sendVerificationEmail(user.copy(userId = Some(userId)))
-        
-        Redirect(routes.Application.index()). 
-        	withSession("email" -> newUser.email)
-  	  }
-  	)
+  	  newUser => insert(newUser)
+	  )
+  }
+  
+  private def insert(newUser: SignupRequest) = universityStore.
+	  getUniversityByName(newUser.university).map { university =>
+
+    val password = passwordHasher.createPassword(newUser.psw1)
+    val user = User(newUser.myname, newUser.surname,
+      newUser.email, password, university.id.get)
+    val userId = userStore.insert(user)
+    // verify the user email
+    sendVerificationEmail(user.copy(userId = Some(userId)))
+    // redirect to login with his session
+    Redirect(routes.Application.index()). 
+    	withSession("email" -> newUser.email)
+
+  }.getOrElse {
+    logger.error("A university could not be found. Check the inputted name again")
+    BadRequest("The university you have specified does not exist")
   }
 
   private def sendVerificationEmail(user: User): Unit = {
