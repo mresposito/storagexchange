@@ -9,12 +9,17 @@ import com.storagexchange.models.Post
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalatest.Matchers
+import scala.concurrent.Future
+import org.elasticsearch.action.search.SearchResponse
 
-class PostSearchSpec extends FlatSpec 
+class PostSearchSpec extends FlatSpec with Matchers
 	with MockitoSugar with ElasticSugar {
   val post1 = Post("m@e.com", "This is the first post", 95, Some(1))
   val post2 = Post("hsimpson@uis.edu", "Homer no function beer well without", 45, Some(2))
   val atMost: Duration = Duration(10, "seconds")
+  
+  implicit def unrollFuture[A](f: Future[A]):A = Await.result(f, atMost)
 
   val dataSearch = new ElasticSearch(new GenericClient(client))
   dataSearch.insertPost(post1)
@@ -31,7 +36,7 @@ class PostSearchSpec extends FlatSpec
     val resp = client.sync.execute {
       search in "posts" -> "post"
     }
-    assert(2 === resp.getHits.totalHits())
+    resp.getHits.totalHits() should equal(2)
   }
   
   "filtering" should "return 1 if less than 50" in {
@@ -40,7 +45,7 @@ class PostSearchSpec extends FlatSpec
         rangeFilter("storageSize") lte "50"
       }
    }
-    assert(1 === resp.getHits.totalHits())
+    resp.getHits.totalHits() should equal(1)
   }
   it should "return 1 if greater than 50" in {
    val resp = client.sync.execute {
@@ -48,7 +53,7 @@ class PostSearchSpec extends FlatSpec
         rangeFilter("storageSize") gte "50"
       }
    }
-    assert(1 === resp.getHits.totalHits())
+    resp.getHits.totalHits() should equal(1)
   }
   it should "return none if invalid range" in {
    val resp = client.sync.execute {
@@ -56,23 +61,23 @@ class PostSearchSpec extends FlatSpec
         rangeFilter("storageSize") lte "0"
       }
    }
-    assert(0 === resp.getHits.totalHits())
+    resp.getHits.totalHits() should equal(0)
   }
   
   "data search" should "return one hit by keyword" in {
-   val resp = Await.result(dataSearch.getPosts, atMost)
-    assert(2 === resp.getHits.totalHits())
+   val resp: SearchResponse = dataSearch.getPosts
+    resp.getHits.totalHits() should equal(2)
   }
   it should "contain the first post description" in {
-   val resp = Await.result(dataSearch.getPosts, atMost)
-    assert(resp.toString().contains(post1.description))
+   val resp: SearchResponse = dataSearch.getPosts
+   resp.toString() should include(post1.description)
   }
   it should "contain the second post description" in {
-   val resp = Await.result(dataSearch.getPosts, atMost)
-    assert(resp.toString().contains(post2.description))
+   val resp: SearchResponse = dataSearch.getPosts
+   resp.toString() should include(post2.description)
   }
   it should "not contain an email address" in {
-   val resp = Await.result(dataSearch.getPosts, atMost)
-    assert(! resp.toString().contains(post2.email))
+   val resp: SearchResponse = dataSearch.getPosts
+   resp.toString() should not include(post2.email)
   }
 }

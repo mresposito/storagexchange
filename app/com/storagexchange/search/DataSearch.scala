@@ -39,11 +39,15 @@ class EmbeddedElasticClient extends ElasticClientInjector {
 trait DataSearch {
 
   def insertPost(post: Post): Future[IndexResponse]
-  def getPosts: Future[SearchResponse]
+  def getPosts: Future[SearchResponse] = getPosts()
+  def getPosts(searches: SearchBuilder*): Future[SearchResponse]
 
   def createIndices: Future[CreateIndexResponse]
   def deleteIndices: Unit
 }
+
+trait SearchBuilder
+case class Filter(field: String, lt: Int, gt: Int) extends SearchBuilder
 
 @Singleton
 class ElasticSearch @Inject() (clientInjector: ElasticClientInjector) extends DataSearch {
@@ -62,13 +66,13 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector) extends Da
         "id" typed IntegerType,
         "description" typed StringType,
         "storageSize" typed IntegerType)
-    ) 
+    )
   }
   def deleteIndices = client execute {
     delete index "posts"
   }
   
-  def getPosts: Future[SearchResponse] = client execute {
+  def getPosts(searches: SearchBuilder*): Future[SearchResponse] = client execute {
     search in "posts" -> "post"
   }
 }
