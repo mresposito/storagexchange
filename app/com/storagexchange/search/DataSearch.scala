@@ -1,6 +1,6 @@
 package com.storagexchange.search
 
-import org.elasticsearch.node.NodeBuilder._
+import org.elasticsearch.node.NodeBuilder.nodeBuilder
 import com.storagexchange.models._
 import com.sksamuel.elastic4s._
 import com.sksamuel.elastic4s.KeywordAnalyzer
@@ -22,6 +22,8 @@ trait ElasticClientInjector {
 class LocalElasticClient extends ElasticClientInjector {
   val client = ElasticClient.local
 }
+
+class GenericClient(val client: ElasticClient) extends ElasticClientInjector
 
 class EmbeddedElasticClient extends ElasticClientInjector {
   val node = nodeBuilder().client(true).node()
@@ -46,27 +48,21 @@ trait DataSearch {
 @Singleton
 class ElasticSearch @Inject() (clientInjector: ElasticClientInjector) extends DataSearch {
   import clientInjector._
-
+  
   def insertPost(post: Post): Future[IndexResponse] = client execute {
     index into "posts" -> "post" fields (
       "id" -> post.postID.get,
       "description" -> post.description,
       "storageSize" -> post.storageSize)
   }
-
+  
   def createIndices: Future[CreateIndexResponse] = client execute {
     create index "posts" mappings (
       "post" as (
         "id" typed IntegerType,
-        "description" typed StringType analyzer "name",
+        "description" typed StringType,
         "storageSize" typed IntegerType)
-    ) analysis (
-      CustomAnalyzerDefinition(
-        "nameAnalyzer",
-        EdgeNGramTokenizer("myedge", minGram=3, maxGram=8),
-        LowercaseTokenFilter,
-        StandardTokenFilter)
-    )
+    ) 
   }
   def deleteIndices = client execute {
     delete index "posts"
