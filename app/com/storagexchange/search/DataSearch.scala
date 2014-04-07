@@ -47,7 +47,8 @@ trait DataSearch {
 }
 
 trait SearchBuilder
-case class Filter(field: String, lt: Int, gt: Int) extends SearchBuilder
+case class Filter(field: String, gt: Int, lt: Int) extends SearchBuilder
+case class Query(term: String) extends SearchBuilder
 
 @Singleton
 class ElasticSearch @Inject() (clientInjector: ElasticClientInjector) extends DataSearch {
@@ -72,7 +73,17 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector) extends Da
     delete index "posts"
   }
   
+  private def matchSearch(red: SearchDefinition,
+    build: SearchBuilder): SearchDefinition = build match {
+    
+    case Filter(field, gt, lt) => red filter {
+      rangeFilter(field) lte lt.toString gte gt.toString
+    }
+    case Query(term) => red query term
+    case _ => red
+  }
+  
   def getPosts(searches: SearchBuilder*): Future[SearchResponse] = client execute {
-    search in "posts" -> "post"
+    searches.foldLeft(search in "posts" types "post")(matchSearch)
   }
 }
