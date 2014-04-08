@@ -1,36 +1,20 @@
 package com.storagexchange.search
 
-import org.elasticsearch.common.settings.ImmutableSettings
-import java.io.File
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.ElasticClient
-import java.util.UUID
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import org.elasticsearch.indices.IndexMissingException
 import org.scalatest.{ Suite, BeforeAndAfterAll }
 import com.typesafe.scalalogging.slf4j.Logging
 
-/** @author Stephen Samuel */
+/** @author Stephen Samuel, @modified Michele Esposito*/
 trait ElasticSugar extends BeforeAndAfterAll with Logging {
 
   this: Suite =>
 
-  val tempFile = File.createTempFile("elasticsearchtests", "tmp")
-  val homeDir = new File(tempFile.getParent + "/" + UUID.randomUUID().toString)
-  homeDir.mkdir()
-  homeDir.deleteOnExit()
-  tempFile.deleteOnExit()
-  logger.info("Setting ES home dir [{}]", homeDir)
-
-  val settings = ImmutableSettings.settingsBuilder()
-    .put("node.http.enabled", false)
-    .put("http.enabled", false)
-    .put("path.home", homeDir.getAbsolutePath)
-    .put("index.number_of_shards", 1)
-    .put("index.number_of_replicas", 0)
-
-  implicit val client = ElasticClient.local(settings.build)
+  val clientInjector = new EmbeddedElasticClient
+  val dataSearch = new ElasticSearch(clientInjector)
+  implicit val client = clientInjector.client
 
   def refresh(indexes: String*) {
     val i = indexes.size match {

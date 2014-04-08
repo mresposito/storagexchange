@@ -46,7 +46,6 @@ class TestModule extends CommodModule {
     bind[IdHasher].to[FakeIdHasher]
     bind[PasswordHelper].to[FakePasswordHelper]
     bind[Clock].to[FakeClock]
-//    bind[ElasticClientInjector].to[EmbeddedElasticClient]
-    bind[ElasticClientInjector].to[LocalElasticClient]
+    bind[ElasticClientInjector].to[EmbeddedElasticClient]
   }
 }

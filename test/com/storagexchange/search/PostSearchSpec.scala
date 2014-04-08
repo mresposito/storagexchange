@@ -1,6 +1,7 @@
 package com.storagexchange.search
 
 import org.scalatest.FlatSpec
+import org.scalatest.Matchers
 import org.scalatest.mock.MockitoSugar
 import com.sksamuel.elastic4s.ElasticDsl._
 import org.elasticsearch.common.Priority
@@ -9,7 +10,6 @@ import com.storagexchange.models.Post
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.scalatest.Matchers
 import scala.concurrent.Future
 import org.elasticsearch.action.search.SearchResponse
 
@@ -21,7 +21,6 @@ class PostSearchSpec extends FlatSpec with Matchers
   
   implicit def unrollFuture[A](f: Future[A]):A = Await.result(f, atMost)
 
-  val dataSearch = new ElasticSearch(new GenericClient(client))
   dataSearch.insertPost(post1)
   dataSearch.insertPost(post2)
 

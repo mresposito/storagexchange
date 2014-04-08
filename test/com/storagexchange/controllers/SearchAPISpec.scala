@@ -11,6 +11,7 @@ import com.storagexchange.utils._
 import com.storagexchange.search.EmbeddedElasticClient
 import com.storagexchange.search.ElasticSearch
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Await
 
 
 /**
@@ -20,32 +21,22 @@ import scala.concurrent.ExecutionContext.Implicits.global
  */
 class SearchAPISpec extends Specification with PostTest {
   
-  val client = new EmbeddedElasticClient
-  val search = new ElasticSearch(client)
-  val IndexPosts = BeforeHook {
-    for {
-      index <- search.createIndices
-	    post <- search.insertPost(post1)
-    } yield (post)
-  }
-  
   "A Search API" should {
     
     "Get posts should" in {
-	    "give 200 if there are posts" in IndexPosts {
+	    "give 200 if there are posts" in CreatePosts {
 	      val Some(page) = route(FakeRequest(GET, routes.SearchAPI.getPosts.url))
-	      client.tearDown
 	      status(page) must beEqualTo(OK)
 	    }
-	    "have the post description in the body" in IndexPosts {
+	    "have the post description in the body" in CreatePosts {
 	      val Some(page) = route(FakeRequest(GET, routes.SearchAPI.getPosts.url))
-	      client.tearDown
 	      contentAsString(page) must contain(post1.description)
+	      contentAsString(page) must contain(post2.description)
 	    }
-	    "have the post size in the body" in IndexPosts {
+	    "have the post size in the body" in CreatePosts {
 	      val Some(page) = route(FakeRequest(GET, routes.SearchAPI.getPosts.url))
-	      client.tearDown
 	      contentAsString(page) must contain(post1.storageSize.toString)
+	      contentAsString(page) must contain(post2.storageSize.toString)
 	    }
     }
   }

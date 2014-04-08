@@ -12,6 +12,9 @@ import scala.concurrent.Future
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.common.settings.ImmutableSettings
+import java.io.File
+import java.util.UUID
 
 trait ElasticClientInjector {
   val client: ElasticClient
@@ -26,14 +29,21 @@ class LocalElasticClient extends ElasticClientInjector {
 class GenericClient(val client: ElasticClient) extends ElasticClientInjector
 
 class EmbeddedElasticClient extends ElasticClientInjector {
-  val node = nodeBuilder().client(true).node()
-  val client = ElasticClient.fromNode(node)
-  /**
-   * Stop the local run node
-   */
-  override def tearDown = {
-    node.stop()
-  }
+  
+  val tempFile = File.createTempFile("elasticsearchtests", "tmp")
+  val homeDir = new File(tempFile.getParent + "/" + UUID.randomUUID().toString)
+  homeDir.mkdir()
+  homeDir.deleteOnExit()
+  tempFile.deleteOnExit()
+
+  val settings = ImmutableSettings.settingsBuilder()
+    .put("node.http.enabled", false)
+    .put("http.enabled", false)
+    .put("path.home", homeDir.getAbsolutePath)
+    .put("index.number_of_shards", 1)
+    .put("index.number_of_replicas", 0)
+
+  val client = ElasticClient.local(settings.build)
 }
 
 trait DataSearch {
@@ -73,17 +83,14 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector) extends Da
     delete index "posts"
   }
   
-  private def matchSearch(red: SearchDefinition,
-    build: SearchBuilder): SearchDefinition = build match {
-    
-    case Filter(field, gt, lt) => red filter {
-      rangeFilter(field) lte lt.toString gte gt.toString
-    }
-    case Query(term) => red query term
-    case _ => red
-  }
-  
   def getPosts(searches: SearchBuilder*): Future[SearchResponse] = client execute {
-    searches.foldLeft(search in "posts" types "post")(matchSearch)
+    searches.foldLeft(search in "posts" types "post") {
+      (red: SearchDefinition, build: SearchBuilder) => build match {
+		    case Filter(field, gt, lt) => red filter {
+		      rangeFilter(field) lte lt.toString gte gt.toString
+		    }
+		    case Query(term) => red query term
+	    }
+    }
   }
 }
