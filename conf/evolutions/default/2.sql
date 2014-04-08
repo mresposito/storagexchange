@@ -25,5 +25,15 @@ CREATE TABLE Post (
   description VARCHAR(2000) NOT NULL,
   storageSize INT NOT NULL);
 
+CREATE TABLE Message (
+  fromUser VARCHAR(50) NOT NULL,
+  toUser VARCHAR(50) NOT NULL,
+  message VARCHAR(2000) NOT NULL,
+  parentID BIGINT,
+  childID BIGINT,
+  messageID BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY
+);
+
 # --- !Downs
 DROP TABLE Post;
+DROP TABLE Message;

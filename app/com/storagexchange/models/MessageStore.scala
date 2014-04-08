@@ -21,7 +21,7 @@ case class Message(fromUser: String,
  */
 trait MessageStore {
   def insert(message: Message): Long
-  def reply(id: Long, message: Message): Option[Message]
+  def reply(id: Long, message: Message): Long
 
   def getById(id: Long): Option[Message]
   def getConversationById(id: Long): List[Message]
@@ -32,12 +32,91 @@ trait MessageStore {
 
 @Singleton
 class MessageDAL extends MessageStore {
-  def insert(message: Message): Long = throw new UnsupportedOperationException("not implemented")
+
+  private[this] val createMessageSql = {
+    SQL("""
+      INSERT INTO Message
+        (fromUser, toUser, message)
+      VALUES
+        ({fromUser}, {toUser}, {message})
+    """.stripMargin)
+  }
+
+  private[this] val createReplySql = {
+    SQL("""
+      INSERT INTO Message
+        (fromUser, toUser, message, parentID)
+      VALUES
+        ({fromUser}, {toUser}, {message}, {parentID})
+    """.stripMargin)
+  }
+
+  private[this] val findMessageByIdSql = {
+    SQL("""
+       SELECT *
+       FROM Message
+       WHERE messageID = {messageID}
+    """.stripMargin)
+  }
+
+  private[this] val updateChildByIdSql = {
+    SQL("""
+       Update Message
+       SET childID = {childID}
+       WHERE messageID = {messageID}
+    """.stripMargin)
+  }
+
+  private[this] val updateParentByIdSql = {
+    SQL("""
+       Update Message
+       SET parentID = {parentID}
+       WHERE messageID = {messageID}
+    """.stripMargin)
+  }
+
+  implicit val messageParser = 
+    str("fromUser") ~
+    str("toUser") ~
+    str("message") ~
+    long("parentID").? ~
+    long("childID").? ~
+    long("messageID").? map {
+      case fromUser ~ toUser ~ message ~ parentID ~ childID ~ messageID =>
+        Message(fromUser, toUser, message, parentID, childID, messageID)
+    }
+
+  def insert(message: Message): Long = DB.withConnection { implicit conn =>
+    createMessageSql.on(
+      'fromUser -> message.fromUser,
+      'toUser -> message.toUser,
+      'message -> message.message
+    ).executeInsert(scalar[Long].single)
+  }
 
   // Return None if id doesn't exist or has a child already.
-  def reply(id: Long, message: Message): Option[Message] = throw new UnsupportedOperationException("not implemented")
+  def reply(id: Long, message: Message): Long = DB.withConnection { implicit conn =>
+    val childID = createReplySql.on(
+      'fromUser -> message.fromUser,
+      'toUser -> message.toUser,
+      'message -> message.message,
+      'parentID -> Some(id)
+    ).executeInsert(scalar[Long].single)
 
-  def getById(id: Long): Option[Message] = throw new UnsupportedOperationException("not implemented")
+    // Update parent message's childID to that returned above.
+    updateChildByIdSql.on(
+      'childID -> childID,
+      'messageID -> id
+    ).executeUpdate()
+
+    childID
+  }
+
+  def getById(id: Long): Option[Message] = DB.withConnection { implicit conn =>
+    findMessageByIdSql.on(
+      'messageID -> id
+    ).as(messageParser.singleOpt)
+  }
 
   /** 
    * Gets conversation rooted at message with id i.e. recurse/iterate until childID is None.
