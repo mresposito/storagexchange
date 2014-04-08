@@ -1,4 +1,7 @@
 @(form: Form[com.storagexchange.controllers.SignupRequest])
+  
+<link rel="stylesheet" type="text/css" href="assets/css/typeahead.css">
+
 @js = {
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 
@@ -8,7 +11,7 @@
 
   <script>
     var universities = new Bloodhound({
-      datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.value); },
+      datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.name); },
       queryTokenizer: Bloodhound.tokenizers.whitespace,
       limit: 10,
       prefetch: { 
@@ -17,10 +20,11 @@
       }
     });
     universities.initialize();
-    $('#scrollable-dropdown-menu .form-control').typeahead(null, {
-      displayKey: 'value',
+    $('.typeahead').typeahead(null, {
+      displayKey: 'name',
       source: universities.ttAdapter()
     });
+    //.on('typeahead:opened', function(){$('.tt-dropdown-menu').css('width',$(this).width()+'px');}); 
   </script>
 }
 
@@ -60,8 +64,8 @@
         </div>
         <div class="form-group">
           <label for="university" class="col-sm-2 control-label">University</label>
-          <div id="scrollable-dropdown-menu" class="col-sm-9">
-            <input class="form-control input-md" type="text" name="university" parsley-trigger="change" placeholder="University" required/>
+          <div class="col-sm-9">
+            <input class="typeahead form-control input-md" type="text" name="university" parsley-trigger="change" placeholder="University" required/>
           </div>
         </div>
 

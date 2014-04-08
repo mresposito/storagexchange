@@ -70,7 +70,7 @@ object Global extends GlobalSettings with Logging {
   )(UniversityInformation)
 
   private def getJsonList( ) : List[UniversityInformation] = {
-    val jsonFile = Play.application.getFile("universities.json")
+    val jsonFile = Play.application.getFile("public/data/universities.json")
     val filePath = jsonFile.toString()
     val jsonContent = scala.io.Source.fromFile(filePath).mkString
     val universityList: JsValue = Json.parse(jsonContent)
