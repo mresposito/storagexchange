@@ -25,9 +25,9 @@ trait MessageStore {
 
   def getById(id: Long): Option[Message]
   def getConversationById(id: Long): List[Message]
-  def getMessagesByEmail(email: String): List[Message]
+  def getByEmail(email: String): List[Message]
 
-  def updateById(id: Long, email: String, message: String): Int
+  def updateById(id: Long, fromUser: String, message: String): Int
 }
 
 @Singleton
@@ -59,12 +59,29 @@ class MessageDAL extends MessageStore {
     """.stripMargin)
   }
 
+  private[this] val findChildByIdSql = {
+    SQL("""
+       SELECT *
+       FROM Message
+       WHERE childID = {childID}
+    """.stripMargin)
+  }
+
   private[this] val findMessagesByEmailSql = {
     SQL("""
        SELECT *
        FROM Message
        WHERE (fromUser = {email} OR toUser = {email}) AND parentID IS NULL
     """.stripMargin) 
+  }
+
+  private[this] val updateMessageByIdSql = {
+    SQL("""
+       Update Message
+       SET message = {message}
+       WHERE messageID = {messageID} AND
+        fromUser = {fromUser}
+    """.stripMargin)
   }
 
   private[this] val updateChildByIdSql = {
@@ -129,18 +146,37 @@ class MessageDAL extends MessageStore {
   /** 
    * Gets conversation rooted at message with id i.e. recurse/iterate until childID is None.
    */
-  def getConversationById(id: Long): List[Message] = throw new UnsupportedOperationException("not implemented")
+  def getConversationById(id: Long): List[Message] = DB.withConnection { implicit conn =>
+    val messageMaybe = getById(id)
+    messageMaybe match {
+      case Some(message) =>
+        message.childID match {
+          case Some(childID) =>
+            message :: getConversationById(childID)
+          case None =>
+            List(message)
+        }
+      case None => Nil
+    }
+  }
 
   /**
-   * Message ids where email is either from or to and parent is None. This will give us the
-   * first message of a conversation initiated either by user with email or another user. 
-   * Can get remainder of conversation via call to getConversationById().
+   * Messages where email is either from or to and parent is None. This will give us the
+   * first message of a conversation initiated either by user with email or another user
+   * sent to user with email. Can get remainder of conversation via call to getConversationById().
    */
-  def getMessagesByEmail(email: String): List[Message] = DB.withConnection { implicit conn =>
+  def getByEmail(email: String): List[Message] = DB.withConnection { implicit conn =>
     findMessagesByEmailSql.on(
       'email -> email
     ).as(messageParser *)
   }
 
-  def updateById(id: Long, email: String, message: String): Int = throw new UnsupportedOperationException("not implemented")
+  def updateById(id: Long, fromUser: String, message: String): Int = DB.withConnection { implicit conn =>
+    updateMessageByIdSql.on(
+      'messageID -> id,
+      'fromUser -> fromUser,
+      'message -> message
+    ).executeUpdate()
+  }
+
 }
