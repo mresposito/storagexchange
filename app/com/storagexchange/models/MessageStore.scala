@@ -25,7 +25,7 @@ trait MessageStore {
 
   def getById(id: Long): Option[Message]
   def getConversationById(id: Long): List[Message]
-  def getRootIdsByEmail(email: String): List[Long]
+  def getMessagesByEmail(email: String): List[Message]
 
   def updateById(id: Long, email: String, message: String): Int
 }
@@ -57,6 +57,14 @@ class MessageDAL extends MessageStore {
        FROM Message
        WHERE messageID = {messageID}
     """.stripMargin)
+  }
+
+  private[this] val findMessagesByEmailSql = {
+    SQL("""
+       SELECT *
+       FROM Message
+       WHERE (fromUser = {email} OR toUser = {email}) AND parentID IS NULL
+    """.stripMargin) 
   }
 
   private[this] val updateChildByIdSql = {
@@ -125,10 +133,14 @@ class MessageDAL extends MessageStore {
 
   /**
    * Message ids where email is either from or to and parent is None. This will give us the
-   * beginning of a conversation initiated either by user with email or another user. Can
-   * get remainder of conversation via call to getConversationById().
+   * first message of a conversation initiated either by user with email or another user. 
+   * Can get remainder of conversation via call to getConversationById().
    */
-  def getRootIdsByEmail(email: String): List[Long] = throw new UnsupportedOperationException("not implemented")
+  def getMessagesByEmail(email: String): List[Message] = DB.withConnection { implicit conn =>
+    findMessagesByEmailSql.on(
+      'email -> email
+    ).as(messageParser *)
+  }
 
   def updateById(id: Long, email: String, message: String): Int = throw new UnsupportedOperationException("not implemented")
 }

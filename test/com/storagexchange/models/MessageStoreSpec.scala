@@ -49,11 +49,11 @@ class MessageStoreSpec extends Specification {
     "update parent message after reply" in InsertMessageReply {
       messageStore.getById(1) must beSome(message1ReplyCopy)
     }
-    "find root message ids by email" in InsertMessageReply {
-      messageStore.getRootIdsByEmail(message1.fromUser) must beEqualTo(List(Some(1)))
+    "find root messages by email for sender" in InsertMessageReply {
+      messageStore.getMessagesByEmail(message1.fromUser) must beEqualTo(List(message1ReplyCopy))
     }
-    "not find any root message ids for user who has only replied" in InsertMessageReply {
-      messageStore.getRootIdsByEmail(message2.fromUser) must beEmpty
+    "find root messages by email for recipient" in InsertMessageReply {
+      messageStore.getMessagesByEmail(message2.fromUser) must beEqualTo(List(message1ReplyCopy))
     }
     "get conversation by root message id" in InsertMessageReply {
       messageStore.getConversationById(1) must beEqualTo(List(message1Copy, message2Copy))
