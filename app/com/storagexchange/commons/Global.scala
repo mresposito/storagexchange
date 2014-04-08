@@ -73,8 +73,7 @@ object Global extends GlobalSettings with Logging {
     val jsonFile = Play.application.getFile("universities.json")
     val filePath = jsonFile.toString()
     val jsonContent = scala.io.Source.fromFile(filePath).mkString
-    val jsonObj: JsValue = Json.parse(jsonContent)
-    val universityList = (jsonObj \ "universities")
+    val universityList: JsValue = Json.parse(jsonContent)
     val universities = universityList.as[List[UniversityInformation]]
     return universities
   }
