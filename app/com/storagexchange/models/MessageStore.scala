@@ -147,8 +147,7 @@ class MessageDAL extends MessageStore {
    * Gets conversation rooted at message with id i.e. recurse/iterate until childID is None.
    */
   def getConversationById(id: Long): List[Message] = DB.withConnection { implicit conn =>
-    val messageMaybe = getById(id)
-    messageMaybe match {
+    getById(id) match {
       case Some(message) =>
         message.childID match {
           case Some(childID) =>
