@@ -14,6 +14,7 @@ trait CommodModule extends ScalaModule {
     bind[UniversityStore].to[UniversityDAL]
     bind[LocationStore].to[LocationDAL]
     bind[PostStore].to[PostDAL]
+    bind[MessageStore].to[MessageDAL]
     additionalConf
   }
   def additionalConf = {}

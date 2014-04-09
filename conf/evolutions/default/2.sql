@@ -37,3 +37,5 @@ CREATE TABLE Message (
 # --- !Downs
 DROP TABLE Post;
 DROP TABLE Message;
+DROP TABLE University;
+DROP TABLE Location;
