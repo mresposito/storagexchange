@@ -19,6 +19,7 @@ GET     /newpost                    @com.storagexchange.controllers.PostBoard.ne
 # Messaging urls
 GET     /message                    @com.storagexchange.controllers.MessageBoard.myMessages
 POST    /message                    @com.storagexchange.controllers.MessageBoard.receiveNewMessage
+POST    /message/:id                @com.storagexchange.controllers.MessageBoard.modify(id: Long)
 GET     /newmessage                 @com.storagexchange.controllers.MessageBoard.newMessage
 POST    /reply                      @com.storagexchange.controllers.MessageBoard.receiveNewReply
 GET     /newreply                   @com.storagexchange.controllers.MessageBoard.newReply

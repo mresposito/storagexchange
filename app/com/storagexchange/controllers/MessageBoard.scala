@@ -43,7 +43,6 @@ class MessageBoard @Inject()(messageStore: MessageStore)
     Ok(views.html.message.newmessage(newMessageForm))
   }
 
-  // TODO: have id and email of message we're replying to as parameter
   def newReply = IsAuthenticated { username => _ =>
     Ok(views.html.message.newreply(newReplyForm))
   }
@@ -73,6 +72,20 @@ class MessageBoard @Inject()(messageStore: MessageStore)
     val messageList = messageStore.getByEmail(username)
     val conversationList = for (message <- messageList) yield messageStore.getConversationById(message.messageID.getOrElse(0))
     Ok(views.html.message.mymessages(conversationList))
+  }
+
+  def modify(id: Long) = IsAuthenticated { username => implicit request =>
+    newMessageForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(views.html.error404()),
+      updatedMessage => {
+        val rows = messageStore.updateById(id, username, updatedMessage.message)
+        if(rows > 0) {
+          Redirect(routes.MessageBoard.myMessages)
+        } else {
+          BadRequest(views.html.error404())
+        }
+      }
+    )
   }
   
 }
