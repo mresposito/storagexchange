@@ -12,8 +12,8 @@ import org.h2.jdbc.JdbcSQLException
 
 class TransactionStoreSpec extends Specification {
   val transactionStore: TransactionStore = new TransactionDAL
-  val transaction1 = Transaction(10, "2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0",1,2,1,Some(1))
-  val transaction2 = Transaction(3, "2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0",1,2,1,Some(2))
+  val transaction1 = Transaction(10, "2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0",2,3,1,Some(1))
+  val transaction2 = Transaction(3, "2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0",2,3,1,Some(2))
   val transaction1Copy = transaction1.copy()
   val transaction2Copy = transaction2.copy()
 
@@ -29,17 +29,29 @@ class TransactionStoreSpec extends Specification {
     "insert a transaction" in RunningApp {
         transactionStore.insert(transaction1).toInt must beEqualTo(1)
     }
-    "find post by postID" in InsertTransaction {
-      transactionStore.getByPostID(transaction1.postID) must beEqualTo(List(transaction1Copy,transaction2Copy))
-    }
-    /*"not find a non-existent transaction by postID" in InsertTransaction {
-      transactionStore.getByPostID(123123) must beEmpty
-    }*/
     "find transaction by id" in InsertTransaction {
       transactionStore.getByID(1) must beSome(transaction1Copy)
     }
     "not find a non-existent transaction by id" in InsertTransaction {
       transactionStore.getByID(3049) must beNone
+    }
+    "find transaction by postID" in InsertTransaction {
+      transactionStore.getByPostID(transaction1.postID) must beEqualTo(List(transaction1Copy,transaction2Copy))
+    }
+    "not find a non-existent transaction by postID" in InsertTransaction {
+      transactionStore.getByPostID(123123) must beEmpty
+    }
+    "find transaction by buyerID" in InsertTransaction {
+      transactionStore.getByBuyerID(transaction1.buyerID) must beEqualTo(List(transaction1Copy,transaction2Copy))
+    }
+    "not find a non-existent transaction by buyerID" in InsertTransaction {
+      transactionStore.getByBuyerID(123123) must beEmpty
+    }
+    "find transaction by sellerID" in InsertTransaction {
+      transactionStore.getBySellerID(transaction1.sellerID) must beEqualTo(List(transaction1Copy,transaction2Copy))
+    }
+    "not find a non-existent transaction by sellerID" in InsertTransaction {
+      transactionStore.getBySellerID(123123) must beEmpty
     }
   }
 }
