@@ -11,7 +11,7 @@ import java.sql.Timestamp
 import org.h2.jdbc.JdbcSQLException
 
 class TransactionStoreSpec extends Specification {
-  val transactionStore: TransactionStore = new TransactionDAL
+  /*val transactionStore: TransactionStore = new TransactionDAL
   val transaction1 = Transaction(10, "2014-01-19 03:14:07", "2014-01-19 03:14:07", "2014-01-19 03:14:07",Some(1),1,2,Some(1))
   val transaction2 = Transaction(3, "2014-01-19 03:14:07", "2014-01-19 03:14:07", "2014-01-19 03:14:07",Some(1),1,2,Some(2))
   val transaction1Copy = transaction1.copy()
@@ -41,5 +41,5 @@ class TransactionStoreSpec extends Specification {
     "not find a non-existent transaction by id" in InsertTransaction {
       transactionStore.getById(3049) must beNone
     }
-  }
+  }*/
 }
