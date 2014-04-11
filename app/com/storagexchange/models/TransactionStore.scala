@@ -22,8 +22,8 @@ case class Transaction(storageTaken: Int,
  */
 trait TransactionStore {
   def insert(trasaction: Transaction): Long
-  /*def getByID(ID: Long): Option[Transaction]
-  def getByPostID(postID: Long): Option[Transaction]
+  def getByID(ID: Long): Option[Transaction]
+  /*def getByPostID(postID: Long): Option[Transaction]
   def getByBuyerID(email: String): List[Transaction]
   def getBySellerID(email: String): List[Transaction]*/
 }
@@ -41,7 +41,7 @@ class TransactionDAL extends TransactionStore {
     """.stripMargin)
   }
 
-  /*private[this] val findTransactionByIdSql = {
+  private[this] val findTransactionByIdSql = {
     SQL("""
        SELECT *
        FROM Transaction
@@ -57,31 +57,20 @@ class TransactionDAL extends TransactionStore {
     """.stripMargin)
   }
 
-  private[this] val updateTransactionById = {
-    SQL("""
-       Update Transaction
-       SET description={description}, storageSize={storageSize}
-       WHERE transactionID = {transactionID} AND
-        email = {email}
-    """.stripMargin)
-  }
-
-  private[this] val removeTransactionByIdSql = {
-    SQL("""
-       DELETE FROM Transaction
-       WHERE transactionID = {transactionID} AND
-        email = {email}
-    """.stripMargin)
-  }
-
   implicit val transactionParser = 
-    str("email") ~
-    str("description") ~
-    int("storageSize") ~
-    long("transactionID").? map {
-      case email ~ description ~ storageSize ~ transactionID =>
-        Transaction(email, description, storageSize,transactionID)
-    }*/
+    long("transactionID")~
+    long("buyerID")~
+    long("sellerID")~
+    long("postID")~
+    int("storageTaken") ~
+    date("startDate") ~
+    date("endDate")~
+    bool("approved")~
+    int("canceled ").? map {
+      case transactionID ~ buyerID ~ sellerID ~ postID ~ storageTaken ~ startDate ~ endDate ~ approved ~ canceled =>
+        Transaction(storageTaken, startDate.toString(), endDate.toString(),buyerID,sellerID,postID,Some(transactionID))
+        //Transaction(storageTaken, startDate.toString(), endDate.toString(),buyerID,sellerID,postID,Some(transactionID))
+    }
 
   def insert(transaction: Transaction): Long = DB.withConnection { implicit conn =>
     createTransactionSql.on(
@@ -94,9 +83,10 @@ class TransactionDAL extends TransactionStore {
     ).executeInsert(scalar[Long].single)
   }
 
-  /*def getById(id: Long): Option[Transaction] = DB.withConnection { implicit conn =>
+  def getByID(ID: Long): Option[Transaction] = DB.withConnection { implicit conn =>
     findTransactionByIdSql.on(
-      'transactionID -> id
+      'transactionID -> ID
     ).as(transactionParser.singleOpt)
-  }*/
+    //Some(Transaction(10, "2014-01-19 03:14:07", "2014-01-19 03:14:07",1,2,1,Some(1)))
+  }
 }
