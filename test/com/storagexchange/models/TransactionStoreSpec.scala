@@ -29,10 +29,10 @@ class TransactionStoreSpec extends Specification {
     "insert a transaction" in RunningApp {
         transactionStore.insert(transaction1).toInt must beEqualTo(1)
     }
-    /*"find post by postID" in InsertTransaction {
-      transactionStore.getByPostID(transaction1.postID) must beEqualTo(List(transaction1Copy))
+    "find post by postID" in InsertTransaction {
+      transactionStore.getByPostID(transaction1.postID) must beEqualTo(List(transaction1Copy,transaction2Copy))
     }
-    "not find a non-existent transaction by postID" in InsertTransaction {
+    /*"not find a non-existent transaction by postID" in InsertTransaction {
       transactionStore.getByPostID(123123) must beEmpty
     }*/
     "find transaction by id" in InsertTransaction {

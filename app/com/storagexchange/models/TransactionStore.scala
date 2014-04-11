@@ -23,8 +23,8 @@ case class Transaction(storageTaken: Int,
 trait TransactionStore {
   def insert(trasaction: Transaction): Long
   def getByID(ID: Long): Option[Transaction]
-  /*def getByPostID(postID: Long): Option[Transaction]
-  def getByBuyerID(email: String): List[Transaction]
+  def getByPostID(postID: Long): List[Transaction]
+  /*def getByBuyerID(email: String): List[Transaction]
   def getBySellerID(email: String): List[Transaction]*/
 }
 
@@ -49,11 +49,11 @@ class TransactionDAL extends TransactionStore {
     """.stripMargin)
   }
 
-  private[this] val findTransactionByEmailSql = {
+  private[this] val findTransactionByPostIDSql = {
     SQL("""
        SELECT *
        FROM Transaction
-       WHERE email = {email}
+       WHERE postID = {postID}
     """.stripMargin)
   }
 
@@ -69,7 +69,6 @@ class TransactionDAL extends TransactionStore {
     int("canceled ").? map {
       case transactionID ~ buyerID ~ sellerID ~ postID ~ storageTaken ~ startDate ~ endDate ~ approved ~ canceled =>
         Transaction(storageTaken, startDate.toString(), endDate.toString(),buyerID,sellerID,postID,Some(transactionID))
-        //Transaction(storageTaken, startDate.toString(), endDate.toString(),buyerID,sellerID,postID,Some(transactionID))
     }
 
   def insert(transaction: Transaction): Long = DB.withConnection { implicit conn =>
@@ -87,6 +86,11 @@ class TransactionDAL extends TransactionStore {
     findTransactionByIdSql.on(
       'transactionID -> ID
     ).as(transactionParser.singleOpt)
-    //Some(Transaction(10, "2014-01-19 03:14:07", "2014-01-19 03:14:07",1,2,1,Some(1)))
+  }
+
+  def getByPostID(postID: Long): List[Transaction] = DB.withConnection { implicit conn =>
+    findTransactionByPostIDSql.on(
+      'postID -> postID
+    ).as(transactionParser *)
   }
 }
