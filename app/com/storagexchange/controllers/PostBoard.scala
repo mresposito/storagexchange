@@ -10,19 +10,34 @@ import play.api.data.Forms._
 import com.typesafe.scalalogging.slf4j.Logging
 import javax.inject.Singleton
 import javax.inject.Inject
+import java.math.BigDecimal
 
 case class PostRequest(
   description: String,
-  storageSize: Int)
+  storageSize: Int,
+  streetNum: Int,
+  street: String,
+  city: String,
+  state: String,
+  zip: String,
+  lat: String,
+  lng: String)
 
 @Singleton
-class PostBoard @Inject()(postStore: PostStore) 
+class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore) 
   extends Controller with Secured {
 
   val newPostForm = Form(
     mapping(
       "description" -> nonEmptyText(minLength = 4),
-      "storageSize" -> number(min=0)
+      "storageSize" -> number(min=0),
+      "streetNum" -> number(min=0),
+      "street" -> nonEmptyText(minLength=5),
+      "city" -> nonEmptyText(minLength=1),
+      "state" -> nonEmptyText(minLength=2), 
+      "zip" -> nonEmptyText(minLength=5),
+      "lat" -> nonEmptyText(minLength=4),
+      "lng" -> nonEmptyText(minLength=4)
       )(PostRequest.apply)(PostRequest.unapply)
     )
 
@@ -33,8 +48,11 @@ class PostBoard @Inject()(postStore: PostStore)
   def recieveNewPost = IsAuthenticated { username => implicit request =>
     newPostForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.error404()),
-      postData => { 
-        postStore.insert(Post(username, postData.description, postData.storageSize))
+      postData => {
+        val locID: Long = locationStore.insert(Location(postData.description, new BigDecimal(postData.lat), new BigDecimal(postData.lng), 
+                                                        postData.city, postData.state, 
+                                                        postData.street, postData.zip, None))
+        postStore.insert(Post(username, postData.description, postData.storageSize, locID))
         Redirect(routes.PostBoard.myPosts)
       }
     )

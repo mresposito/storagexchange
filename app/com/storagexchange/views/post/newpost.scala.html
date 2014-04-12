@@ -2,7 +2,51 @@
 @import helper.twitterBootstrap._
 
 @views.html.user.main("Storage Exchange", "My Posts") {
- <div class="page loginPage">
+  <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true&libraries=places"></script> 
+  <script type="text/javascript">
+    var placeSearch, autocomplete;
+    var component_form = {
+      'street_number': 'short_name',
+      'route': 'long_name',
+      'locality': 'long_name',
+      'administrative_area_level_1': 'short_name',
+      'postal_code': 'short_name'
+    };
+    function initialize() {
+      autocomplete = new google.maps.places.Autocomplete(document.getElementById('autocomplete'), { types: [ 'geocode' ] });
+      google.maps.event.addListener(autocomplete, 'place_changed', function() {
+        fillInAddress();    
+      });
+    }
+    function fillInAddress() {
+      var place = autocomplete.getPlace();
+      document.getElementById('latitude').value = place.geometry.location.lat();
+      document.getElementById('longitude').value = place.geometry.location.lng();
+      for (var component in component_form) {
+        document.getElementById(component).value = "";
+        document.getElementById(component).disabled = false;
+      }
+    
+      for (var j = 0; j < place.address_components.length; j++) {
+        var att = place.address_components[j].types[0];
+        if (component_form[att]) {
+          var val = place.address_components[j][component_form[att]];
+          document.getElementById(att).value = val;
+        }
+      }
+    }
+  	function geolocate() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          var geolocation = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+          autocomplete.setBounds(new google.maps.LatLngBounds(geolocation, geolocation));
+        });
+      }
+    }
+    
+  </script>
+  <body onload=initialize()>
+  <div class="page loginPage">
     <div class="container">
       <div class="text-center">
         <h1>Post</h1>
@@ -22,6 +66,19 @@
             </div>
           </div>
           <div class="form-group">
+            <label for="inputLocation3" class="col-sm-2 control-label">Address</label>
+            <div class="col-sm-9">
+              <input type="textfield" class="form-control" id="autocomplete" placeholder="Enter the storage address" onFocus="geolocate()"></input>
+            </div> 
+          </div>
+            <input type="hidden" id="street_number" name="streetNum"></input>
+            <input type="hidden" id="route" name="street"></input>
+            <input type="hidden" id="locality" name="city"></input> 
+            <input type="hidden" id="administrative_area_level_1" name="state"></input> 
+            <input type="hidden" id="postal_code" name="zip"></input>
+            <input type="hidden" id="latitude" name="lat"></input>
+            <input type="hidden" id="longitude" name="lng"></input>
+          <div class="form-group">
             <div class="col-sm-offset-1 col-sm-10">
               <button type="submit" class="btn btn-block btn-lg btn-flashy">Submit</button>
             </div>
@@ -30,4 +87,5 @@
       </div>
     </div>
   </div>
+  </body>
 }

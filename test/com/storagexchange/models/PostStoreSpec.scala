@@ -12,6 +12,7 @@ import org.h2.jdbc.JdbcSQLException
 
 class PostStoreSpec extends Specification {
   val postStore: PostStore = new PostDAL
+  //TODO: change these so that you have a valid location id
   val post1 = Post("user@test.com", "My post", 95, Some(1))
   val post2 = Post("other@me.com", "Some other post", 42, Some(2))
   val post1Copy = post1.copy()
@@ -54,6 +55,10 @@ class PostStoreSpec extends Specification {
 	    "Deleting a post that is not mine should be false" in InsertPost {
 	      postStore.removeById(1, "myfakeemal") must beFalse
 	    }
+    }
+    "get location by post id" in InsertPost {
+      postStore.insert(post1).toInt must beEqualTo(3)
+      postStore.getPostsByLocationId(1) must beSome(post1copy)
     }
     "update post by id" in InsertPost {
       val updatedPost = Post("user@test.com", "My updated post", 101, Some(1))
