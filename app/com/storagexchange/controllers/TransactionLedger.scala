@@ -41,7 +41,8 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore)
     newTransactionForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.error404()),
       transactionData => {
-        BadRequest(views.html.error404())
+        transactionStore.insert(Transaction(transactionData.storageTaken,transactionData.startDate, transactionData.endDate, 1,2,transactionData.postID))
+        Redirect(routes.PostBoard.myPosts)
       }
     )
   }
