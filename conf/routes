@@ -16,6 +16,9 @@ POST    /post                       @com.storagexchange.controllers.PostBoard.re
 DELETE  /post/:id                   @com.storagexchange.controllers.PostBoard.delete(id: Long)
 POST    /post/:id                   @com.storagexchange.controllers.PostBoard.modify(id: Long)
 GET     /newpost                    @com.storagexchange.controllers.PostBoard.newPost
+# Transaction urls
+GET     /newpost/:postID            @com.storagexchange.controllers.TransactionLedger.newTransaction(postID : Long)
+POST    /receivenewpost/           @com.storagexchange.controllers.TransactionLedger.receiveNewTransaction
 
 # Dynamic pages
 GET     /profile                    @com.storagexchange.controllers.Dynamic.profile
