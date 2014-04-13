@@ -1,6 +1,5 @@
 package com.storagexchange.search
 
-import org.elasticsearch.node.NodeBuilder.nodeBuilder
 import com.storagexchange.models._
 import com.sksamuel.elastic4s._
 import com.sksamuel.elastic4s.KeywordAnalyzer
@@ -12,39 +11,6 @@ import scala.concurrent.Future
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.action.search.SearchResponse
-import org.elasticsearch.common.settings.ImmutableSettings
-import java.io.File
-import java.util.UUID
-
-trait ElasticClientInjector {
-  val client: ElasticClient
-  def tearDown: Unit = {}
-  def close = client.close
-}
-
-class LocalElasticClient extends ElasticClientInjector {
-  val client = ElasticClient.local
-}
-
-class GenericClient(val client: ElasticClient) extends ElasticClientInjector
-
-class EmbeddedElasticClient extends ElasticClientInjector {
-  
-  val tempFile = File.createTempFile("elasticsearchtests", "tmp")
-  val homeDir = new File(tempFile.getParent + "/" + UUID.randomUUID().toString)
-  homeDir.mkdir()
-  homeDir.deleteOnExit()
-  tempFile.deleteOnExit()
-
-  val settings = ImmutableSettings.settingsBuilder()
-    .put("node.http.enabled", false)
-    .put("http.enabled", false)
-    .put("path.home", homeDir.getAbsolutePath)
-    .put("index.number_of_shards", 1)
-    .put("index.number_of_replicas", 0)
-
-  val client = ElasticClient.local(settings.build)
-}
 
 trait DataSearch {
 
