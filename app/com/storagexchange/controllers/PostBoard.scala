@@ -49,9 +49,10 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore)
     newPostForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.error404()),
       postData => {
+        val fullStreet = postData.streetNum.toString + " " + postData.street
         val locID: Long = locationStore.insert(Location(postData.description, new BigDecimal(postData.lat), new BigDecimal(postData.lng), 
                                                         postData.city, postData.state, 
-                                                        postData.street, postData.zip, None))
+                                                        fullStreet, postData.zip, None))
         postStore.insert(Post(username, postData.description, postData.storageSize, locID))
         Redirect(routes.PostBoard.myPosts)
       }
@@ -60,7 +61,7 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore)
 
   def myPosts = IsAuthenticated { username => _ => 
       val postList = postStore.getByEmail(username)
-      Ok(views.html.post.myposts(postList))
+      Ok(views.html.post.myposts(postList, locationStore))
   }
 
   def delete(id: Long) = IsAuthenticated { username => _ => 
@@ -70,13 +71,16 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore)
       BadRequest(views.html.error404())  
     }
   }
-  
+ 
   def modify(id: Long) = IsAuthenticated { username => implicit request =>
     newPostForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.error404()),
       updatedPost => {
+        val streetWithoutNumber = updatedPost.street.replace(updatedPost.streetNum+" ", "")
         val rows = postStore.updateById(id, username,
-            updatedPost.description, updatedPost.storageSize)
+          updatedPost.description, updatedPost.storageSize, updatedPost.streetNum,
+          streetWithoutNumber, updatedPost.city, updatedPost.state, updatedPost.zip,
+          updatedPost.lat, updatedPost.lng)
         if(rows > 0) {
 	        Redirect(routes.PostBoard.myPosts)
         } else {

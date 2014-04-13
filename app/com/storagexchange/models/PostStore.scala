@@ -24,7 +24,10 @@ trait PostStore {
   def getByEmail(email: String): List[Post]
 
   def removeById(id: Long, email: String): Boolean
-  def updateById(id: Long, email: String, description: String, storageSize: Int): Int
+  def updateById(id: Long, email: String, description: String,
+                 storageSize: Int, streetNum: Int, street: String, 
+                 city: String, state: String, zip: String, lat: String,
+                 lng: String): Int
 }
 
 // Actual implementation of Post Store method
@@ -112,11 +115,20 @@ class PostDAL extends PostStore {
   }
 
   def updateById(id: Long, email: String, description: String,
-      storageSize: Int): Int = DB.withConnection{ implicit conn =>
+                 storageSize: Int, streetNum: Int, street: String, 
+                 city: String, state: String, zip: String, lat: String,
+                 lng: String): Int = DB.withConnection{ implicit conn =>
     updatePostById.on(
         'postID-> id,
         'description-> description,
         'storageSize-> storageSize,
+        'streetNum -> streetNum,
+        'street -> street,
+        'city -> city,
+        'state -> state,
+        'zip -> zip,
+        'lat -> lat,
+        'lng -> lng,
         'email -> email
       ).executeUpdate()
   }

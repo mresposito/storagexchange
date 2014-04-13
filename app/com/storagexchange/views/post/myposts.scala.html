@@ -1,11 +1,19 @@
-@(myPosts : List[models.Post])
+@(myPosts : List[models.Post], locationStore : models.LocationStore)
 @import helper.twitterBootstrap._
 
 @js = {
   <script>
     var descriptionHtml = '<input type="textfield" class="form-control" id="inputDescription" name="description" value="">';
     var areaHtml = '<input type="textfield" class="form-control" id="inputstorageSize" name="storageSize" value="">';
-
+    /*
+    var streetNumHtml = '<input type="hidden" id="street_number" name="streetNum" value="">'
+    var streetHtml =  '<input type="hidden" id="route" name="street" value="">'
+    var localityHtml = '<input type="hidden" id="locality" name="city" value="">' 
+    var stateHtml = '<input type="hidden" id="administrative_area_level_1" name="state" value="">' 
+    var postalHtml = '<input type="hidden" id="postal_code" name="zip" value="">'
+    var latHtml = '<input type="hidden" id="latitude" name="lat" value="">'
+    var lngHtml = '<input type="hidden" id="longitude" name="lng" value="">'
+    */
     $(".delete").click(function(event) {
       var well = $(event.target).closest(".well");
       var id = well.data("id");
@@ -58,6 +66,17 @@
           <div class="col-md-2">
             <b>Size: </b><span class="area">@post.storageSize</span> sq/ft
           </div>
+          @locationStore.getById(post.locationID).map { location =>   
+            <input type="hidden" class="form-control" id="route" name="street" value="@location.address"></input>
+            <input type="hidden" class="form-control" id="street_number" name="streetNum" value="@location.address.split(" ")(0).toInt"></input>
+            <input type="hidden" class="form-control" id="locality" name="city" value="@location.city"></input> 
+            <input type="hidden" class="form-control" id="administrative_area_level_1" name="state" value="@location.state"></input> 
+            <input type="hidden" class="form-control" id="postal_code" name="zip" value="@location.zip"></input>
+            <input type="hidden" class="form-control" id="latitude" name="lat" value="@location.lat"></input>
+            <input type="hidden" class="form-control" id="longitude" name="lng" value="@location.lng"></input>
+          }.getOrElse {
+            org.scalatry.BadRequest("Invalid Location") 
+          }
           <div class="col-md-2 actions">
             <a href="#" class="edit"><i class="fa fa-pencil-square-o"></i></a>
             <a href="#" class="delete"><i class="fa fa-trash-o"></i></a>

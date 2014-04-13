@@ -10,11 +10,11 @@ import play.api.test._
 import play.api.test.Helpers._
 import com.storagexchange.models.PostStore
 
-trait PostTest extends Specification {
+trait PostTest extends Specification with LocationTest {
     
-  val post1 = Post("m@e.com", "This is the first post", 95, Some(1))
+  val post1 = Post("m@e.com", "This is the first post", 95, 1, Some(1))
   val post1Modified = post1.copy(description = "This is the second post")
-  val post2 = Post("hsimpson@uis.edu", "Homer no function beer well without", 45, Some(2))
+  val post2 = Post("hsimpson@uis.edu", "Homer no function beer well without", 45, 1, Some(2))
 
   val CreatePosts = BeforeHook {
     val Some(create1) = route(createRequest(post1))
@@ -25,14 +25,30 @@ trait PostTest extends Specification {
     withSession(("email", post.email)).
     withFormUrlEncodedBody(
       "description" -> post.description,
-      "storageSize" -> post.storageSize.toString)
+      "storageSize" -> post.storageSize.toString,
+      "streetNum" -> "450",
+      "street" -> "Serra Mall",
+      "city" -> testLoc.city,
+      "state" -> testLoc.state,
+      "zip" -> testLoc.zip,
+      "lat" -> testLoc.lat.toString,
+      "lng" -> testLoc.lng.toString
+    )
 
   def deletePost(id: Long) = withSession(FakeRequest(DELETE, routes.PostBoard.delete(id).url))
   def modifyPost(post: Post) = withSession(
     FakeRequest(POST, routes.PostBoard.modify(post.postID.get).url).
     withFormUrlEncodedBody(
       "description" -> post.description,
-      "storageSize" -> post.storageSize.toString))
+      "storageSize" -> post.storageSize.toString,
+      "streetNum" -> "450",
+      "street" -> "Serra Mall",
+      "city" -> testLoc.city,
+      "state" -> testLoc.state,
+      "zip" -> testLoc.zip,
+      "lat" -> testLoc.lat.toString,
+      "lng" -> testLoc.lng.toString
+    ))
 
   def requestWithSession(route: String) = withSession(FakeRequest(GET, route))
   def withSession[T](request: FakeRequest[T]) = request.withSession(("email", post1.email))
