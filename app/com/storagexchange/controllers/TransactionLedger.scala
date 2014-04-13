@@ -16,8 +16,7 @@ case class TransactionRequest(
   storageTaken: Int,
   startDate: String,
   endDate: String,
-  postID: Long,
-  sellerID: Long)
+  postID: Long)
 
 @Singleton
 class TransactionLedger @Inject()(transactionStore: TransactionStore) 
@@ -28,8 +27,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore)
       "storageTaken" -> number(min=0),
       "startDate" -> nonEmptyText(minLength = 4),
       "endDate" -> nonEmptyText(minLength = 4),
-      "postID" -> of[Long],
-      "sellerID" -> of[Long]
+      "postID" -> of[Long]
       )(TransactionRequest.apply)(TransactionRequest.unapply)
     )
 
@@ -41,9 +39,15 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore)
     newTransactionForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.error404()),
       transactionData => {
-        transactionStore.insert(Transaction(transactionData.storageTaken,transactionData.startDate, transactionData.endDate, 1,2,transactionData.postID))
+        println(transactionData.postID)
+        transactionStore.insert(Transaction(10, "2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0",2,3,1,Some(1)/*transactionData.storageTaken,transactionData.startDate, transactionData.endDate, 1,2,transactionData.postID*/))
         Redirect(routes.PostBoard.myPosts)
       }
     )
+  }
+
+  def myPurchases =  IsAuthenticated { username => _ =>
+    val purchaselist = transactionStore.getByBuyerUsername(username)
+    Ok(views.html.transaction.mypurchases(purchaselist))
   }
 }

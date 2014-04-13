@@ -1,0 +1,72 @@
+@(myPurchases : List[models.Transaction])
+@import helper.twitterBootstrap._
+
+@js = {
+  <script>
+    var descriptionHtml = '<input type="textfield" class="form-control" id="inputDescription" name="description" value="">';
+    var areaHtml = '<input type="textfield" class="form-control" id="inputstorageSize" name="storageSize" value="">';
+
+    $(".delete").click(function(event) {
+      var well = $(event.target).closest(".well");
+      var id = well.data("id");
+      $.ajax({
+        url: "/post/" + id,
+        type: "DELETE",
+      }).done(function(deleted) {
+        well.remove();
+      });
+    });
+    var swapInput = function($el, html) {
+      console.log("hello");
+      var input = $el.text();
+      $el.html(html);
+      $el.find("input").attr("value", input);
+    };
+    var save = function(event) {
+     var $well = $(event.target).closest(".well"); 
+     $well.find("form").submit();
+    }
+   $(".edit").click(function(event) {
+     var $well = $(event.target).closest(".well"); 
+     var id = $well.data("id");
+     var description = $well.find(".description");
+     var area = $well.find(".area");
+     swapInput(description, descriptionHtml)
+     swapInput(area, areaHtml);
+     var wellHtml = $well.html();
+     $well.html("");
+     $well.prepend('<form method="POST" action="/post/' + id + '" ></form>');
+     $well.find("form").html(wellHtml);
+
+     $well.find(".actions").prepend(
+       '<a href="#" class="save"><i class="fa fa-floppy-o"></i></a>');
+     $well.find(".edit").remove();
+     $well.find(".save").click(save);
+    });
+  </script>
+}
+
+@views.html.user.main("Storage Exchange", "My Purchases", js) {
+ <div class="post">
+    <div class="container">
+        @myPurchases.map { purchase =>
+        <div class="row well"  data-id="@purchase.postID">
+          <div class="col-md-8">
+            <b>Storage Size</b><br>
+            <span class="description">@purchase.storageTaken</span>
+          </div>
+          <div class="col-md-2">
+            <b>Seller: </b><span class="area">@purchase.sellerID</span> sq/ft
+          </div>
+          <div class="col-md-2 actions">
+            <a href="#" class="edit"><i class="fa fa-pencil-square-o"></i></a>
+            <a href="#" class="delete"><i class="fa fa-trash-o"></i></a>
+          </div>
+        </div>
+      }
+      @if(myPurchases.isEmpty) {
+        <h3>You have made no purchases</h3>
+      }
+    </div>
+  </div>
+}

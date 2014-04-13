@@ -25,7 +25,9 @@ trait TransactionStore {
   def getByID(ID: Long): Option[Transaction]
   def getByPostID(postID: Long): List[Transaction]
   def getByBuyerID(buyerID: Long): List[Transaction]
+  def getByBuyerUsername(buyerUsername: String): List[Transaction]
   def getBySellerID(sellerID: Long): List[Transaction]
+  def getBySellerUsername(sellerUsername: String): List[Transaction]
 }
 
 // Actual implementation of Transaction Store method
@@ -65,11 +67,27 @@ class TransactionDAL extends TransactionStore {
     """.stripMargin)
   }
 
+  private[this] val findTransactionByBuyerUsernameSql = {
+    SQL("""
+       SELECT *
+       FROM Transaction
+       WHERE buyerID = (SELECT userID FROM User WHERE email={buyerUsername})
+    """.stripMargin)
+  }
+
   private[this] val findTransactionBySellerIDSql = {
     SQL("""
        SELECT *
        FROM Transaction
        WHERE sellerID = {sellerID}
+    """.stripMargin)
+  }
+
+  private[this] val findTransactionBySellerUsernameSql = {
+    SQL("""
+       SELECT *
+       FROM Transaction
+       WHERE sellerID = (SELECT userID FROM User WHERE email={sellerUsername})
     """.stripMargin)
   }
 
@@ -116,9 +134,21 @@ class TransactionDAL extends TransactionStore {
     ).as(transactionParser *)
   }
 
+  def getByBuyerUsername(buyerUsername: String): List[Transaction] = DB.withConnection { implicit conn =>
+    findTransactionByBuyerUsernameSql.on(
+      'buyerUsername -> buyerUsername
+    ).as(transactionParser *)
+  }
+
   def getBySellerID(sellerID: Long): List[Transaction] = DB.withConnection { implicit conn =>
     findTransactionBySellerIDSql.on(
       'sellerID -> sellerID
+    ).as(transactionParser *)
+  }
+
+  def getBySellerUsername(sellerUsername: String): List[Transaction] = DB.withConnection { implicit conn =>
+    findTransactionBySellerUsernameSql.on(
+      'sellerUsername -> sellerUsername
     ).as(transactionParser *)
   }
 }
