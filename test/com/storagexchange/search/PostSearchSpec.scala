@@ -87,23 +87,23 @@ class PostSearchSpec extends FlatSpec with Matchers
    * SearchBuilder Filter
    */
   "data search with SearchBuilder Filter" should "have 1 item less than 50" in {
-   val resp: SearchResponse = dataSearch.getPosts(Filter("storageSize", 0, 50))
+   val resp: SearchResponse = dataSearch.getPosts(SearchFilter("storageSize", 0, 50))
    resp.getHits.totalHits() should equal(1)
   }
   it should "include post 2 description for less than 50" in {
-   val resp: SearchResponse = dataSearch.getPosts(Filter("storageSize", 0, 50))
+   val resp: SearchResponse = dataSearch.getPosts(SearchFilter("storageSize", 0, 50))
    resp.toString should include(post2.description)
   }
   it should "have 1 item more than 50" in {
-   val resp: SearchResponse = dataSearch.getPosts(Filter("storageSize", 50, 50000))
+   val resp: SearchResponse = dataSearch.getPosts(SearchFilter("storageSize", 50, 50000))
    resp.getHits.totalHits() should equal(1)
   }
   it should "include post 2 description for more than 50" in {
-   val resp: SearchResponse = dataSearch.getPosts(Filter("storageSize", 50, 50000))
+   val resp: SearchResponse = dataSearch.getPosts(SearchFilter("storageSize", 50, 50000))
    resp.toString should include(post1.description)
   }
   it should "have nothing on an inexistent range" in {
-   val resp: SearchResponse = dataSearch.getPosts(Filter("storageSize", 0, 0))
+   val resp: SearchResponse = dataSearch.getPosts(SearchFilter("storageSize", 0, 0))
    resp.getHits.totalHits() should equal(0)
   }
   

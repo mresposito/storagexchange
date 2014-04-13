@@ -57,7 +57,7 @@ trait DataSearch {
 }
 
 trait SearchBuilder
-case class Filter(field: String, gt: Int, lt: Int) extends SearchBuilder
+case class SearchFilter(field: String, gt: Int, lt: Int) extends SearchBuilder
 case class Query(term: String) extends SearchBuilder
 
 @Singleton
@@ -86,7 +86,7 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector) extends Da
   def getPosts(searches: SearchBuilder*): Future[SearchResponse] = client execute {
     searches.foldLeft(search in "posts" types "post") {
       (red: SearchDefinition, build: SearchBuilder) => build match {
-		    case Filter(field, gt, lt) => red filter {
+		    case SearchFilter(field, gt, lt) => red filter {
 		      rangeFilter(field) lte lt.toString gte gt.toString
 		    }
 		    case Query(term) => red query term
