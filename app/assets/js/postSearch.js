@@ -4,8 +4,7 @@ require.config({
     underscore: "/assets/js/underscore-min",
     backbone: "/assets/js/backbone-min",
     typeahead: "/assets/js/typeahead.min",
-    hogan: "/assets/js/hogan-2.0.0",
-    elastic: "/assets/js/elasticsearch.min"
+    hogan: "/assets/js/hogan-2.0.0"
   },
   shim: {
     jquery: {
