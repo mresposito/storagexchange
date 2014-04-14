@@ -31,11 +31,11 @@ class MessageBoard @Inject()(messageStore: MessageStore)
       )(MessageRequest.apply)(MessageRequest.unapply)
     )
 
-  val newReplyForm = Form(
+  var newReplyForm = Form(
     mapping(
       "replyToId"   -> longNumber(min = 1),
       "replyToUser" -> nonEmptyText(minLength = 4),
-      "message"     -> nonEmptyText(minLength = 4)
+      "message"     -> text
       )(ReplyRequest.apply)(ReplyRequest.unapply)
     )
 
@@ -43,8 +43,11 @@ class MessageBoard @Inject()(messageStore: MessageStore)
     Ok(views.html.message.newmessage(newMessageForm))
   }
 
-  def newReply = IsAuthenticated { username => _ =>
-    Ok(views.html.message.newreply(newReplyForm))
+  def newReply(replyToId: Long, replyToUser: String) = IsAuthenticated { username => _ =>
+    val replyData = Map("replyToId" -> replyToId.toString, 
+                      "replyToUser" -> replyToUser,
+                      "message"     -> "")
+    Ok(views.html.message.newreply(newReplyForm.bind(replyData)))
   }
 
   def receiveNewMessage = IsAuthenticated { username => implicit request =>

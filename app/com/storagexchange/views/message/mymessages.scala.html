@@ -3,11 +3,10 @@
 
 @js = {
   <script>
-    var descriptionHtml = '<input type="textfield" class="form-control" id="inputDescription" name="description" value="">';
-    var areaHtml = '<input type="textfield" class="form-control" id="inputstorageSize" name="storageSize" value="">';
+    var messageHtml = '<input type="textfield" class="form-control" id="inputMessage" name="message" value="">';
+    var toHtml = '<input type="hidden" class="form-control" id="inputTo" name="toUser" value="">';
 
     var swapInput = function($el, html) {
-      console.log("hello");
       var input = $el.text();
       $el.html(html);
       $el.find("input").attr("value", input);
@@ -19,10 +18,10 @@
    $(".edit").click(function(event) {
      var $well = $(event.target).closest(".well"); 
      var id = $well.data("id");
-     var description = $well.find(".description");
-     var area = $well.find(".area");
-     swapInput(description, descriptionHtml)
-     swapInput(area, areaHtml);
+     var to = $well.find(".to");
+     var message = $well.find(".message");
+     swapInput(to, toHtml)
+     swapInput(message, messageHtml)
      var wellHtml = $well.html();
      $well.html("");
      $well.prepend('<form method="POST" action="/message/' + id + '" ></form>');
@@ -32,6 +31,15 @@
        '<a href="#" class="save"><i class="fa fa-floppy-o"></i></a>');
      $well.find(".edit").remove();
      $well.find(".save").click(save);
+    });
+   $(".reply").click(function(event) {
+     var $well = $(event.target).closest(".well"); 
+     var replyId = $well.data("replyid");
+     var replyUser = $well.data("replyuser");
+     var wellHtml = $well.html();
+     $well.html("");
+     $well.prepend('<form method="POST" action="/newreply/' + replyId + '/' + replyUser + '" ></form>');
+     $well.find("form").submit();
     });
   </script>
 }
@@ -55,7 +63,11 @@
             </div>
           </div>
         }
-        <button type="btn" class="btn btn-block btn-lg btn-transparent" onclick="location.href='@controllers.routes.MessageBoard.newReply';">Reply</button>
+        <div class="row well" data-replyid="@conversation.last.messageID.get" data-replyuser="@conversation.last.fromUser">
+          <div class="actions">
+            <a href="#" class="reply" style="text-decoration:none"><button type="btn" class="btn btn-block btn-lg btn-transparent">Reply</button></a>
+          </div>
+        </div>
       }
       @if(myConversations.isEmpty) {
         <h3>You have no messages</h3>

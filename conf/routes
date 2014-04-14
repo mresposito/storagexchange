@@ -22,7 +22,7 @@ POST    /message                    @com.storagexchange.controllers.MessageBoard
 POST    /message/:id                @com.storagexchange.controllers.MessageBoard.modify(id: Long)
 GET     /newmessage                 @com.storagexchange.controllers.MessageBoard.newMessage
 POST    /reply                      @com.storagexchange.controllers.MessageBoard.receiveNewReply
-GET     /newreply                   @com.storagexchange.controllers.MessageBoard.newReply
+POST    /newreply/:id/:user         @com.storagexchange.controllers.MessageBoard.newReply(id: Long, user: String)
 
 # Dynamic pages
 GET     /profile                    @com.storagexchange.controllers.Dynamic.profile

@@ -23,6 +23,12 @@ trait MessageTest extends Specification {
     val Some(create3) = route(createMessageRequest(message3)) 
   }
 
+  val CreateReplies = BeforeHook {
+    val Some(create1) = route(createMessageRequest(message1))
+    val Some(create2) = route(createReplyRequest(message2))
+    val Some(create3) = route(createMessageRequest(message3)) 
+  }
+
   def createMessageRequest(message: Message) = FakeRequest(POST, "/message").
     withSession(("email", message.fromUser)).
     withFormUrlEncodedBody(
@@ -30,9 +36,18 @@ trait MessageTest extends Specification {
       "toUser"   -> message.toUser,
       "message"  -> message.message)
 
+  def createReplyRequest(reply: Message) = FakeRequest(POST, "/reply").
+    withSession(("email", reply.fromUser)).
+    withFormUrlEncodedBody(
+      "replyToId"   -> reply.parentID.toString,
+      "replyToUser" -> reply.toUser,
+      "message"     -> reply.message)
+
   def modifyMessage(message: Message) = withSession(
     FakeRequest(POST, routes.MessageBoard.modify(message.messageID.get).url).
-    withFormUrlEncodedBody("message"  -> message.message))
+    withFormUrlEncodedBody(
+      "toUser"  -> message.toUser,
+      "message" -> message.message))
 
   def requestWithSession(route: String) = withSession(FakeRequest(GET, route))
   def withSession[T](request: FakeRequest[T]) = request.withSession(("email", message1.fromUser))
@@ -44,49 +59,56 @@ class MessageBoardSpec extends Specification with MessageTest {
 
         "View messages" in {
             "accept valid message" in RunningApp {
-                val Some(create) = route(createMessageRequest(message1))
-                        status(create) must beEqualTo(SEE_OTHER)
+              val Some(create) = route(createMessageRequest(message1))
+              status(create) must beEqualTo(SEE_OTHER)
             }
             "view messages I've sent" in CreateMessages {
-                val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url))
-                        contentAsString(myMessages) must contain(message1.message)
+              val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url))
+              contentAsString(myMessages) must contain(message1.message)
             }
             "view messages I've received" in CreateMessages {
-                val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url))
-                        contentAsString(myMessages) must contain(message2.message)
+              val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url))
+              contentAsString(myMessages) must contain(message2.message)
             }
             "should not display messages between other users" in CreateMessages {
-                val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url))
-                        contentAsString(myMessages) must not contain(message3.message)
+              val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url))
+              contentAsString(myMessages) must not contain(message3.message)
             }
             "cannot view my messages if not logged in" in CreateMessages {
-                val Some(myMessages) = route(FakeRequest(GET, routes.MessageBoard.myMessages.url))
-                        status(myMessages) must beEqualTo(SEE_OTHER)
+              val Some(myMessages) = route(FakeRequest(GET, routes.MessageBoard.myMessages.url))
+              status(myMessages) must beEqualTo(SEE_OTHER)
             }
         }
 
-        "Modify Messages" in {
+        "Reply to messages" in {
+            "sender can view reply" in CreateReplies {
+              val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url))
+              contentAsString(myMessages) must contain(message2.message)
+            }
+        }
+
+        "Modify messages" in {
             "can't modify a message that does not exist" in RunningApp {
-                val Some(modify) = route(modifyMessage(message1Modified)) 
-                        status(modify) must beEqualTo(BAD_REQUEST)
+              val Some(modify) = route(modifyMessage(message1Modified)) 
+              status(modify) must beEqualTo(BAD_REQUEST)
             }
             "Can't modify a message I don't own" in CreateMessages {
-                val Some(modify) = route(modifyMessage(message2)) 
-                        status(modify) must beEqualTo(BAD_REQUEST)
+              val Some(modify) = route(modifyMessage(message2)) 
+              status(modify) must beEqualTo(BAD_REQUEST)
             }
             "modifying my message should be successful" in CreateMessages {
-                val Some(modify) = route(modifyMessage(message1Modified)) 
-                        status(modify) must beEqualTo(SEE_OTHER)
+              val Some(modify) = route(modifyMessage(message1Modified)) 
+              status(modify) must beEqualTo(SEE_OTHER)
             }
             "change message text in modified message" in CreateMessages {
-                val Some(modify) = route(modifyMessage(message1Modified)) 
-                        val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url))
-                        contentAsString(myMessages) must contain(message1Modified.message)
+              val Some(modify) = route(modifyMessage(message1Modified)) 
+              val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url))
+              contentAsString(myMessages) must contain(message1Modified.message)
             }
             "modify message should update the message text" in CreateMessages {
-                val Some(modify) = route(modifyMessage(message1Modified)) 
-                        val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url))
-                        contentAsString(myMessages) must not contain(message1.message)
+              val Some(modify) = route(modifyMessage(message1Modified)) 
+              val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url))
+              contentAsString(myMessages) must not contain(message1.message)
             }
         }
     }
