@@ -35,8 +35,8 @@ class PostBoard @Inject()(postStore: PostStore, dataSearch: DataSearch)
       formWithErrors => BadRequest(views.html.error404()),
       postData => { 
         val post = Post(username, postData.description, postData.storageSize)
-//FIXME:        dataSearch.insertPost(post)
-        postStore.insert(post)
+        val id = postStore.insert(post)
+        dataSearch.insertPost(post.copy(postID = Some(id)))
         Redirect(routes.PostBoard.myPosts)
       }
     )
@@ -49,6 +49,7 @@ class PostBoard @Inject()(postStore: PostStore, dataSearch: DataSearch)
 
   def delete(id: Long) = IsAuthenticated { username => _ => 
     if(postStore.removeById(id, username)) {
+      dataSearch.deletePost(id)
 	    Ok
     } else {
       BadRequest(views.html.error404())  
@@ -62,6 +63,8 @@ class PostBoard @Inject()(postStore: PostStore, dataSearch: DataSearch)
         val rows = postStore.updateById(id, username,
             updatedPost.description, updatedPost.storageSize)
         if(rows > 0) {
+          dataSearch.updatePost(Post(username,
+            updatedPost.description, updatedPost.storageSize, Some(id)))
 	        Redirect(routes.PostBoard.myPosts)
         } else {
           BadRequest(views.html.error404())

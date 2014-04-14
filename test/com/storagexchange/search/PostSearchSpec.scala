@@ -12,6 +12,8 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.action.delete.DeleteResponse
+import org.elasticsearch.action.update.UpdateResponse
 
 class PostSearchSpec extends FlatSpec with Matchers
 	with MockitoSugar with ElasticSugar {
@@ -133,5 +135,15 @@ class PostSearchSpec extends FlatSpec with Matchers
   it should "not include post 1 on query 'beer'" in {
     val resp: SearchResponse = dataSearch.getPosts(Query("beer"))
     resp.toString should not include(post1.description)
+  }
+  
+  "deleting posts" should "delete the first post" in {
+    val resp: DeleteResponse = dataSearch.deletePost(post1.postID.get)
+    resp.isFound() should be(true)
+  }
+  
+  "update post" should "update the second post" in {
+    val resp: UpdateResponse = dataSearch.updatePost(post2.copy(storageSize = 3999))
+    resp.isCreated() should be(false)
   }
 }
