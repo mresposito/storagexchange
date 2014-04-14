@@ -13,7 +13,7 @@ import org.h2.jdbc.JdbcSQLException
 class PostStoreSpec extends Specification with LocationTest {
   val postStore: PostStore = new PostDAL
   val post1 = Post("user@test.com", "My post", 95, 1,Some(1))
-  val post2 = Post("other@me.com", "Some other post", 42, 1,Some(2))
+  val post2 = Post("other@me.com", "Some other post", 42, 2,Some(2))
   val post1Copy = post1.copy()
   val post2Copy = post2.copy()
 
@@ -27,6 +27,7 @@ class PostStoreSpec extends Specification with LocationTest {
     DB.withConnection { implicit conn =>
       //need to insert location first 
       locationStore.insert(testLoc)
+      locationStore.insert(testLoc2)
       postStore.insert(post1).toInt must beEqualTo(1)
       postStore.insert(post2).toInt must beEqualTo(2)
     }
@@ -63,9 +64,11 @@ class PostStoreSpec extends Specification with LocationTest {
 	      postStore.removeById(1, "myfakeemal") must beFalse
 	    }
     }
-    "get location by post id" in InsertPost {
-      postStore.insert(post1).toInt must beEqualTo(3)
-      //postStore.getPostsByLocationId(1) must beSome(post1copy)
+    "get posts by location id" in InsertPost {
+      postStore.getPostByLocationID(1) must beSome(post1Copy)
+    }
+    "get posts by city" in InsertPost {
+      postStore.getPostsByCity("Champaign") must beEqualTo(List(post2Copy))
     }
     "update post by id" in InsertPost {
       val updatedPost = Post("user@test.com", "My updated post", 101, 1, Some(1))

@@ -28,6 +28,8 @@ trait PostStore {
                  storageSize: Int, streetNum: Int, street: String, 
                  city: String, state: String, zip: String, lat: String,
                  lng: String): Int
+  def getPostByLocationID(locationID: Long): Option[Post]
+  def getPostsByCity(city: String): List[Post]
 }
 
 // Actual implementation of Post Store method
@@ -50,7 +52,13 @@ class PostDAL extends PostStore {
        WHERE postID = {postID}
     """.stripMargin)
   }
-
+  private[this] val findPostByLocationID = {
+    SQL("""
+       SELECT * 
+       FROM Post
+       WHERE locationID = {locationID}
+    """.stripMargin)
+  }
   private[this] val findPostByEmailSql = {
     SQL("""
        SELECT *
@@ -65,6 +73,15 @@ class PostDAL extends PostStore {
        SET description={description}, storageSize={storageSize}
        WHERE postID = {postID} AND
         email = {email}
+    """.stripMargin)
+  }
+  
+  private[this] val findPostsByCity = {
+    SQL("""
+       SELECT * 
+       FROM Post
+       WHERE locationID IN 
+       (SELECT id FROM Location WHERE city = {city})
     """.stripMargin)
   }
 
@@ -104,6 +121,18 @@ class PostDAL extends PostStore {
   def getByEmail(email: String): List[Post] = DB.withConnection { implicit conn =>
     findPostByEmailSql.on(
       'email -> email
+    ).as(postParser *)
+  }
+  
+  def getPostByLocationID(locationID: Long): Option[Post] = DB.withConnection { implicit conn =>
+    findPostByLocationID.on(
+      'locationID -> locationID
+    ).as(postParser.singleOpt)
+  }
+  
+  def getPostsByCity(city: String): List[Post] = DB.withConnection { implicit conn =>
+    findPostsByCity.on(
+      'city -> city
     ).as(postParser *)
   }
 
