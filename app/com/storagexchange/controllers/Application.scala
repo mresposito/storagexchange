@@ -10,6 +10,7 @@ import play.api.data._
 import play.api.data.Forms._
 import play.api.db._
 import play.api.Play.current
+import anorm._
 import play.api.db.DB
 import javax.inject.Singleton
 import javax.inject.Inject
@@ -25,9 +26,10 @@ case class SignupRequest(
 
 @Singleton
 class Application @Inject()(userStore: UserStore, mailSender: MailSender,
-    passwordHasher: PasswordHelper, idHasher: IdHasher) extends Controller 
+    passwordHasher: PasswordHelper, idHasher: IdHasher, universityStore: UniversityStore) extends Controller  
     with Logging with Secured {
-
+  
+  
   val loginForm = Form(
     tuple(
       "email" -> nonEmptyText(minLength = 4),
@@ -51,6 +53,9 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
       })
       verifying ("User already exists", user => user match {
         case userData => ! userStore.getByEmail(user.email).isDefined  
+      })
+      verifying ("Enter a valid university", user => user match {
+        case userData => universityStore.getUniversityByName(user.university).isDefined
       })
     )
 
@@ -94,17 +99,26 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
   def registration = Action { implicit request =>
   	newUserForm.bindFromRequest.fold(
   	  formWithErrors => BadRequest(views.html.signup(formWithErrors)),
-  	  newUser => {
-  	  	val password = passwordHasher.createPassword(newUser.psw1)
-  	  	// FIXME: insert proper university id
-        val user = User(newUser.myname, newUser.surname,
-          newUser.email, password, 0)
-        val userId = userStore.insert(user)
-        sendVerificationEmail(user.copy(userId = Some(userId)))
-        Redirect(routes.Application.index()).
-        	withSession("email" -> newUser.email)
-  	  }
-  	)
+  	  newUser => insert(newUser)
+	  )
+  }
+  
+  private def insert(newUser: SignupRequest) = universityStore.
+	  getUniversityByName(newUser.university).map { university =>
+
+    val password = passwordHasher.createPassword(newUser.psw1)
+    val user = User(newUser.myname, newUser.surname,
+      newUser.email, password, university.id.get)
+    val userId = userStore.insert(user)
+    // verify the user email
+    sendVerificationEmail(user.copy(userId = Some(userId)))
+    // redirect to login with his session
+    Redirect(routes.Application.index()). 
+    	withSession("email" -> newUser.email)
+
+  }.getOrElse {
+    logger.error("A university could not be found. Check the inputted name again")
+    BadRequest("The university you have specified does not exist")
   }
 
   private def sendVerificationEmail(user: User): Unit = {
