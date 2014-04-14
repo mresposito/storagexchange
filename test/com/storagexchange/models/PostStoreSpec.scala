@@ -72,8 +72,7 @@ class PostStoreSpec extends Specification with LocationTest {
     }
     "update post by id" in InsertPost {
       val updatedPost = Post("user@test.com", "My updated post", 101, 1, Some(1))
-      postStore.updateById(1, post1.email, "My updated post", 101, 450, "Serra Mall", 
-                           "Stanford", "CA", "94305", y.toString, z.toString)
+      postStore.updateById(1, post1.email, "My updated post", 101)
       postStore.getById(1) must beSome(updatedPost)
     }
   }

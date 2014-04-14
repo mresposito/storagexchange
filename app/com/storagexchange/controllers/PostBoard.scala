@@ -78,9 +78,7 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore)
       updatedPost => {
         val streetWithoutNumber = updatedPost.street.replace(updatedPost.streetNum+" ", "")
         val rows = postStore.updateById(id, username,
-          updatedPost.description, updatedPost.storageSize, updatedPost.streetNum,
-          streetWithoutNumber, updatedPost.city, updatedPost.state, updatedPost.zip,
-          updatedPost.lat, updatedPost.lng)
+          updatedPost.description, updatedPost.storageSize)
         if(rows > 0) {
 	        Redirect(routes.PostBoard.myPosts)
         } else {
