@@ -17,8 +17,8 @@ import org.elasticsearch.action.update.UpdateResponse
 
 class PostSearchSpec extends FlatSpec with Matchers
 	with MockitoSugar with ElasticSugar {
-  val post1 = Post("m@e.com", "This is the first post", 95, Some(1))
-  val post2 = Post("hsimpson@uis.edu", "Homer no function beer well without", 45, Some(2))
+  val post1 = Post("m@e.com", "This is the first post", 95,1, Some(1))
+  val post2 = Post("hsimpson@uis.edu", "Homer no function beer well without", 45,2, Some(2))
   val atMost: Duration = Duration(10, "seconds")
   
   implicit def unrollFuture[A](f: Future[A]):A = Await.result(f, atMost)
