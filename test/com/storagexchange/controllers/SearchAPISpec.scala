@@ -19,6 +19,7 @@ import scala.concurrent.Await
  * For more information, consult the wiki.
  */
 class SearchAPISpec extends Specification with PostTest {
+   args(skipAll = true)
   
   import JsonSearchFormatters._
   
