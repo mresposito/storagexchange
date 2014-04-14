@@ -7,7 +7,7 @@
 
   <script src="@routes.Assets.at("js/parsley.min.js")" type="text/javascript"></script>
   
-  <script src="@routes.Assets.at("js/typeahead.js")" type="text/javascript"></script> 
+  <script src="@routes.Assets.at("js/typeahead.bundle.min.js")" type="text/javascript"></script> 
 
   <script>
     var universities = new Bloodhound({
@@ -15,7 +15,7 @@
       queryTokenizer: Bloodhound.tokenizers.whitespace,
       limit: 10,
       prefetch: { 
-        url: "assets/data/universities.json",
+        url: "@routes.Assets.at("data/universities.json")",
         ttl: 0
       }
     });
