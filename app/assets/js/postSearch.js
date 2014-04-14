@@ -4,17 +4,11 @@ require.config({
     underscore: "/assets/js/underscore-min",
     backbone: "/assets/js/backbone-min",
     typeahead: "/assets/js/typeahead.min",
-    hogan: "/assets/js/hogan-2.0.0",
-    elastic: "/assets/js/elasticsearch.min",
-    slider: "/assets/js/bootstrap-slider"
+    hogan: "/assets/js/hogan-2.0.0"
   },
   shim: {
     jquery: {
       exports: "$"
-    },
-    ui: {
-      exports: "UI",
-      deps: ["jquery"]
     },
     underscore: {
       exports: "_"
@@ -31,12 +25,10 @@ require ([
   "jquery",
   "underscore",
   "backbone",
-  "views/users",
-  "models/user"
-], function($, _, Backbone, UserSearch, User) {
+  "views/post"
+], function($, _, Backbone, PostSearch) {
 
-  new UserSearch({
-    el: $(".userIndex"),
-    model: new User
+  new PostSearch({
+    el: $(".index")
   });
 });
