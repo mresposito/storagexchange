@@ -23,6 +23,8 @@ POST    /message/:id                @com.storagexchange.controllers.MessageBoard
 GET     /newmessage                 @com.storagexchange.controllers.MessageBoard.newMessage
 POST    /reply                      @com.storagexchange.controllers.MessageBoard.receiveNewReply
 POST    /newreply/:id/:user         @com.storagexchange.controllers.MessageBoard.newReply(id: Long, user: String)
+# Search API
+POST    /api/search/post            @com.storagexchange.controllers.SearchAPI.getPosts
 
 # Dynamic pages
 GET     /profile                    @com.storagexchange.controllers.Dynamic.profile

@@ -2,7 +2,6 @@ package com.storagexchange.controllers
 
 import com.storagexchange.models._
 import com.storagexchange.views
-
 import play.api._
 import play.api.mvc._
 import play.api.data._
@@ -10,13 +9,14 @@ import play.api.data.Forms._
 import com.typesafe.scalalogging.slf4j.Logging
 import javax.inject.Singleton
 import javax.inject.Inject
+import com.storagexchange.search.DataSearch
 
 case class PostRequest(
   description: String,
   storageSize: Int)
 
 @Singleton
-class PostBoard @Inject()(postStore: PostStore) 
+class PostBoard @Inject()(postStore: PostStore, dataSearch: DataSearch) 
   extends Controller with Secured {
 
   val newPostForm = Form(
@@ -34,7 +34,9 @@ class PostBoard @Inject()(postStore: PostStore)
     newPostForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.error404()),
       postData => { 
-        postStore.insert(Post(username, postData.description, postData.storageSize))
+        val post = Post(username, postData.description, postData.storageSize)
+        val id = postStore.insert(post)
+        dataSearch.insertPost(post.copy(postID = Some(id)))
         Redirect(routes.PostBoard.myPosts)
       }
     )
@@ -47,6 +49,7 @@ class PostBoard @Inject()(postStore: PostStore)
 
   def delete(id: Long) = IsAuthenticated { username => _ => 
     if(postStore.removeById(id, username)) {
+      dataSearch.deletePost(id)
 	    Ok
     } else {
       BadRequest(views.html.error404())  
@@ -60,6 +63,8 @@ class PostBoard @Inject()(postStore: PostStore)
         val rows = postStore.updateById(id, username,
             updatedPost.description, updatedPost.storageSize)
         if(rows > 0) {
+          dataSearch.updatePost(Post(username,
+            updatedPost.description, updatedPost.storageSize, Some(id)))
 	        Redirect(routes.PostBoard.myPosts)
         } else {
           BadRequest(views.html.error404())
