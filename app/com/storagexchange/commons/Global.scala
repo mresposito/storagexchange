@@ -8,7 +8,7 @@ import play.api.db.DB
 import play.api.Play.current
 import java.io.File
 import com.typesafe.config.ConfigFactory
-import play.api.Play.current
+import com.storagexchange.search.DataSearch
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import com.storagexchange.models._
@@ -29,18 +29,30 @@ object Global extends GlobalSettings with Logging {
     }
   }
 
+  override def onStart(app: Application) {
+  	val search = getControllerInstance(classOf[DataSearch])
+    // refresh everything
+  	search.deleteIndices
+  	search.createIndices
+    Play.mode match {
+      case Mode.Dev => {
+        initializeUniversities
+        injectData
+      }
+      case _ => Unit
+    }
+  }
+  
+  private def injectData = {
+    val generator = injector.getInstance(classOf[DataGenerator])
+    generator.createFakeData
+  }
+
   /**
    * overrides the default injector
    */
   override def getControllerInstance[A](clazz: Class[A]) = {
     injector.getInstance(clazz)
-  }
-
-  override def onStart(app: Application) {
-    Play.mode match {
-      case Mode.Dev => initializeUniversities
-      case _ => Unit
-    }
   }
 
   case class UniversityInformation(name: String,
@@ -70,11 +82,10 @@ object Global extends GlobalSettings with Logging {
   )(UniversityInformation)
 
   private def getJsonList( ) : List[UniversityInformation] = {
-    val jsonFile = Play.application.getFile("universities.json")
+    val jsonFile = Play.application.getFile("public/data/universities.json")
     val filePath = jsonFile.toString()
     val jsonContent = scala.io.Source.fromFile(filePath).mkString
-    val jsonObj: JsValue = Json.parse(jsonContent)
-    val universityList = (jsonObj \ "universities")
+    val universityList: JsValue = Json.parse(jsonContent)
     val universities = universityList.as[List[UniversityInformation]]
     return universities
   }

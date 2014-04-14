@@ -1,5 +1,4 @@
-{ 
-  "universities": [
+[
           {
             "name": "University of Illinois, Urbana Champaign",
             "website": "http://www.illinois.edu",
@@ -66,4 +65,3 @@
             "zip": "94720"
           }
   ]
-}

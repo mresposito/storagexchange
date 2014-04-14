@@ -1,7 +1,6 @@
 package com.storagexchange.utils
 
 import org.specs2.execute.AsResult
-import org.mockito.Mockito.{mock, when}
 import org.specs2.mutable._
 import play.api.test._
 import play.api.test.Helpers._

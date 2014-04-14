@@ -2,7 +2,6 @@ package com.storagexchange.controllers
 
 import com.storagexchange.models._
 import com.storagexchange.views
-
 import play.api._
 import play.api.mvc._
 import play.api.data._
@@ -11,6 +10,7 @@ import com.typesafe.scalalogging.slf4j.Logging
 import javax.inject.Singleton
 import javax.inject.Inject
 import java.math.BigDecimal
+import com.storagexchange.search.DataSearch
 
 case class PostRequest(
   description: String,
@@ -24,7 +24,7 @@ case class PostRequest(
   lng: String)
 
 @Singleton
-class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore) 
+class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, dataSearch: DataSearch) 
   extends Controller with Secured {
 
   val newPostForm = Form(
@@ -53,7 +53,9 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore)
         val locID: Long = locationStore.insert(Location(postData.description, new BigDecimal(postData.lat), new BigDecimal(postData.lng), 
                                                         postData.city, postData.state, 
                                                         fullStreet, postData.zip, None))
-        postStore.insert(Post(username, postData.description, postData.storageSize, locID))
+        val post = Post(username, postData.description, postData.storageSize, locID)
+        val id = postStore.insert(Post(username, postData.description, postData.storageSize, locID))
+        dataSearch.insertPost(post.copy(postID = Some(id))) 
         Redirect(routes.PostBoard.myPosts)
       }
     )
@@ -66,6 +68,7 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore)
 
   def delete(id: Long) = IsAuthenticated { username => _ => 
     if(postStore.removeById(id, username)) {
+      dataSearch.deletePost(id)
 	    Ok
     } else {
       BadRequest(views.html.error404())  
@@ -77,13 +80,18 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore)
       formWithErrors => BadRequest(views.html.error404()),
       updatedPost => {
         val streetWithoutNumber = updatedPost.street.replace(updatedPost.streetNum+" ", "")
-        val rows = postStore.updateById(id, username,
-          updatedPost.description, updatedPost.storageSize)
-        if(rows > 0) {
-	        Redirect(routes.PostBoard.myPosts)
-        } else {
-          BadRequest(views.html.error404())
-        }
+        postStore.getById(id).map { post => 
+          val locId = post.locationID
+          val rows = postStore.updateById(id, username,
+            updatedPost.description, updatedPost.storageSize)
+          if(rows > 0) {
+            dataSearch.updatePost(Post(username,
+              updatedPost.description, updatedPost.storageSize, locId, Some(id)))
+            Redirect(routes.PostBoard.myPosts)
+          } else {
+            BadRequest(views.html.error404())
+          }
+        }.getOrElse(BadRequest(views.html.error404()))
       }
     )
   }

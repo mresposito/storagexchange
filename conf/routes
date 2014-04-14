@@ -16,6 +16,8 @@ POST    /post                       @com.storagexchange.controllers.PostBoard.re
 DELETE  /post/:id                   @com.storagexchange.controllers.PostBoard.delete(id: Long)
 POST    /post/:id                   @com.storagexchange.controllers.PostBoard.modify(id: Long)
 GET     /newpost                    @com.storagexchange.controllers.PostBoard.newPost
+# Search API
+POST    /api/search/post            @com.storagexchange.controllers.SearchAPI.getPosts
 
 # Dynamic pages
 GET     /profile                    @com.storagexchange.controllers.Dynamic.profile
