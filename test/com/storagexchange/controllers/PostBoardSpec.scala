@@ -45,64 +45,64 @@ class PostBoardSpec extends Specification with PostTest {
 		"View posts" in {
 			"accept valid post" in RunningApp {
 				val Some(create) = route(createRequest(post1))
-						status(create) must beEqualTo(SEE_OTHER)
+        status(create) must beEqualTo(SEE_OTHER)
 			}
 			"view my posts" in CreatePosts {
 				val Some(myPosts) = route(requestWithSession(routes.PostBoard.myPosts.url))
-						contentAsString(myPosts) must contain(post1.description)
+				contentAsString(myPosts) must contain(post1.description)
 			}
 			"view my posts should not display posts that are not my" in CreatePosts {
 				val Some(myPosts) = route(requestWithSession(routes.PostBoard.myPosts.url))
-						contentAsString(myPosts) must not contain(post2.description)
+				contentAsString(myPosts) must not contain(post2.description)
 			}
 			"cannot view my posts if not logged in" in CreatePosts {
 				val Some(myPosts) = route(FakeRequest(GET, routes.PostBoard.myPosts.url))
-						status(myPosts) must beEqualTo(SEE_OTHER)
+				status(myPosts) must beEqualTo(SEE_OTHER)
 			}
 		}
 
 		"Delete Posts" in {
 			"deleting a non existing post gives you bad request" in RunningApp {
 				val Some(delete) = route(deletePost(490))
-						status(delete) must beEqualTo(BAD_REQUEST)
+				status(delete) must beEqualTo(BAD_REQUEST)
 			}
 			"deleting a post you dont own gives you bad requests" in CreatePosts {
 				val Some(delete) = route(deletePost(2))
-						status(delete) must beEqualTo(BAD_REQUEST)
+				status(delete) must beEqualTo(BAD_REQUEST)
 			}
 			"delete my post should be successful" in CreatePosts {
 				val Some(delete) = route(deletePost(1))
-						status(delete) must beEqualTo(OK)
+				status(delete) must beEqualTo(OK)
 			}
 			"can't see my post after deleting" in CreatePosts {
 				val Some(delete) = route(deletePost(1))
-						val Some(myPosts) = route(requestWithSession(routes.PostBoard.myPosts.url))
-						contentAsString(myPosts) must not contain(post1.description)
+				val Some(myPosts) = route(requestWithSession(routes.PostBoard.myPosts.url))
+				contentAsString(myPosts) must not contain(post1.description)
 			}
 		}
 
 		"Modify Posts" in {
 			"can't modify a post that does not exist" in RunningApp {
 				val Some(modify) = route(modifyPost(post1Modified)) 
-						status(modify) must beEqualTo(BAD_REQUEST)
+				status(modify) must beEqualTo(BAD_REQUEST)
 			}
 			"Can't modify a post I don't own" in CreatePosts {
 				val Some(modify) = route(modifyPost(post2)) 
-						status(modify) must beEqualTo(BAD_REQUEST)
+        status(modify) must beEqualTo(BAD_REQUEST)
 			}
 			"modify my post should be successful" in CreatePosts {
 				val Some(modify) = route(modifyPost(post1Modified)) 
-						status(modify) must beEqualTo(SEE_OTHER)
+				status(modify) must beEqualTo(SEE_OTHER)
 			}
 			"change description in modified post" in CreatePosts {
 				val Some(modify) = route(modifyPost(post1Modified)) 
-						val Some(myPosts) = route(requestWithSession(routes.PostBoard.myPosts.url))
-						contentAsString(myPosts) must contain(post1Modified.description)
+				val Some(myPosts) = route(requestWithSession(routes.PostBoard.myPosts.url))
+				contentAsString(myPosts) must contain(post1Modified.description)
 			}
 			"modify post should update the description" in CreatePosts {
 				val Some(modify) = route(modifyPost(post1Modified)) 
-						val Some(myPosts) = route(requestWithSession(routes.PostBoard.myPosts.url))
-						contentAsString(myPosts) must not contain(post1.description)
+				val Some(myPosts) = route(requestWithSession(routes.PostBoard.myPosts.url))
+				contentAsString(myPosts) must not contain(post1.description)
 			}
 		}
 	}
