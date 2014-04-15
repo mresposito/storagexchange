@@ -16,12 +16,21 @@ case class Transaction(storageTaken: Int,
   postID: Long,
   transactionID: Option[Long] = None)
 
+case class TransactionByEmail(storageTaken: Int,
+  startDate: String,
+  endDate: String,
+  buyerEmail: String,
+  sellerEmail: String,
+  postID: Long,
+  transactionID: Option[Long] = None)
+
 /**
  * Methods that we will be using from
  * the interface to the database
  */
 trait TransactionStore {
   def insert(trasaction: Transaction): Long
+  def insertByEmail(trasaction: TransactionByEmail): Long
   def getByID(ID: Long): Option[Transaction]
   def getByPostID(postID: Long): List[Transaction]
   def getByBuyerID(buyerID: Long): List[Transaction]
@@ -40,6 +49,15 @@ class TransactionDAL extends TransactionStore {
         (storageTaken, startDate, endDate, buyerID, sellerID, postID)
       VALUES
         ({storageTaken}, {startDate}, {endDate}, {buyerID}, {sellerID}, {postID})
+    """.stripMargin)
+  }
+
+  private[this] val createTransactionByEmailSql = {
+    SQL("""
+      INSERT INTO Transaction
+        (storageTaken, startDate, endDate, buyerID, sellerID, postID)
+      VALUES
+        ({storageTaken}, {startDate}, {endDate}, (SELECT userID FROM User WHERE email={buyerEmail}), (SELECT userID FROM User WHERE email={sellerEmail}), {postID})
     """.stripMargin)
   }
 
@@ -112,6 +130,17 @@ class TransactionDAL extends TransactionStore {
       'endDate -> transaction.endDate,
       'buyerID -> transaction.buyerID,
       'sellerID -> transaction.sellerID,
+      'postID -> transaction.postID
+    ).executeInsert(scalar[Long].single)
+  }
+
+  def insertByEmail(transaction: TransactionByEmail): Long = DB.withConnection { implicit conn =>
+    createTransactionByEmailSql.on(
+      'storageTaken -> transaction.storageTaken,
+      'startDate -> transaction.startDate,
+      'endDate -> transaction.endDate,
+      'buyerEmail -> transaction.buyerEmail,
+      'sellerEmail -> transaction.sellerEmail,
       'postID -> transaction.postID
     ).executeInsert(scalar[Long].single)
   }
