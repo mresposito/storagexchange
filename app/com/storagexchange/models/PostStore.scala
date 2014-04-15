@@ -22,10 +22,8 @@ trait PostStore {
   def insert(post: Post): Long
   def getById(id: Long): Option[Post]
   def getByEmail(email: String): List[Post]
-
   def removeById(id: Long, email: String): Boolean
-  def updateById(id: Long, email: String, description: String,
-                 storageSize: Int): Int
+  def updateById(id: Long, email: String, description: String, storageSize: Int): Int
   def getPostByLocationID(locationID: Long): Option[Post]
   def getPostsByCity(city: String): List[Post]
 }

@@ -31,8 +31,8 @@ class JavaFakerDataGenerator @Inject()(userStore: UserStore,
       "m@e.com", 
       passwordHasher.createPassword("123456"), 0)
   
-  val y = new BigDecimal(37.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
-  val z = new BigDecimal(122.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
+  private val y = new BigDecimal(37.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
+  private val z = new BigDecimal(122.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
   private val testLoc = Location("Stanford University", y, z, "Stanford", "California", "450 Serra Mall", "94305", Some(1))
   
   def createFakeData = for {
@@ -40,10 +40,6 @@ class JavaFakerDataGenerator @Inject()(userStore: UserStore,
   } yield {
     insertUser(user)
     createPosts(user)
-  }
-
-  private def insertLoc(location: Location) = {
-    locationStore.insert(location)
   }
 
   private def createPosts(user: User) = for {

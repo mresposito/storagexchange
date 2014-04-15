@@ -34,6 +34,20 @@ trait PostTest extends Specification with LocationTest {
       "lat" -> testLoc.lat.toString,
       "lng" -> testLoc.lng.toString
     )
+  
+  def createInvalidLocationRequest(post: Post) = FakeRequest(POST, "/post").
+    withSession(("email", post.email)).
+    withFormUrlEncodedBody(
+      "description" -> post.description,
+      "storageSize" -> post.storageSize.toString,
+      "streetNum" -> "450",
+      "street" -> "",
+      "city" -> testLoc.city,
+      "state" -> testLoc.state,
+      "zip" -> testLoc.zip,
+      "lat" -> testLoc.lat.toString,
+      "lng" -> testLoc.lng.toString
+    )
 
   def deletePost(id: Long) = withSession(FakeRequest(DELETE, routes.PostBoard.delete(id).url))
   def modifyPost(post: Post) = withSession(
@@ -63,6 +77,10 @@ class PostBoardSpec extends Specification with PostTest {
 				val Some(create) = route(createRequest(post1))
 						status(create) must beEqualTo(SEE_OTHER)
 			}
+      "reject post with invalid location format" in RunningApp {
+        val Some(create) = route(createInvalidLocationRequest(post1))
+          status(create) must beEqualTo(BAD_REQUEST)
+      }
 			"view my posts" in CreatePosts {
 				val Some(myPosts) = route(requestWithSession(routes.PostBoard.myPosts.url))
 						contentAsString(myPosts) must contain(post1.description)

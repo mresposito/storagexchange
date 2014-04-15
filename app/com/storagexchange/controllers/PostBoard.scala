@@ -29,7 +29,7 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, da
 
   val newPostForm = Form(
     mapping(
-      "description" -> nonEmptyText(minLength = 4),
+      "description" -> nonEmptyText(minLength=4),
       "storageSize" -> number(min=0),
       "streetNum" -> number(min=0),
       "street" -> nonEmptyText(minLength=5),
@@ -49,10 +49,10 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, da
     newPostForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.error404()),
       postData => {
+        //When inserting an address into Location, we concatenate the street number with the street
         val fullStreet = postData.streetNum.toString + " " + postData.street
         val locID: Long = locationStore.insert(Location(postData.description, new BigDecimal(postData.lat), new BigDecimal(postData.lng), 
-                                                        postData.city, postData.state, 
-                                                        fullStreet, postData.zip, None))
+                                                        postData.city, postData.state, fullStreet, postData.zip, None))
         val post = Post(username, postData.description, postData.storageSize, locID)
         val id = postStore.insert(Post(username, postData.description, postData.storageSize, locID))
         dataSearch.insertPost(post.copy(postID = Some(id))) 
@@ -79,7 +79,6 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, da
     newPostForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.error404()),
       updatedPost => {
-        val streetWithoutNumber = updatedPost.street.replace(updatedPost.streetNum+" ", "")
         postStore.getById(id).map { post => 
           val locId = post.locationID
           val rows = postStore.updateById(id, username,
