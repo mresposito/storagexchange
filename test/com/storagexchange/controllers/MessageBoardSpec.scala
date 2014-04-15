@@ -14,7 +14,7 @@ trait MessageTest extends Specification {
     
   val message1 = Message("user1@gmail.com", "user2@yahoo.com", "user1 message to user2")
   val message2 = Message("user2@yahoo.com", "user1@gmail.com", "user2 reply to user1", Some(1))
-  val message3 = Message("user1@yahoo.com", "user2@gmail.com", "user2 reply to user1", Some(2))
+  val message3 = Message("user1@yahoo.com", "user2@gmail.com", "user1 reply to user2", Some(2))
   val message4 = Message("user2@yahoo.com", "user3@gmail.com", "user2 message to user3")
   val message1Modified = message1.copy(message = "My updated message", messageID = Some(1))
   val message2Modified = message2.copy(message = "My updated message", messageID = Some(2))  
