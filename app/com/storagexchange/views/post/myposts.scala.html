@@ -1,4 +1,4 @@
-@(myPosts : List[models.Post], locationStore : models.LocationStore)
+@(myPosts : List[models.Post], postMap : Map[models.Post,models.Location])
 @import helper.twitterBootstrap._
 
 @js = {
@@ -57,8 +57,7 @@
           <div class="col-md-2">
             <b>Size: </b><span class="area">@post.storageSize</span> sq/ft
           </div>
-          <!-- We aren't letting the user change location. The user needs to create a new post for a new location -->
-          @locationStore.getById(post.locationID).map { location =>   
+          @postMap.get(post).map { location =>   
             <input type="hidden" class="form-control" id="route" name="street" value="@location.address"></input>
             <input type="hidden" class="form-control" id="street_number" name="streetNum" value="@location.address.split(" ")(0).toInt"></input>
             <input type="hidden" class="form-control" id="locality" name="city" value="@location.city"></input> 

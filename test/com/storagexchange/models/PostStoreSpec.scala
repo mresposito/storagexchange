@@ -65,7 +65,7 @@ class PostStoreSpec extends Specification with LocationTest {
 	    }
     }
     "get posts by location id" in InsertPost {
-      postStore.getPostByLocationID(1) must beSome(post1Copy)
+      postStore.getPostsByLocationID(1) must beEqualTo(List(post1Copy))
     }
     "get posts by city" in InsertPost {
       postStore.getPostsByCity("Champaign") must beEqualTo(List(post2Copy))

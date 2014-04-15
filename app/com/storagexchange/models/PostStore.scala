@@ -24,7 +24,7 @@ trait PostStore {
   def getByEmail(email: String): List[Post]
   def removeById(id: Long, email: String): Boolean
   def updateById(id: Long, email: String, description: String, storageSize: Int): Int
-  def getPostByLocationID(locationID: Long): Option[Post]
+  def getPostsByLocationID(locationID: Long): List[Post]
   def getPostsByCity(city: String): List[Post]
 }
 
@@ -37,7 +37,7 @@ class PostDAL extends PostStore {
       INSERT INTO Post
         (email, description, locationID, storageSize)
       VALUES
-        ({email},{description},{locationID},{storageSize})
+        ({email}, {description}, {locationID}, {storageSize})
     """.stripMargin)
   }
 
@@ -48,7 +48,7 @@ class PostDAL extends PostStore {
        WHERE postID = {postID}
     """.stripMargin)
   }
-  private[this] val findPostByLocationID = {
+  private[this] val findPostsByLocationID = {
     SQL("""
        SELECT * 
        FROM Post
@@ -120,10 +120,10 @@ class PostDAL extends PostStore {
     ).as(postParser *)
   }
   
-  def getPostByLocationID(locationID: Long): Option[Post] = DB.withConnection { implicit conn =>
-    findPostByLocationID.on(
+  def getPostsByLocationID(locationID: Long): List[Post] = DB.withConnection { implicit conn =>
+    findPostsByLocationID.on(
       'locationID -> locationID
-    ).as(postParser.singleOpt)
+    ).as(postParser *)
   }
   
   def getPostsByCity(city: String): List[Post] = DB.withConnection { implicit conn =>
@@ -140,7 +140,7 @@ class PostDAL extends PostStore {
   }
 
   def updateById(id: Long, email: String, description: String,
-                 storageSize: Int): Int = DB.withConnection{ implicit conn =>
+      storageSize: Int): Int = DB.withConnection { implicit conn =>
     updatePostById.on(
         'postID-> id,
         'description-> description,
