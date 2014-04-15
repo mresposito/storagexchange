@@ -28,8 +28,8 @@
    $(".edit").click(function(event) {
      var $well = $(event.target).closest(".well"); 
      var id = $well.data("id");
-     var $locWell = $well.find("div.locId");
-     var locId = $locWell.data("id");
+     var $loc = $well.find("div.locId");
+     var locId = $loc.data("id");
      var description = $well.find(".description");
      var area = $well.find(".area");
      swapInput(description, descriptionHtml)
