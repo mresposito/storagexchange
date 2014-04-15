@@ -88,7 +88,7 @@ class PostBoardSpec extends Specification with PostTest {
 			}
 			"delete my post should be successful" in CreatePosts {
 				val Some(delete) = route(deletePost(1))
-						status(delete) must beEqualTo(OK)
+						status(delete) must beEqualTo(SEE_OTHER)
 			}
 			"can't see my post after deleting" in CreatePosts {
 				val Some(delete) = route(deletePost(1))

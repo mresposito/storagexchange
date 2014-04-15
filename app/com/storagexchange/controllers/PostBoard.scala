@@ -69,7 +69,7 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, da
   def delete(id: Long) = IsAuthenticated { username => _ => 
     if(postStore.removeById(id, username)) {
       dataSearch.deletePost(id)
-	    Ok
+	    Redirect(routes.PostBoard.myPosts)
     } else {
       BadRequest(views.html.error404())  
     }
