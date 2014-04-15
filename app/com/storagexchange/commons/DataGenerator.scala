@@ -61,10 +61,11 @@ class JavaFakerDataGenerator @Inject()(userStore: UserStore,
      faker.lastName,
      emailAddress,
      password,
-     0)
+     random.nextInt(4)+1)
   private def generatePost(email: String) = Post(email, 
       faker.sentence(),
-      random.nextInt(maxStorage), 1)
+      random.nextInt(maxStorage), 
+      random.nextInt(4)+1)
 
   private def emailAddress = sampleString + "@gmail.com"
   private def password = sampleString
