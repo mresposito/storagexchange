@@ -90,22 +90,19 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, da
     }
   }
  
-  def modify(id: Long) = IsAuthenticated { username => implicit request =>
+  def modify(id: Long, locId: Long) = IsAuthenticated { username => implicit request =>
     newPostForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.error404()),
       updatedPost => {
-        postStore.getById(id).map { post => 
-          val locId = post.locationID
-          val rows = postStore.updateById(id, username,
-            updatedPost.description, updatedPost.storageSize)
-          if(rows > 0) {
-            dataSearch.updatePost(Post(username,
-              updatedPost.description, updatedPost.storageSize, locId, Some(id)))
-            Redirect(routes.PostBoard.myPosts)
-          } else {
-            BadRequest(views.html.error404())
-          }
-        }.getOrElse(BadRequest(views.html.error404()))
+        val rows = postStore.updateById(id, username,
+          updatedPost.description, updatedPost.storageSize)
+        if(rows > 0) {
+          dataSearch.updatePost(Post(username,
+            updatedPost.description, updatedPost.storageSize, locId, Some(id)))
+          Redirect(routes.PostBoard.myPosts)
+        } else {
+          BadRequest(views.html.error404())
+        }
       }
     )
   }
