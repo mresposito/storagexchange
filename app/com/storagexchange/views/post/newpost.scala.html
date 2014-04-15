@@ -26,7 +26,6 @@
         document.getElementById(component).value = "";
         document.getElementById(component).disabled = false;
       }
-    
       for (var j = 0; j < place.address_components.length; j++) {
         var att = place.address_components[j].types[0];
         if (component_form[att]) {
