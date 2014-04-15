@@ -119,7 +119,6 @@ class MessageDAL extends MessageStore {
     ).executeInsert(scalar[Long].single)
   }
 
-  // Return None if id doesn't exist or has a child already.
   def reply(id: Long, message: Message): Long = DB.withConnection { implicit conn =>
     val childID = createReplySql.on(
       'fromUser -> message.fromUser,
