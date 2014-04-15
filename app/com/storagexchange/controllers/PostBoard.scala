@@ -51,15 +51,15 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, da
       postData => {
         //When inserting an address into Location, we concatenate the street number with the street
         val fullStreet = postData.streetNum.toString + " " + postData.street
-        val locID: Long = 
-          locationStore.insert(Location(postData.description, 
-                                        new BigDecimal(postData.lat), 
-                                        new BigDecimal(postData.lng), 
-                                        postData.city, 
-                                        postData.state, 
-                                        fullStreet, 
-                                        postData.zip, 
-                                        None))
+        val locID: Long = locationStore.insert(
+          Location(postData.description, 
+            new BigDecimal(postData.lat), 
+            new BigDecimal(postData.lng), 
+            postData.city, 
+            postData.state, 
+            fullStreet, 
+            postData.zip, 
+            None))
         val post = Post(username, postData.description, postData.storageSize, locID)
         val id = postStore.insert(Post(username, postData.description, postData.storageSize, locID))
         dataSearch.insertPost(post.copy(postID = Some(id))) 
@@ -84,7 +84,7 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, da
   def delete(id: Long) = IsAuthenticated { username => _ => 
     if(postStore.removeById(id, username)) {
       dataSearch.deletePost(id)
-	    Redirect(routes.PostBoard.myPosts)
+      Ok
     } else {
       BadRequest(views.html.error404())  
     }
