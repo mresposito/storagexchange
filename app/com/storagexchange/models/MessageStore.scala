@@ -143,20 +143,13 @@ class MessageDAL extends MessageStore {
   }
 
   /** 
-   * Gets conversation rooted at message with id i.e. recurse/iterate until childID is None.
+   * Gets conversation rooted at message with id i.e. recurse until childID is None.
    */
-  def getConversationById(id: Long): List[Message] = {
-    getById(id) match {
-      case Some(message) =>
-        message.childID match {
-          case Some(childID) =>
-            message :: getConversationById(childID)
-          case None =>
-            List(message)
-        }
-      case None => Nil
-    }
-  }
+  def getConversationById(id: Long): List[Message] = getById(id).map { message => 
+    message.childID.map { childID => 
+      message :: getConversationById(childID) 
+    }.getOrElse(List(message))
+  }.getOrElse(Nil)
 
   /**
    * Messages where email is either from or to and parent is None. This will give us the
