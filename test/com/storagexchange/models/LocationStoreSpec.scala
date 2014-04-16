@@ -20,7 +20,11 @@ trait LocationTest extends Specification {
   val y = new BigDecimal(37.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
   val z = new BigDecimal(122.000000).setScale(6,BigDecimal.ROUND_HALF_UP)
 
+  val q = new BigDecimal(40.110500).setScale(6,BigDecimal.ROUND_HALF_UP)
+  val r = new BigDecimal(-88.228400).setScale(6,BigDecimal.ROUND_HALF_UP)
   val testLoc = Location("Stanford University", y, z, "Stanford", "California", "450 Serra Mall", "94305", Some(1))
+  val testLoc2 = Location("University of Illinois, Urbana Champaign", q, r, "Champaign", "Illinois", 
+                          "Admissions and Records, 901 West Illinois Street","61801", Some(2)) 
   val testUniv = University(1,"Stanford University", "http://www.stanford.edu", 
                             "http://upload.wikimedia.org/wikipedia/en/b/b7/Stanford_University_seal_2003.svg",
                             "Cardinal, White", Option(1))

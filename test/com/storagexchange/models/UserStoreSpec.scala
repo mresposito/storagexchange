@@ -31,7 +31,7 @@ class UserStoreSpec extends Specification with UserTest {
     	userStore.insert(user).toInt must beEqualTo(1)
     }
     "should trow an exception if inserting user twice" in InsertUser {
-    	userStore.insert(user).toInt must throwA[JdbcSQLException]
+    	userStore.insert(user) must throwA[JdbcSQLException]
     }
     "authorize user" in InsertUser {
       userStore.authenticate(user.email, user.password) must beTrue

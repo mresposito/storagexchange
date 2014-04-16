@@ -36,8 +36,8 @@ object Global extends GlobalSettings with Logging {
   	search.createIndices
     Play.mode match {
       case Mode.Dev => {
-        injectData
         initializeUniversities
+        injectData
       }
       case _ => Unit
     }
