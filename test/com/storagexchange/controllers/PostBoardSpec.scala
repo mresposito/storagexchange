@@ -18,8 +18,8 @@ trait PostTest extends Specification with LocationTest {
   val testLocId: Long = 2
 
   val CreatePosts = BeforeHook {
-    val Some(create1) = route(createRequest(post1))
-    val Some(create2) = route(createRequest(post2))
+    val create1 = route(createRequest(post1)).get
+    val create2 = route(createRequest(post2)).get
   }
 
   def createRequest(post: Post) = FakeRequest(POST, "/post").
@@ -50,7 +50,9 @@ trait PostTest extends Specification with LocationTest {
       "lng" -> testLoc.lng.toString
     )
 
-  def deletePost(id: Long) = withSession(FakeRequest(DELETE, routes.PostBoard.delete(id).url))
+  def deletePost(id: Long) = withSession(
+    FakeRequest(DELETE, routes.PostBoard.delete(id).url))
+
   def modifyPost(post: Post) = withSession(
     FakeRequest(POST, routes.PostBoard.modify(post.postID.get, testLocId).url).
     withFormUrlEncodedBody(
@@ -110,7 +112,7 @@ class PostBoardSpec extends Specification with PostTest {
 				status(delete) must beEqualTo(OK)
 			}
 			"can't see my post after deleting" in CreatePosts {
-				val Some(delete) = route(deletePost(1))
+				val delete = route(deletePost(1)).get
 				val Some(myPosts) = route(requestWithSession(routes.PostBoard.myPosts.url))
 				contentAsString(myPosts) must not contain(post1.description)
 			}
@@ -130,13 +132,13 @@ class PostBoardSpec extends Specification with PostTest {
 				status(modify) must beEqualTo(SEE_OTHER)
 			}
 			"change description in modified post" in CreatePosts {
-				val Some(modify) = route(modifyPost(post1Modified)) 
+				val modify = route(modifyPost(post1Modified)).get
 				val Some(myPosts) = route(requestWithSession(routes.PostBoard.myPosts.url))
 				contentAsString(myPosts) must contain(post1Modified.description)
 			}
 			"modify post should update the description" in CreatePosts {
-				val Some(modify) = route(modifyPost(post1Modified)) 
-				val Some(myPosts) = route(requestWithSession(routes.PostBoard.myPosts.url))
+			  val modify = route(modifyPost(post1Modified)).get
+			  val Some(myPosts) = route(requestWithSession(routes.PostBoard.myPosts.url))
 				contentAsString(myPosts) must not contain(post1.description)
 			}
 		}
