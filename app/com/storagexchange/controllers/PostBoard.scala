@@ -70,15 +70,15 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, da
 
   def myPosts = IsAuthenticated { username => _ => 
       val postList = postStore.getByEmail(username)
-      var postMap:Map[Post,Location] = Map()
+      var postLoc: List[(Post, Location)] = List()
       postList.map(post => 
         locationStore.getById(post.locationID).map { location =>  
-          postMap += (post -> location) 
+          postLoc ::= (post, location)
         }.getOrElse {
           BadRequest("Invalid Location")
         }
       )
-      Ok(views.html.post.myposts(postList, postMap))
+      Ok(views.html.post.myposts(postLoc))
   }
 
   def delete(id: Long) = IsAuthenticated { username => _ => 

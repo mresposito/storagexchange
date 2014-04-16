@@ -1,4 +1,4 @@
-@(myPosts : List[models.Post], postMap : Map[models.Post,models.Location])
+@(postLoc : List[(models.Post, models.Location)])
 @import helper.twitterBootstrap._
 
 @js = {
@@ -50,35 +50,31 @@
 @views.html.user.main("Storage Exchange", "My Posts", js) {
  <div class="post">
     <div class="container">
-        @myPosts.map { post =>
-        <div class="row well"  data-id="@post.postID.get">
+        @postLoc.map { postTuple =>
+        <div class="row well"  data-id="@postTuple._1.postID.get">
           <div class="col-md-8">
             <b>Description</b><br>
-            <span class="description">@post.description</span>
+            <span class="description">@postTuple._1.description</span>
           </div>
           <div class="col-md-2">
-            <b>Size: </b><span class="area">@post.storageSize</span> sq/ft
+            <b>Size: </b><span class="area">@postTuple._1.storageSize</span> sq/ft
           </div>
-          @postMap.get(post).map { location =>  
-          <div class="locId" data-id="@location.id"> 
-            <input type="hidden" class="form-control" id="route" name="street" value="@location.address"></input>
-            <input type="hidden" class="form-control" id="street_number" name="streetNum" value="@location.address.split(" ")(0).toInt"></input>
-            <input type="hidden" class="form-control" id="locality" name="city" value="@location.city"></input> 
-            <input type="hidden" class="form-control" id="administrative_area_level_1" name="state" value="@location.state"></input> 
-            <input type="hidden" class="form-control" id="postal_code" name="zip" value="@location.zip"></input>
-            <input type="hidden" class="form-control" id="latitude" name="lat" value="@location.lat"></input>
-            <input type="hidden" class="form-control" id="longitude" name="lng" value="@location.lng"></input>
+          <div class="locId" data-id="@postTuple._2.id"> 
+            <input type="hidden" class="form-control" id="route" name="street" value="@postTuple._2.address"></input>
+            <input type="hidden" class="form-control" id="street_number" name="streetNum" value="@postTuple._2.address.split(" ")(0).toInt"></input>
+            <input type="hidden" class="form-control" id="locality" name="city" value="@postTuple._2.city"></input> 
+            <input type="hidden" class="form-control" id="administrative_area_level_1" name="state" value="@postTuple._2.state"></input> 
+            <input type="hidden" class="form-control" id="postal_code" name="zip" value="@postTuple._2.zip"></input>
+            <input type="hidden" class="form-control" id="latitude" name="lat" value="@postTuple._2.lat"></input>
+            <input type="hidden" class="form-control" id="longitude" name="lng" value="@postTuple._2.lng"></input>
           </div>
-          }.getOrElse {
-            org.scalatry.BadRequest("Invalid Location") 
-          }
           <div class="col-md-2 actions">
             <a href="#" class="edit"><i class="fa fa-pencil-square-o"></i></a>
             <a href="#" class="delete"><i class="fa fa-trash-o"></i></a>
           </div>
         </div>
       }
-      @if(myPosts.isEmpty) {
+      @if(postLoc.isEmpty) {
         <h3>You have no posts</h3>
         <b>Create a new one!</b>
       }

@@ -15,6 +15,7 @@ trait PostTest extends Specification with LocationTest {
   val post1 = Post("m@e.com", "This is the first post", 95, 1, Some(1))
   val post1Modified = post1.copy(description = "This is the second post")
   val post2 = Post("hsimpson@uis.edu", "Homer no function beer well without", 45, 1, Some(2))
+  val testLocId: Long = 2
 
   val CreatePosts = BeforeHook {
     val Some(create1) = route(createRequest(post1))
@@ -51,7 +52,7 @@ trait PostTest extends Specification with LocationTest {
 
   def deletePost(id: Long) = withSession(FakeRequest(DELETE, routes.PostBoard.delete(id).url))
   def modifyPost(post: Post) = withSession(
-    FakeRequest(POST, routes.PostBoard.modify(post.postID.get).url).
+    FakeRequest(POST, routes.PostBoard.modify(post.postID.get, testLocId).url).
     withFormUrlEncodedBody(
       "description" -> post.description,
       "storageSize" -> post.storageSize.toString,
