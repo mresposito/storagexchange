@@ -13,6 +13,7 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import com.storagexchange.models._
 import java.math.BigDecimal
+import org.h2.jdbc.JdbcSQLException
 
 object Global extends GlobalSettings with Logging {
 
@@ -36,8 +37,14 @@ object Global extends GlobalSettings with Logging {
   	search.createIndices
     Play.mode match {
       case Mode.Dev => {
-        initializeUniversities
-        injectData
+        try {
+          initializeUniversities
+          injectData
+        } catch {
+          case e: JdbcSQLException => {
+            logger.error("Primary key exception") 
+          }
+        }
       }
       case _ => Unit
     }
