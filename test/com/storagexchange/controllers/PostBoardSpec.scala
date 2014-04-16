@@ -50,7 +50,9 @@ trait PostTest extends Specification with LocationTest {
       "lng" -> testLoc.lng.toString
     )
 
-  def deletePost(id: Long) = withSession(FakeRequest(DELETE, routes.PostBoard.delete(id).url))
+  def deletePost(id: Long) = withSession(
+    FakeRequest(DELETE, routes.PostBoard.delete(id).url))
+
   def modifyPost(post: Post) = withSession(
     FakeRequest(POST, routes.PostBoard.modify(post.postID.get, testLocId).url).
     withFormUrlEncodedBody(
@@ -131,7 +133,6 @@ class PostBoardSpec extends Specification with PostTest {
 			}
 			"change description in modified post" in CreatePosts {
 				val modify = route(modifyPost(post1Modified)).get
-				status(modify) must beEqualTo(SEE_OTHER)
 				val Some(myPosts) = route(requestWithSession(routes.PostBoard.myPosts.url))
 				contentAsString(myPosts) must contain(post1Modified.description)
 			}
