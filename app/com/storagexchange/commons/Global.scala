@@ -9,10 +9,7 @@ import play.api.Play.current
 import java.io.File
 import com.typesafe.config.ConfigFactory
 import com.storagexchange.search.DataSearch
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
-import com.storagexchange.models._
-import java.math.BigDecimal
+import org.h2.jdbc.JdbcSQLException
 
 object Global extends GlobalSettings with Logging {
 
@@ -36,11 +33,6 @@ object Global extends GlobalSettings with Logging {
   	search.createIndices
     Play.mode match {
       case Mode.Dev => {
-        try {
-	        initializeUniversities
-        } catch {
-          case e: Exception => Unit
-        }
         injectData
       }
       case _ => Unit
@@ -49,6 +41,11 @@ object Global extends GlobalSettings with Logging {
   
   private def injectData = {
     val generator = injector.getInstance(classOf[DataGenerator])
+    try {
+     generator.initializeUniversities 
+    } catch {
+      case e: JdbcSQLException => Unit
+    }
     generator.createFakeData
   }
 
@@ -57,59 +54,6 @@ object Global extends GlobalSettings with Logging {
    */
   override def getControllerInstance[A](clazz: Class[A]) = {
     injector.getInstance(clazz)
-  }
-
-  case class UniversityInformation(name: String,
-    website: String,
-    colors: String,
-    logo: String,
-    locationID: Long,
-    lat: BigDecimal,
-    lng: BigDecimal,
-    city: String,
-    state: String,
-    address: String,
-    zip: String)
-
-  implicit val universityReader: Reads[UniversityInformation] = (
-    (__ \ "name").read[String] and
-    (__ \ "website").read[String] and
-    (__ \ "colors").read[String] and
-    (__ \ "logo").read[String] and
-    (__ \ "locationID").read[Long] and
-    (__ \ "lat").read[BigDecimal] and
-    (__ \ "lng").read[BigDecimal] and
-    (__ \ "city").read[String] and
-    (__ \ "state").read[String] and
-    (__ \ "address").read[String] and
-    (__ \ "zip").read[String] 
-  )(UniversityInformation)
-
-  private def getJsonList( ) : List[UniversityInformation] = {
-    val jsonFile = Play.application.getFile("public/data/universities.json")
-    val filePath = jsonFile.toString()
-    val jsonContent = scala.io.Source.fromFile(filePath).mkString
-    val universityList: JsValue = Json.parse(jsonContent)
-    val universities = universityList.as[List[UniversityInformation]]
-    return universities
-  }
-
-  private def initializeUniversities = {
-    val universityTable = injector.getInstance(classOf[UniversityStore])
-    val locationTable = injector.getInstance(classOf[LocationStore])
-    val universities = getJsonList() 
-    //insert json content into universities table
-    universities.map{ university => university match {
-      case UniversityInformation(name, website, colors,
-          logo, locationID, lat,
-          lng, city, state, address, zip) => {
-          locationTable.insert(Location(name,lat,lng,city,state,address,zip,None))
-          universityTable.insert(University(locationID,name,website,logo,colors,None))
-        }
-        case _ => logger.error("Invalid JSON formatting")
-      } 
-    }
-
   }
 
   /**

@@ -86,7 +86,6 @@ define ([
       _.map(facets, function (facet) {
         var selector = "ul.storageControls [data-from=" + facet.from + "]"
         var $li = $(selector)
-        console.log("hello")
         $li.find(".count").html(facet.count)
       });
     },
