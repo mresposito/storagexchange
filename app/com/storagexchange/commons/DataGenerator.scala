@@ -24,6 +24,8 @@ class JavaFakerDataGenerator @Inject()(userStore: UserStore,
   private val maxStorage = 3000
   private val numberOfUsers = 100
   private val maxPosts = 10
+  private val locationGenVal = 4
+  private val universityGenVal = 4
 
   private val random = new Random()
   private val faker = new Faker
@@ -61,11 +63,11 @@ class JavaFakerDataGenerator @Inject()(userStore: UserStore,
      faker.lastName,
      emailAddress,
      password,
-     random.nextInt(4)+1)
+     random.nextInt(universityGenVal)+1)
   private def generatePost(email: String) = Post(email, 
       faker.sentence(),
       random.nextInt(maxStorage), 
-      random.nextInt(4)+1)
+      random.nextInt(locationGenVal)+1)
 
   private def emailAddress = sampleString + "@gmail.com"
   private def password = sampleString
