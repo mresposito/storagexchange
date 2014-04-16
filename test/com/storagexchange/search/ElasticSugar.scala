@@ -31,6 +31,12 @@ trait ElasticSugar extends BeforeAndAfterAll with Logging {
     fct.iterator().toList.map(_.getCount()).sum
   }
   
+  def countFacets(resp: SearchResponse): Int = {
+    val fct: RangeFacet = resp.getFacets().
+	    facetsAsMap().get("size").asInstanceOf[RangeFacet]
+    fct.iterator().toList.length
+  }
+  
   def refresh(indexes: String*) {
     val i = indexes.size match {
       case 0 => Seq("_all")

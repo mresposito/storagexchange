@@ -83,6 +83,22 @@ class ElasticClientSpec extends FlatSpec with Matchers
     }
     facetToSum(resp) should be(1)
   }
+  it should "contain 1 facet if 0 to 50" in {
+    val resp = client.sync.execute {
+      search in "posts" types "post" facets {
+        facet range "size" field "storageSize" range(0 -> 50)
+      }
+    }
+    countFacets(resp) should be(1)
+  }
+  it should "contain 2 facets if 0 to 50 and 50 to 90" in {
+    val resp = client.sync.execute {
+      search in "posts" types "post" facets {
+        facet range "size" field "storageSize" range(0 -> 50) range(50 -> 90)
+      }
+    }
+    countFacets(resp) should be(2)
+  }
   it should "count 0 in the facet 0 to 1" in {
     val resp = client.sync.execute {
       search in "posts" types "post" facets {

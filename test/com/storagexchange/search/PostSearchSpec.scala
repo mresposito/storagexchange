@@ -128,4 +128,8 @@ class PostSearchSpec extends FlatSpec with Matchers
     val resp: SearchResponse = dataSearch.getPosts(Query("I love ES"))
     facetToSum(resp) should be(0)
   }
+  it should "contain 4 facets" in {
+    val resp: SearchResponse = dataSearch.getPosts(Query("I love ES"))
+    countFacets(resp) should be(4)
+  }
 }
