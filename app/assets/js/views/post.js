@@ -92,7 +92,7 @@ define ([
 
     renderPosts: function(posts) {
       var $el = $(this.el);
-      var $posts = $el.find(".content .posts")
+      var $posts = $el.find(".content")
       $posts.html("");
       _.map(posts, function(post) {
         $posts.append(postHTML(post["_source"]));

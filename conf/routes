@@ -18,6 +18,7 @@ POST    /post/:id/:locId            @com.storagexchange.controllers.PostBoard.mo
 GET     /newpost                    @com.storagexchange.controllers.PostBoard.newPost
 # Search API
 POST    /api/search/post            @com.storagexchange.controllers.SearchAPI.getPosts
+GET     /api/uni                    @com.storagexchange.controllers.SearchAPI.getUniversities
 
 # Dynamic pages
 GET     /profile                    @com.storagexchange.controllers.Dynamic.profile
