@@ -26,16 +26,16 @@ class MessageBoard @Inject()(messageStore: MessageStore)
 
   val newMessageForm = Form(
     mapping(
-      "toUser"  -> nonEmptyText(minLength = 4),
+      "toUser" -> nonEmptyText(minLength = 4),
       "message" -> nonEmptyText(minLength = 4)
       )(MessageRequest.apply)(MessageRequest.unapply)
     )
 
   var newReplyForm = Form(
     mapping(
-      "replyToId"   -> longNumber(min = 1),
+      "replyToId" -> longNumber(min = 1),
       "replyToUser" -> nonEmptyText(minLength = 4),
-      "message"     -> text
+      "message" -> text
       )(ReplyRequest.apply)(ReplyRequest.unapply)
     )
 
@@ -45,8 +45,8 @@ class MessageBoard @Inject()(messageStore: MessageStore)
 
   def newReply(replyToId: Long, replyToUser: String) = IsAuthenticated { username => _ =>
     val replyData = Map("replyToId" -> replyToId.toString, 
-                      "replyToUser" -> replyToUser,
-                      "message"     -> "")
+      "replyToUser" -> replyToUser,
+      "message" -> "")
     Ok(views.html.message.newreply(newReplyForm.bind(replyData)))
   }
 
@@ -72,8 +72,8 @@ class MessageBoard @Inject()(messageStore: MessageStore)
   }
 
   def myMessages = IsAuthenticated { username => _ => 
-    val messageList = messageStore.getByEmail(username)
-    val conversationList = for (message <- messageList) yield messageStore.getConversationById(message.messageID.getOrElse(0))
+    val conversationList = messageStore.getByEmail(username).map(message => 
+      messageStore.getConversationById(message.messageID.getOrElse(0)))
     Ok(views.html.message.mymessages(conversationList))
   }
 
