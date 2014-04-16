@@ -57,82 +57,82 @@ trait MessageTest extends Specification {
 
 class MessageBoardSpec extends Specification with MessageTest {
 
-    "Message Board" should {
+  "Message Board" should {
 
-        "View messages" in {
-            "accept valid message" in RunningApp {
-              val Some(create) = route(createMessageRequest(message1))
-              status(create) must beEqualTo(SEE_OTHER)
-            }
-            "view messages I've sent" in CreateMessages {
-              val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url, 
-                message1.fromUser))
-              contentAsString(myMessages) must contain(message1.message)
-            }
-            "view messages I've received" in CreateMessages {
-              val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url, 
-                message1.fromUser))
-              contentAsString(myMessages) must contain(message2.message)
-            }
-            "should not display messages between other users" in CreateMessages {
-              val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url, 
-                message1.fromUser))
-              contentAsString(myMessages) must not contain(message4.message)
-            }
-            "cannot view my messages if not logged in" in CreateMessages {
-              val Some(myMessages) = route(FakeRequest(GET, routes.MessageBoard.myMessages.url))
-              status(myMessages) must beEqualTo(SEE_OTHER)
-            }
-        }
-
-        "Reply to messages" in {
-            "sender can view 1st reply" in CreateReplies {
-              val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url, 
-                message1.fromUser))
-              contentAsString(myMessages) must contain(message2.message)
-            }
-            "sender can view 2nd reply" in CreateReplies {
-              val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url, 
-                message1.fromUser))
-              contentAsString(myMessages) must contain(message3.message)
-            }
-            "recipient can view 1st reply" in CreateReplies {
-              val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url, 
-                message1.toUser))
-              contentAsString(myMessages) must contain(message2.message)
-            }
-            "recipient can view 2nd reply" in CreateReplies {
-              val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url, 
-                message1.toUser))
-              contentAsString(myMessages) must contain(message3.message)
-            }
-        }
-
-        "Modify messages" in {
-            "can't modify a message that does not exist" in RunningApp {
-              val Some(modify) = route(modifyMessage(message1Modified)) 
-              status(modify) must beEqualTo(BAD_REQUEST)
-            }
-            "Can't modify a message I don't own" in CreateMessages {
-              val Some(modify) = route(modifyMessage(message2Modified)) 
-              status(modify) must beEqualTo(BAD_REQUEST)
-            }
-            "modifying my message should be successful" in CreateMessages {
-              val Some(modify) = route(modifyMessage(message1Modified)) 
-              status(modify) must beEqualTo(SEE_OTHER)
-            }
-            "change message text in modified message" in CreateMessages {
-              val Some(modify) = route(modifyMessage(message1Modified)) 
-              val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url, 
-                message1.fromUser))
-              contentAsString(myMessages) must contain(message1Modified.message)
-            }
-            "modify message should update the message text" in CreateMessages {
-              val Some(modify) = route(modifyMessage(message1Modified)) 
-              val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url,
-                message1.fromUser))
-              contentAsString(myMessages) must not contain(message1.message)
-            }
-        }
+    "View messages" in {
+      "accept valid message" in RunningApp {
+        val Some(create) = route(createMessageRequest(message1))
+        status(create) must beEqualTo(SEE_OTHER)
+      }
+      "view messages I've sent" in CreateMessages {
+        val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url, 
+          message1.fromUser))
+        contentAsString(myMessages) must contain(message1.message)
+      }
+      "view messages I've received" in CreateMessages {
+        val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url, 
+          message1.fromUser))
+        contentAsString(myMessages) must contain(message2.message)
+      }
+      "should not display messages between other users" in CreateMessages {
+        val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url, 
+          message1.fromUser))
+        contentAsString(myMessages) must not contain(message4.message)
+      }
+      "cannot view my messages if not logged in" in CreateMessages {
+        val Some(myMessages) = route(FakeRequest(GET, routes.MessageBoard.myMessages.url))
+        status(myMessages) must beEqualTo(SEE_OTHER)
+      }
     }
+
+    "Reply to messages" in {
+      "sender can view 1st reply" in CreateReplies {
+        val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url, 
+          message1.fromUser))
+        contentAsString(myMessages) must contain(message2.message)
+      }
+      "sender can view 2nd reply" in CreateReplies {
+        val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url, 
+          message1.fromUser))
+        contentAsString(myMessages) must contain(message3.message)
+      }
+      "recipient can view 1st reply" in CreateReplies {
+        val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url, 
+          message1.toUser))
+        contentAsString(myMessages) must contain(message2.message)
+      }
+      "recipient can view 2nd reply" in CreateReplies {
+        val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url, 
+          message1.toUser))
+        contentAsString(myMessages) must contain(message3.message)
+      }
+    }
+
+    "Modify messages" in {
+      "can't modify a message that does not exist" in RunningApp {
+        val Some(modify) = route(modifyMessage(message1Modified)) 
+        status(modify) must beEqualTo(BAD_REQUEST)
+      }
+      "Can't modify a message I don't own" in CreateMessages {
+        val Some(modify) = route(modifyMessage(message2Modified)) 
+        status(modify) must beEqualTo(BAD_REQUEST)
+      }
+      "modifying my message should be successful" in CreateMessages {
+        val Some(modify) = route(modifyMessage(message1Modified)) 
+        status(modify) must beEqualTo(SEE_OTHER)
+      }
+      "change message text in modified message" in CreateMessages {
+        val Some(modify) = route(modifyMessage(message1Modified)) 
+        val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url, 
+          message1.fromUser))
+        contentAsString(myMessages) must contain(message1Modified.message)
+      }
+      "modify message should update the message text" in CreateMessages {
+        val Some(modify) = route(modifyMessage(message1Modified)) 
+        val Some(myMessages) = route(requestWithSession(routes.MessageBoard.myMessages.url,
+          message1.fromUser))
+        contentAsString(myMessages) must not contain(message1.message)
+      }
+    }
+  }
 }
