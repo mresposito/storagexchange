@@ -24,13 +24,17 @@ case class TransactionByEmail(storageTaken: Int,
   postID: Long,
   transactionID: Option[Long] = None)
 
-case class TransactionDetails(storageTaken: Int,
+case class TransactionDetails(transactionID: Long,
+  storageTaken: Int,
   startDate: String,
   endDate: String,
+  buyerID: Long,
+  sellerID: Long,
   buyerEmail: String,
   sellerEmail: String,
   postID: Long,
-  transactionID: Option[Long] = None)
+  confirmed: Boolean,
+  canceled: Int)
 
 /**
  * Methods that we will be using from
@@ -39,12 +43,12 @@ case class TransactionDetails(storageTaken: Int,
 trait TransactionStore {
   def insert(trasaction: Transaction): Long
   def insertByEmail(trasaction: TransactionByEmail): Long
-  def getByID(ID: Long): Option[Transaction]
-  def getByPostID(postID: Long): List[Transaction]
-  def getByBuyerID(buyerID: Long): List[Transaction]
-  def getByBuyerEmail(buyerEmail: String): List[Transaction]
-  def getBySellerID(sellerID: Long): List[Transaction]
-  def getBySellerEmail(sellerEmail: String): List[Transaction]
+  def getByID(ID: Long): Option[TransactionDetails]
+  def getByPostID(postID: Long): List[TransactionDetails]
+  def getByBuyerID(buyerID: Long): List[TransactionDetails]
+  def getByBuyerEmail(buyerEmail: String): List[TransactionDetails]
+  def getBySellerID(sellerID: Long): List[TransactionDetails]
+  def getBySellerEmail(sellerEmail: String): List[TransactionDetails]
 }
 
 // Actual implementation of Transaction Store method
@@ -54,18 +58,18 @@ class TransactionDAL extends TransactionStore {
   private[this] val createTransactionSql = {
     SQL("""
       INSERT INTO Transaction
-        (storageTaken, startDate, endDate, buyerID, sellerID, postID)
+        (storageTaken, startDate, endDate, buyerID, sellerID, buyerEmail, sellerEmail, postID)
       VALUES
-        ({storageTaken}, {startDate}, {endDate}, {buyerID}, {sellerID}, {postID})
+        ({storageTaken}, {startDate}, {endDate}, {buyerID}, {sellerID}, (SELECT email FROM User WHERE userID={buyerID}), (SELECT email FROM User WHERE userID={sellerID}), {postID})
     """.stripMargin)
   }
 
   private[this] val createTransactionByEmailSql = {
     SQL("""
       INSERT INTO Transaction
-        (storageTaken, startDate, endDate, buyerID, sellerID, postID)
+        (storageTaken, startDate, endDate, buyerID, sellerID, buyerEmail, sellerEmail, postID)
       VALUES
-        ({storageTaken}, {startDate}, {endDate}, (SELECT userID FROM User WHERE email={buyerEmail}), (SELECT userID FROM User WHERE email={sellerEmail}), {postID})
+        ({storageTaken}, {startDate}, {endDate}, (SELECT userID FROM User WHERE email={buyerEmail}), (SELECT userID FROM User WHERE email={sellerEmail}), {buyerEmail}, {sellerEmail}, {postID})
     """.stripMargin)
   }
 
@@ -113,7 +117,7 @@ class TransactionDAL extends TransactionStore {
     SQL("""
        SELECT *
        FROM Transaction
-       WHERE sellerID = (SELECT userID FROM User WHERE email={sellerEmail})
+       WHERE sellerEmail = {sellerEmail}
     """.stripMargin)
   }
 
@@ -121,14 +125,16 @@ class TransactionDAL extends TransactionStore {
     long("transactionID")~
     long("buyerID")~
     long("sellerID")~
+    str("buyerEmail")~
+    str("sellerEmail")~
     long("postID")~
     int("storageTaken") ~
     date("startDate") ~
     date("endDate")~
     bool("approved")~
-    int("canceled ").? map {
-      case transactionID ~ buyerID ~ sellerID ~ postID ~ storageTaken ~ startDate ~ endDate ~ approved ~ canceled =>
-        Transaction(storageTaken, startDate.toString(), endDate.toString(),buyerID,sellerID,postID,Some(transactionID))
+    int("canceled") map {
+      case transactionID ~ buyerID ~ sellerID ~buyerEmail ~ sellerEmail ~ postID ~ storageTaken ~ startDate ~ endDate ~ approved ~ canceled =>
+        TransactionDetails(transactionID,storageTaken, startDate.toString(), endDate.toString(),buyerID,sellerID, buyerEmail, sellerEmail, postID,approved,canceled)
     }
 
   def insert(transaction: Transaction): Long = DB.withConnection { implicit conn =>
@@ -153,37 +159,37 @@ class TransactionDAL extends TransactionStore {
     ).executeInsert(scalar[Long].single)
   }
 
-  def getByID(ID: Long): Option[Transaction] = DB.withConnection { implicit conn =>
+  def getByID(ID: Long): Option[TransactionDetails] = DB.withConnection { implicit conn =>
     findTransactionByIdSql.on(
       'transactionID -> ID
     ).as(transactionParser.singleOpt)
   }
 
-  def getByPostID(postID: Long): List[Transaction] = DB.withConnection { implicit conn =>
+  def getByPostID(postID: Long): List[TransactionDetails] = DB.withConnection { implicit conn =>
     findTransactionByPostIDSql.on(
       'postID -> postID
     ).as(transactionParser *)
   }
 
-  def getByBuyerID(buyerID: Long): List[Transaction] = DB.withConnection { implicit conn =>
+  def getByBuyerID(buyerID: Long): List[TransactionDetails] = DB.withConnection { implicit conn =>
     findTransactionByBuyerIDSql.on(
       'buyerID -> buyerID
     ).as(transactionParser *)
   }
 
-  def getByBuyerEmail(buyerEmail: String): List[Transaction] = DB.withConnection { implicit conn =>
+  def getByBuyerEmail(buyerEmail: String): List[TransactionDetails] = DB.withConnection { implicit conn =>
     findTransactionByBuyerEmailSql.on(
       'buyerEmail -> buyerEmail
     ).as(transactionParser *)
   }
 
-  def getBySellerID(sellerID: Long): List[Transaction] = DB.withConnection { implicit conn =>
+  def getBySellerID(sellerID: Long): List[TransactionDetails] = DB.withConnection { implicit conn =>
     findTransactionBySellerIDSql.on(
       'sellerID -> sellerID
     ).as(transactionParser *)
   }
 
-  def getBySellerEmail(sellerEmail: String): List[Transaction] = DB.withConnection { implicit conn =>
+  def getBySellerEmail(sellerEmail: String): List[TransactionDetails] = DB.withConnection { implicit conn =>
     findTransactionBySellerEmailSql.on(
       'sellerEmail -> sellerEmail
     ).as(transactionParser *)

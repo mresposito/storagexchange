@@ -28,13 +28,15 @@ CREATE TABLE Post (
 CREATE TABLE Transaction (
   transactionID BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   buyerID BIGINT NOT NULL, 
-  sellerID BIGINT NOT NULL, 
+  sellerID BIGINT NOT NULL,
+  buyerEmail VARCHAR(50) NOT NULL,
+  sellerEmail VARCHAR(50) NOT NULL,
   postID BIGINT NOT NULL,
   storageTaken INT NOT NULL,
   startDate DATETIME NOT NULL,
   endDate DATETIME NOT NULL,
   approved BOOLEAN NOT NULL DEFAULT 0,
-  canceled INT NOT NULL DEFAULT 0,
+  canceled INT  NOT NULL DEFAULT 0,
   timestamp TIMESTAMP);
 
 # --- !Downs

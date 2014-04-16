@@ -16,18 +16,17 @@ class TransactionStoreSpec extends Specification with UserTest {
   val transactionStore: TransactionStore = new TransactionDAL
   val transaction1 = Transaction(10, "2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0",1,2,1,Some(1))
   val transaction2 = Transaction(3, "2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0",1,2,1,Some(2))
-  val transaction1Copy = transaction1.copy()
-  val transaction2Copy = transaction2.copy()
+  
 
   val transactionByEmail1 = TransactionByEmail(10, "2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0","user1@user.com","user2@user.com",1,Some(1))
   val transactionByEmail2 = TransactionByEmail(3, "2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0","user1@user.com","user2@user.com",1,Some(2))
-  val transactionByEmail1Copy = transaction1.copy()
-  val transactionByEmail2Copy = transaction2.copy()
 
-  //val userStore: UserStore = new UserDAL
   val user1 = User("user1","user1","user1@user.com","abcd",1);
   val user2 = User("user2","user2","user2@user.com","abcd",1);
 
+
+  val transaction1Check = TransactionDetails(1, transaction1.storageTaken, transaction1.startDate, transaction1.endDate, transaction1.buyerID, transaction1.sellerID, user1.email, user2.email, transaction1.postID, false,0)
+  val transaction2Check = TransactionDetails(2, transaction2.storageTaken, transaction2.startDate, transaction2.endDate, transaction2.buyerID, transaction2.sellerID, user1.email, user2.email, transaction2.postID, false,0)
 
   val InsertTransaction = BeforeHook {
     DB.withConnection { implicit conn =>
@@ -55,47 +54,47 @@ class TransactionStoreSpec extends Specification with UserTest {
   }
   
   "Transaction Store" should {
-    "insert a transaction" in RunningApp {
+    "insert a transaction" in InsertUser {
         transactionStore.insert(transaction1).toInt must beEqualTo(1)
     }
     "insert a transaction by Email" in InsertUser {
         transactionStore.insertByEmail(transactionByEmail1).toInt must beEqualTo(1)
     }
     "find transaction by id" in InsertTransaction {
-      transactionStore.getByID(1) must beSome(transaction1Copy)
+      transactionStore.getByID(1) must beSome(transaction1Check)
     }
     "not find a non-existent transaction by id" in InsertTransaction {
       transactionStore.getByID(3049) must beNone
     }
     "find transaction by postID" in InsertTransaction {
-      transactionStore.getByPostID(transaction1.postID) must beEqualTo(List(transaction1Copy,transaction2Copy))
+      transactionStore.getByPostID(transaction1.postID) must beEqualTo(List(transaction1Check,transaction2Check))
     }
     "not find a non-existent transaction by postID" in InsertTransaction {
       transactionStore.getByPostID(123123) must beEmpty
     }
     "find transaction by buyerID" in InsertTransaction {
-      transactionStore.getByBuyerID(transaction1.buyerID) must beEqualTo(List(transaction1Copy,transaction2Copy))
+      transactionStore.getByBuyerID(transaction1.buyerID) must beEqualTo(List(transaction1Check,transaction2Check))
     }
     "not find a non-existent transaction by buyerID" in InsertTransaction {
       transactionStore.getByBuyerID(123123) must beEmpty
     }
 
     "find transaction by buyerEmail" in InsertTransactionByEmail {
-      transactionStore.getByBuyerEmail(transactionByEmail1.buyerEmail) must beEqualTo(List(transaction1Copy,transaction2Copy))
+      transactionStore.getByBuyerEmail(transactionByEmail1.buyerEmail) must beEqualTo(List(transaction1Check,transaction2Check))
     }
     "not find a non-existent transaction by buyerEmail" in InsertTransactionByEmail {
       transactionStore.getByBuyerEmail("asdfasd@user.com") must beEmpty
     }
 
     "find transaction by sellerID" in InsertTransaction {
-      transactionStore.getBySellerID(transaction1.sellerID) must beEqualTo(List(transaction1Copy,transaction2Copy))
+      transactionStore.getBySellerID(transaction1.sellerID) must beEqualTo(List(transaction1Check,transaction2Check))
     }
     "not find a non-existent transaction by sellerID" in InsertTransaction {
       transactionStore.getBySellerID(123123) must beEmpty
     }
 
     "find transaction by sellerEmail" in InsertTransactionByEmail {
-      transactionStore.getBySellerEmail(transactionByEmail1.sellerEmail) must beEqualTo(List(transaction1Copy,transaction2Copy))
+      transactionStore.getBySellerEmail(transactionByEmail1.sellerEmail) must beEqualTo(List(transaction1Check,transaction2Check))
     }
     "not find a non-existent transaction by sellerEmail" in InsertTransactionByEmail {
       transactionStore.getBySellerEmail("asdfasd@user.com") must beEmpty
