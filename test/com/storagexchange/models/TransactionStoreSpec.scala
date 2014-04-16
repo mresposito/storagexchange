@@ -28,6 +28,8 @@ class TransactionStoreSpec extends Specification with UserTest {
   val transaction1Check = TransactionDetails(1, transaction1.storageTaken, transaction1.startDate, transaction1.endDate, transaction1.buyerID, transaction1.sellerID, user1.email, user2.email, transaction1.postID, false,0)
   val transaction2Check = TransactionDetails(2, transaction2.storageTaken, transaction2.startDate, transaction2.endDate, transaction2.buyerID, transaction2.sellerID, user1.email, user2.email, transaction2.postID, false,0)
 
+   val transaction1ApprovedCheck = TransactionDetails(1, transaction1.storageTaken, transaction1.startDate, transaction1.endDate, transaction1.buyerID, transaction1.sellerID, user1.email, user2.email, transaction1.postID, true,0)
+
   val InsertTransaction = BeforeHook {
     DB.withConnection { implicit conn =>
       userStore.insert(user1).toInt must beEqualTo(1)
@@ -98,6 +100,16 @@ class TransactionStoreSpec extends Specification with UserTest {
     }
     "not find a non-existent transaction by sellerEmail" in InsertTransactionByEmail {
       transactionStore.getBySellerEmail("asdfasd@user.com") must beEmpty
+    }
+
+    "approved a transaction" in InsertTransaction {
+      transactionStore.approve(1,"user2@user.com")
+      transactionStore.getByID(1) must beSome(transaction1ApprovedCheck)
+
+    }
+    "can't approved a transaction as non-seller" in InsertTransaction {
+      transactionStore.approve(1,"user1@user.com")
+      transactionStore.getByID(1) must beSome(transaction1Check)
     }
   }
 }

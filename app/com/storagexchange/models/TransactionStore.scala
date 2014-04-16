@@ -33,7 +33,7 @@ case class TransactionDetails(transactionID: Long,
   buyerEmail: String,
   sellerEmail: String,
   postID: Long,
-  confirmed: Boolean,
+  approved: Boolean,
   canceled: Int)
 
 /**
@@ -49,6 +49,7 @@ trait TransactionStore {
   def getByBuyerEmail(buyerEmail: String): List[TransactionDetails]
   def getBySellerID(sellerID: Long): List[TransactionDetails]
   def getBySellerEmail(sellerEmail: String): List[TransactionDetails]
+  def approve(transactionID: Long, sellerEmail: String): Int
 }
 
 // Actual implementation of Transaction Store method
@@ -118,6 +119,14 @@ class TransactionDAL extends TransactionStore {
        SELECT *
        FROM Transaction
        WHERE sellerEmail = {sellerEmail}
+    """.stripMargin)
+  }
+
+  private[this] val approveSql = {
+    SQL("""
+       Update Transaction
+       SET approved=1
+       WHERE transactionID = {transactionID} AND sellerEmail = {sellerEmail}
     """.stripMargin)
   }
 
@@ -193,5 +202,12 @@ class TransactionDAL extends TransactionStore {
     findTransactionBySellerEmailSql.on(
       'sellerEmail -> sellerEmail
     ).as(transactionParser *)
+  }
+
+  def approve(transactionID: Long, sellerEmail: String): Int = DB.withConnection { implicit conn =>
+    approveSql.on(
+      'transactionID -> transactionID,
+      'sellerEmail -> sellerEmail
+      ).executeUpdate()
   }
 }
