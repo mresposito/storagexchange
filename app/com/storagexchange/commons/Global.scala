@@ -36,7 +36,11 @@ object Global extends GlobalSettings with Logging {
   	search.createIndices
     Play.mode match {
       case Mode.Dev => {
-        initializeUniversities
+        try {
+	        initializeUniversities
+        } catch {
+          case e: Exception => Unit
+        }
         injectData
       }
       case _ => Unit
