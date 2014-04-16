@@ -31,14 +31,14 @@ trait MessageTest extends Specification {
     val Some(create3) = route(createReplyRequest(message3))
   }
 
-  def createMessageRequest(message: Message) = FakeRequest(POST, "/message").
+  def createMessageRequest(message: Message) = FakeRequest(POST, routes.MessageBoard.receiveNewMessage.url).
     withSession(("email", message.fromUser)).
     withFormUrlEncodedBody(
       "fromUser" -> message.fromUser,
       "toUser"   -> message.toUser,
       "message"  -> message.message)
 
-  def createReplyRequest(reply: Message) = FakeRequest(POST, "/reply").
+  def createReplyRequest(reply: Message) = FakeRequest(POST, routes.MessageBoard.receiveNewReply.url).
     withSession(("email", reply.fromUser)).
     withFormUrlEncodedBody(
       "replyToId"   -> reply.parentID.toString,
