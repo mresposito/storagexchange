@@ -41,3 +41,10 @@ appJsLibDir <+= baseDirectory { src => src / "public" / "js" }
 jasmineTestDir <+= baseDirectory { src => src / "test" / "assets" / "js" }
 
 jasmineConfFile <+= baseDirectory { src => src / "test" / "assets" / "js" / "test.dependencies.js" }
+
+// Memory settings
+javaOptions in Test += "-Xmx4G"
+ 
+javaOptions in Test += "-XX:MaxPermSize=1024M"
+
+

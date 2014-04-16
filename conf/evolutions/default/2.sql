@@ -23,7 +23,9 @@ CREATE TABLE Post (
   postID BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   email VARCHAR(50) NOT NULL,
   description VARCHAR(2000) NOT NULL,
-  storageSize INT NOT NULL);
+  locationID BIGINT NOT NULL,
+  storageSize INT NOT NULL,
+  FOREIGN KEY(locationID) REFERENCES Location(id) ON DELETE CASCADE);
 
 # --- !Downs
 DROP TABLE Post;

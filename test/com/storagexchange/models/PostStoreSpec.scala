@@ -10,22 +10,31 @@ import play.api.Play.{current => curr}
 import java.sql.Timestamp
 import org.h2.jdbc.JdbcSQLException
 
-class PostStoreSpec extends Specification {
+class PostStoreSpec extends Specification with LocationTest {
   val postStore: PostStore = new PostDAL
-  val post1 = Post("user@test.com", "My post", 95, Some(1))
-  val post2 = Post("other@me.com", "Some other post", 42, Some(2))
+  val post1 = Post("user@test.com", "My post", 95, 1,Some(1))
+  val post2 = Post("other@me.com", "Some other post", 42, 2,Some(2))
   val post1Copy = post1.copy()
   val post2Copy = post2.copy()
 
+  val InsertLocation = BeforeHook {
+    DB.withConnection { implicit conn =>
+      locationStore.insert(testLoc)
+    }
+  }
+
   val InsertPost = BeforeHook {
     DB.withConnection { implicit conn =>
+      //need to insert location first 
+      locationStore.insert(testLoc)
+      locationStore.insert(testLoc2)
       postStore.insert(post1).toInt must beEqualTo(1)
       postStore.insert(post2).toInt must beEqualTo(2)
     }
   }
   
   "Post Store" should {
-    "insert a post" in RunningApp {
+    "insert a post" in InsertLocation {
         postStore.insert(post1).toInt must beEqualTo(1)
     }
     "find post by email" in InsertPost {
@@ -55,10 +64,17 @@ class PostStoreSpec extends Specification {
 	      postStore.removeById(1, "myfakeemal") must beFalse
 	    }
     }
+    "get posts by location id" in InsertPost {
+      postStore.getPostsByLocationID(1) must beEqualTo(List(post1Copy))
+    }
+    "get posts by city" in InsertPost {
+      postStore.getPostsByCity("Champaign") must beEqualTo(List(post2Copy))
+    }
     "update post by id" in InsertPost {
-      val updatedPost = Post("user@test.com", "My updated post", 101, Some(1))
+      val updatedPost = Post("user@test.com", "My updated post", 101, 1, Some(1))
       postStore.updateById(1, post1.email, "My updated post", 101)
       postStore.getById(1) must beSome(updatedPost)
     }
   }
 }
+
