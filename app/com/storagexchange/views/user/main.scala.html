@@ -9,6 +9,7 @@
   @Seq(
     (controllers.routes.Application.index(), "Home"),
     (controllers.routes.PostBoard.myPosts(), "My Posts"),
+    (controllers.routes.MessageBoard.myMessages(), "My Messages"),
     (controllers.routes.Dynamic.profile(), "Profile"),
     (controllers.routes.Application.logout(), "Logout")).map { case(link, name) =>
     @if(name == tab) {

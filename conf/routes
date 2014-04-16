@@ -16,6 +16,13 @@ POST    /post                       @com.storagexchange.controllers.PostBoard.re
 DELETE  /post/:id                   @com.storagexchange.controllers.PostBoard.delete(id: Long)
 POST    /post/:id/:locId            @com.storagexchange.controllers.PostBoard.modify(id: Long, locId: Long)
 GET     /newpost                    @com.storagexchange.controllers.PostBoard.newPost
+# Messaging urls
+GET     /message                    @com.storagexchange.controllers.MessageBoard.myMessages
+POST    /message                    @com.storagexchange.controllers.MessageBoard.receiveNewMessage
+POST    /message/:id                @com.storagexchange.controllers.MessageBoard.modify(id: Long)
+GET     /newmessage                 @com.storagexchange.controllers.MessageBoard.newMessage
+POST    /reply                      @com.storagexchange.controllers.MessageBoard.receiveNewReply
+POST    /newreply/:id/:user         @com.storagexchange.controllers.MessageBoard.newReply(id: Long, user: String)
 # Search API
 POST    /api/search/post            @com.storagexchange.controllers.SearchAPI.getPosts
 GET     /api/uni                    @com.storagexchange.controllers.SearchAPI.getUniversities
