@@ -47,7 +47,7 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, da
 
   def recieveNewPost = IsAuthenticated { username => implicit request =>
     newPostForm.bindFromRequest.fold(
-      formWithErrors => BadRequest(views.html.error404()),
+      formWithErrors => BadRequest(views.html.post.newpost(formWithErrors)),
       postData => {
         //When inserting an address into Location, we concatenate the street number with the street
         val fullStreet = postData.streetNum.toString + " " + postData.street
@@ -58,8 +58,7 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, da
             postData.city, 
             postData.state, 
             fullStreet, 
-            postData.zip, 
-            None))
+            postData.zip))
         val post = Post(username, postData.description, postData.storageSize, locID)
         val id = postStore.insert(post)
         dataSearch.insertPost(post.copy(postID = Some(id))) 
@@ -69,16 +68,13 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, da
   }
 
   def myPosts = IsAuthenticated { username => _ => 
-      val postList = postStore.getByEmail(username)
-      var postLoc: List[(Post, Location)] = List()
-      postList.map(post => 
-        locationStore.getById(post.locationID).map { location =>  
-          postLoc ::= (post, location)
-        }.getOrElse {
-          BadRequest("Invalid Location")
-        }
-      )
-      Ok(views.html.post.myposts(postLoc))
+    val postList = postStore.getByEmail(username).map { post =>
+      locationStore.getById(post.locationID).map { location =>  
+        (post, location)
+      }
+    }
+    val validPosts = postList.filter(_.isDefined).map(_.get)
+    Ok(views.html.post.myposts(validPosts))
   }
 
   def delete(id: Long) = IsAuthenticated { username => _ => 
