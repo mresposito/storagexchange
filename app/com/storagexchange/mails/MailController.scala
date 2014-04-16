@@ -11,18 +11,18 @@ import com.typesafe.scalalogging.slf4j.Logging
 
 //not sure why we use case classes
 case class Recipient(name: String, email: String)
-case class EmailMessage(html: String,
+case class Message(html: String,
   subject: String,
   to: List[Recipient],
   from_name: String = "StorageExchange",
   from_email: String = "noreply@storagexchange.com")
 
 trait MailSender {
-  def send (message: EmailMessage)
+  def send (message: Message)
 }
 
 class FakeSender extends MailSender with Logging {
-  def send(message: EmailMessage) = {
+  def send(message: Message) = {
     logger.info(s"Sending email to ${message.to}")
   }
 }
@@ -32,18 +32,18 @@ class MandrillSender extends MailSender {
   val mandrillRoot = Play.current.configuration.getString("mandrill.apiURL")
 
   case class MandrillWrapper( 
-    message: EmailMessage,
+    message: Message,
     async: Boolean = false,
     ip_pool: String = "Main Pool",
     //getOrElse is for defaults
     key: String  = mandrillKey.getOrElse("no key"))
 
   implicit val recipientFormatter = Json.format[Recipient]
-  implicit val messageFormatter = Json.format[EmailMessage]
+  implicit val messageFormatter = Json.format[Message]
   implicit val mandrillFormatter = Json.format[MandrillWrapper]
 
   //non-blocking
-  def send(message: EmailMessage) = scala.concurrent.Future {
+  def send(message: Message) = scala.concurrent.Future {
     val mandrill = MandrillWrapper(message)
     WS.url(mandrillRoot.get + "/messages/send").post(Json.toJson(mandrill))
   }

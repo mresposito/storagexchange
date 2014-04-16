@@ -2,7 +2,7 @@ package com.storagexchange.controllers
 
 import com.storagexchange.views
 import com.storagexchange.models._
-import com.storagexchange.mails._
+import com.storagexchange.mails.{Message => EmailMessage, _}
 import com.storagexchange.utils._
 import play.api._
 import play.api.mvc._
