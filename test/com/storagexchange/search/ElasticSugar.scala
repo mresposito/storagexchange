@@ -1,11 +1,16 @@
 package com.storagexchange.search
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import scala.concurrent.Await
 import scala.concurrent.duration._
 import org.elasticsearch.indices.IndexMissingException
 import org.scalatest.{ Suite, BeforeAndAfterAll }
 import com.typesafe.scalalogging.slf4j.Logging
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+import scala.concurrent.Future
+import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.search.facet.range.RangeFacet
+import scala.collection.JavaConversions._
 
 /** @author Stephen Samuel, @modified Michele Esposito*/
 trait ElasticSugar extends BeforeAndAfterAll with Logging {
@@ -16,6 +21,22 @@ trait ElasticSugar extends BeforeAndAfterAll with Logging {
   val dataSearch = new ElasticSearch(clientInjector)
   implicit val client = clientInjector.client
 
+  val atMost: Duration = Duration(10, "seconds")
+  
+  implicit def unrollFuture[A](f: Future[A]):A = Await.result(f, atMost)
+
+  def facetToSum(resp: SearchResponse): Long = {
+    val fct: RangeFacet = resp.getFacets().
+	    facetsAsMap().get("size").asInstanceOf[RangeFacet]
+    fct.iterator().toList.map(_.getCount()).sum
+  }
+  
+  def countFacets(resp: SearchResponse): Int = {
+    val fct: RangeFacet = resp.getFacets().
+	    facetsAsMap().get("size").asInstanceOf[RangeFacet]
+    fct.iterator().toList.length
+  }
+  
   def refresh(indexes: String*) {
     val i = indexes.size match {
       case 0 => Seq("_all")

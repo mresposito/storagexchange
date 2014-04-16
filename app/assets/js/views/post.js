@@ -74,9 +74,19 @@ define ([
         contentType: "application/json",
         data:  JSON.stringify(queries),
         success: function(posts) {
-          var hits = JSON.parse(posts).hits.hits;
+          var data = JSON.parse(posts);
+          var hits = data.hits.hits;
+          self.renderFacets(data.facets.size.ranges);
           self.renderPosts(hits);
         }
+      });
+    },
+
+    renderFacets: function(facets) {
+      _.map(facets, function (facet) {
+        var selector = "ul.storageControls [data-from=" + facet.from + "]"
+        var $li = $(selector)
+        $li.find(".count").html(facet.count)
       });
     },
 

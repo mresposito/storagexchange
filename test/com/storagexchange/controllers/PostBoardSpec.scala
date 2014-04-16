@@ -10,7 +10,7 @@ import play.api.test._
 import play.api.test.Helpers._
 import com.storagexchange.models.PostStore
 
-trait PostTest extends Specification with LocationTest {
+trait PostTest extends LocationTest {
     
   val post1 = Post("m@e.com", "This is the first post", 95, 1, Some(1))
   val post1Modified = post1.copy(description = "This is the second post")
