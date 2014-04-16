@@ -43,6 +43,7 @@ case class TransactionDetails(transactionID: Long,
 trait TransactionStore {
   def insert(trasaction: Transaction): Long
   def insertByEmail(trasaction: TransactionByEmail): Long
+  def insertByEmailByPostID(trasaction: TransactionByEmail): Long
   def getByID(ID: Long): Option[TransactionDetails]
   def getByPostID(postID: Long): List[TransactionDetails]
   def getByBuyerID(buyerID: Long): List[TransactionDetails]
@@ -71,6 +72,15 @@ class TransactionDAL extends TransactionStore {
         (storageTaken, startDate, endDate, buyerID, sellerID, buyerEmail, sellerEmail, postID)
       VALUES
         ({storageTaken}, {startDate}, {endDate}, (SELECT userID FROM User WHERE email={buyerEmail}), (SELECT userID FROM User WHERE email={sellerEmail}), {buyerEmail}, {sellerEmail}, {postID})
+    """.stripMargin)
+  }
+
+  private[this] val createTransactionByEmailByPostIDSql = {
+    SQL("""
+      INSERT INTO Transaction
+        (storageTaken, startDate, endDate, buyerID, sellerID, buyerEmail, sellerEmail, postID)
+      VALUES
+        ({storageTaken}, {startDate}, {endDate}, (SELECT userID FROM User WHERE email={buyerEmail}), (SELECT userID FROM Post NATURAL JOIN User WHERE postID={postID}), {buyerEmail}, (SELECT email FROM Post WHERE postID={postID}), {postID})
     """.stripMargin)
   }
 
@@ -164,6 +174,16 @@ class TransactionDAL extends TransactionStore {
       'endDate -> transaction.endDate,
       'buyerEmail -> transaction.buyerEmail,
       'sellerEmail -> transaction.sellerEmail,
+      'postID -> transaction.postID
+    ).executeInsert(scalar[Long].single)
+  }
+
+  def insertByEmailByPostID(transaction: TransactionByEmail): Long = DB.withConnection { implicit conn =>
+    createTransactionByEmailByPostIDSql.on(
+      'storageTaken -> transaction.storageTaken,
+      'startDate -> transaction.startDate,
+      'endDate -> transaction.endDate,
+      'buyerEmail -> transaction.buyerEmail,
       'postID -> transaction.postID
     ).executeInsert(scalar[Long].single)
   }

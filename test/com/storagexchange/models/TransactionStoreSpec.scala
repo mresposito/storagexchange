@@ -13,6 +13,18 @@ import org.h2.jdbc.JdbcSQLException
 import com.storagexchange.controllers.UserTest
 
 class TransactionStoreSpec extends Specification with UserTest {
+  val user1 = User("user1","user1","user1@user.com","abcd",1);
+  val user2 = User("user2","user2","user2@user.com","abcd",1);
+
+
+
+  val postStore: PostStore = new PostDAL
+  val post1 = Post(user2.email, "My post", 95, Some(1))
+  val post2 = Post(user2.email, "Some other post", 42, Some(2))
+  val post1Copy = post1.copy()
+  val post2Copy = post2.copy()
+
+
   val transactionStore: TransactionStore = new TransactionDAL
   val transaction1 = Transaction(10, "2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0",1,2,1,Some(1))
   val transaction2 = Transaction(3, "2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0",1,2,1,Some(2))
@@ -21,8 +33,8 @@ class TransactionStoreSpec extends Specification with UserTest {
   val transactionByEmail1 = TransactionByEmail(10, "2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0","user1@user.com","user2@user.com",1,Some(1))
   val transactionByEmail2 = TransactionByEmail(3, "2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0","user1@user.com","user2@user.com",1,Some(2))
 
-  val user1 = User("user1","user1","user1@user.com","abcd",1);
-  val user2 = User("user2","user2","user2@user.com","abcd",1);
+  val transactionByEmailByPostID1 = TransactionByEmail(10, "2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0","user1@user.com","asdfa",1,Some(1))
+  val transactionByEmailByPostID2 = TransactionByEmail(3, "2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0","user1@user.com","asdfa",1,Some(2))
 
 
   val transaction1Check = TransactionDetails(1, transaction1.storageTaken, transaction1.startDate, transaction1.endDate, transaction1.buyerID, transaction1.sellerID, user1.email, user2.email, transaction1.postID, false,0)
@@ -34,6 +46,8 @@ class TransactionStoreSpec extends Specification with UserTest {
     DB.withConnection { implicit conn =>
       userStore.insert(user1).toInt must beEqualTo(1)
       userStore.insert(user2).toInt must beEqualTo(2)
+      postStore.insert(post1).toInt must beEqualTo(1)
+      postStore.insert(post2).toInt must beEqualTo(2)
       transactionStore.insert(transaction1).toInt must beEqualTo(1)
       transactionStore.insert(transaction2).toInt must beEqualTo(2)
     }
@@ -43,6 +57,8 @@ class TransactionStoreSpec extends Specification with UserTest {
     DB.withConnection { implicit conn =>
       userStore.insert(user1).toInt must beEqualTo(1)
       userStore.insert(user2).toInt must beEqualTo(2)
+      postStore.insert(post1).toInt must beEqualTo(1)
+      postStore.insert(post2).toInt must beEqualTo(2)
       transactionStore.insertByEmail(transactionByEmail1).toInt must beEqualTo(1)
       transactionStore.insertByEmail(transactionByEmail2).toInt must beEqualTo(2)
     }
@@ -52,6 +68,8 @@ class TransactionStoreSpec extends Specification with UserTest {
     DB.withConnection { implicit conn =>
       userStore.insert(user1).toInt must beEqualTo(1)
       userStore.insert(user2).toInt must beEqualTo(2)
+      postStore.insert(post1).toInt must beEqualTo(1)
+      postStore.insert(post2).toInt must beEqualTo(2)
     }
   }
   
@@ -100,6 +118,12 @@ class TransactionStoreSpec extends Specification with UserTest {
     }
     "not find a non-existent transaction by sellerEmail" in InsertTransactionByEmail {
       transactionStore.getBySellerEmail("asdfasd@user.com") must beEmpty
+    }
+    "insert By Email By PostID" in InsertUser{
+      transactionStore.insertByEmailByPostID(transactionByEmailByPostID1) must beEqualTo(1)
+      transactionStore.insertByEmailByPostID(transactionByEmailByPostID2) must beEqualTo(2)
+
+      transactionStore.getBySellerEmail(transactionByEmail1.sellerEmail) must beEqualTo(List(transaction1Check,transaction2Check))
     }
 
     "approved a transaction" in InsertTransaction {
