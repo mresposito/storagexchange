@@ -2,7 +2,7 @@ package com.storagexchange.controllers
 
 import com.storagexchange.views
 import com.storagexchange.models._
-import com.storagexchange.mails._
+import com.storagexchange.mails.{Message => EmailMessage, _}
 import com.storagexchange.utils._
 import play.api._
 import play.api.mvc._
@@ -128,7 +128,7 @@ class Application @Inject()(userStore: UserStore, mailSender: MailSender,
     val verificationURL = url + "verify/" + hashedId
     val body = views.html.verifyEmail(user.name, verificationURL)
     val recipient = Recipient(user.name, user.email)
-    mailSender.send(Message(
+    mailSender.send(EmailMessage(
       body.toString(),
       "Welcome to Storage Exchange",
       List(recipient)))
