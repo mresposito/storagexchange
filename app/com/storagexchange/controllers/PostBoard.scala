@@ -68,13 +68,11 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, da
   }
 
   def myPosts = IsAuthenticated { username => _ => 
-    val postList = postStore.getByEmail(username).map { post =>
-      locationStore.getById(post.locationID).map { location =>  
-        (post, location)
-      }
-    }
-    val validPosts = postList.filter(_.isDefined).map(_.get)
-    Ok(views.html.post.myposts(validPosts))
+    val postList = for {
+      post <- postStore.getByEmail(username)
+      location <- locationStore.getById(post.locationID)
+    } yield (post, location)
+    Ok(views.html.post.myposts(postList))
   }
 
   def delete(id: Long) = IsAuthenticated { username => _ => 
