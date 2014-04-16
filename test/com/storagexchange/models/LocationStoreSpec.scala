@@ -11,7 +11,7 @@ import java.sql.Timestamp
 import org.h2.jdbc.JdbcSQLException
 import java.math.BigDecimal
 
-trait LocationTest extends Specification {
+trait LocationTest {
   val locationStore: LocationStore = new LocationDAL()
   val universityStore: UniversityStore = new UniversityDAL()
   

@@ -78,9 +78,13 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector) extends Da
       "description" -> post.description,
       "storageSize" -> post.storageSize)
   }
+
+  private def defaultSearch = search in "posts" types "post" facets {
+    facet range "size" field "storageSize" range(0 -> 60) range(60 -> 100)
+  }
   
   def getPosts(searches: SearchBuilder*): Future[SearchResponse] = client execute {
-    searches.foldLeft(search in "posts" types "post") {
+    searches.foldLeft(defaultSearch) {
       (red: SearchDefinition, build: SearchBuilder) => build match {
 		    case SearchFilter(field, gt, lt) => red filter {
 		      rangeFilter(field) lte lt.toString gte gt.toString

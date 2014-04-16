@@ -7,64 +7,25 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import org.elasticsearch.common.Priority
 import com.storagexchange.controllers.PostTest
 import com.storagexchange.models.Post
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.delete.DeleteResponse
 import org.elasticsearch.action.update.UpdateResponse
 
 class PostSearchSpec extends FlatSpec with Matchers
-	with MockitoSugar with ElasticSugar {
-  val post1 = Post("m@e.com", "This is the first post", 95, 1, Some(1))
-  val post2 = Post("hsimpson@uis.edu", "Homer no function beer well without", 45, 2, Some(2))
-  val atMost: Duration = Duration(10, "seconds")
-  
-  implicit def unrollFuture[A](f: Future[A]):A = Await.result(f, atMost)
+	with MockitoSugar with ElasticSugar with PostTest {
 
-  dataSearch.insertPost(post1)
-  dataSearch.insertPost(post2)
-
-  client.admin.cluster.prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForGreenStatus().execute().actionGet
-
-  refresh("posts")
-  blockUntilCount(2, "posts")
-
-  client.admin.cluster.prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForGreenStatus().execute().actionGet
-
-  "post index" should "return two hits" in {
-    val resp = client.sync.execute {
-      search in "posts" -> "post"
+  try {
+	  blockUntilCount(2, "posts")
+  } catch {
+    case e: IllegalArgumentException => {
+		  refresh("posts")
+		  dataSearch.insertPost(post1)
+		  dataSearch.insertPost(post2)
+		  blockUntilCount(2, "posts")
     }
-    resp.getHits.totalHits() should equal(2)
   }
-  
-  "filtering" should "return 1 if less than 50" in {
-   val resp = client.sync.execute {
-      search in "posts" types "post" filter {
-        rangeFilter("storageSize") lte "50"
-      }
-   }
-    resp.getHits.totalHits() should equal(1)
-  }
-  it should "return 1 if greater than 50" in {
-   val resp = client.sync.execute {
-      search in "posts" types "post" filter {
-        rangeFilter("storageSize") gte "50"
-      }
-   }
-    resp.getHits.totalHits() should equal(1)
-  }
-  it should "return none if invalid range" in {
-   val resp = client.sync.execute {
-      search in "posts" types "post" filter {
-        rangeFilter("storageSize") lte "0"
-      }
-   }
-    resp.getHits.totalHits() should equal(0)
-  }
-  
+
   /**
    * Data Search
    */
@@ -145,5 +106,26 @@ class PostSearchSpec extends FlatSpec with Matchers
   "update post" should "update the second post" in {
     val resp: UpdateResponse = dataSearch.updatePost(post2.copy(storageSize = 3999))
     resp.isCreated() should be(false)
+  }
+  
+  "facets" should "have facets in its response" in {
+    val resp: SearchResponse = dataSearch.getPosts
+    resp.getFacets().facets().size() should be(1)
+  }
+  it should "count 2 facets in total" in {
+    val resp: SearchResponse = dataSearch.getPosts
+    facetToSum(resp) should be(2)
+  }
+  it should "count 1 facet if query 'beer'" in {
+    val resp: SearchResponse = dataSearch.getPosts(Query("beer"))
+    facetToSum(resp) should be(1)
+  }
+  it should "count 2 facet if use range " in {
+    val resp: SearchResponse = dataSearch.getPosts(SearchFilter("storageSize", 0, 60))
+    facetToSum(resp) should be(2)
+  }
+  it should "count nothing on invalid query" in {
+    val resp: SearchResponse = dataSearch.getPosts(Query("I love ES"))
+    facetToSum(resp) should be(0)
   }
 }
