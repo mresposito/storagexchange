@@ -4,6 +4,7 @@ import com.storagexchange.search.SearchBuilder
 import com.storagexchange.search.SearchFilter
 import com.storagexchange.search.Query
 import com.storagexchange.search.DataSearch
+import com.storagexchange.search.Offset
 import play.api._
 import play.api.mvc._
 import play.api.data._
@@ -17,16 +18,17 @@ import scala.concurrent.Future
 import com.storagexchange.models.University
 import com.storagexchange.models.UniversityStore
 
-case class SearchQuery(query: Option[Query], filters: Option[List[SearchFilter]]) {
-  def unfilters = filters.getOrElse(List())
-  def allQueries: List[SearchBuilder] = query.map { q => 
-    q::unfilters
-  }.getOrElse(unfilters)
+case class SearchQuery(query: Option[Query], filters: Option[List[SearchFilter]],
+  offset: Option[Offset]) {
+  lazy val all = List(query, offset).filter(_.isDefined).map(_.get)
+  lazy val unfilters = filters.getOrElse(List())
+  def allQueries: List[SearchBuilder] = all ++ unfilters
 }
 
 object JsonSearchFormatters {
   implicit val place = Json.format[SearchFilter]
   implicit val query = Json.format[Query]
+  implicit val offsetQuery = Json.format[Offset]
   implicit val searchQuery = Json.format[SearchQuery]
   implicit val uniJson = Json.format[University]
 }

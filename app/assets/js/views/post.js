@@ -8,7 +8,7 @@ define ([
   return Backbone.View.extend({
 
     events: {
-      "change .search": "updateBoard",
+      "change .search": "searchCallback",
       "click a.storageSize": "sizeRange",
       "click .load button": "loadMorePosts"
     },
@@ -20,10 +20,12 @@ define ([
     },
 
     loadMorePosts: function() {
-      console.log("loading")
+      this.startingPost += this.stepIncrement;
+      this.updateBoard();
     },
 
     sizeRange: function(event) {
+      this.startingPost = 0;
       var link = $(event.target).closest("li");
       if(link.hasClass("active")) {
         link.removeClass("active");
@@ -44,16 +46,30 @@ define ([
        })
     },
 
+    searchCallback: function() {
+      this.startingPost = 0;
+      this.updateBoard()
+    },
+
     updateBoard: function() {
       var query = this.queryValue();
       var filters = this.filterValues();
       var starter = this.starterValues();
-      var search = _.reduce([query, filters, starter], _.extend);
+      var search = _.extend(query, _.extend(filters, starter));
       this.findPosts(search);
     },
 
     starterValues: function() {
-      return {}
+      if(this.startingPost == 0) {
+        return {}
+      } else {
+        return {
+          offset: {
+            start: this.startingPost,
+            limit: 10
+          }
+        }
+      }
     },
 
     textSearch: function(event) {
@@ -80,8 +96,12 @@ define ([
       }
     },
 
+    getTextSearchBox: function() {
+      return $(this.el).find(".search").val();
+    },
+
     queryValue: function() {
-      var value = $(this.el).find(".search").val();
+      var value = this.getTextSearchBox()
       if(value.length > 2) {
         return {
           query: {
@@ -99,12 +119,17 @@ define ([
     findPosts: function(queries) {
       var self = this;
       $.ajax({
-        url:"/api/search/post",
+        url: "/api/search/post",
         type: "POST",
         contentType: "application/json",
         data:  JSON.stringify(queries),
         success: function(posts) {
-          var data = JSON.parse(posts);
+          var data = posts;
+          try { // when testing, its already parsed in json. very weird
+            data = JSON.parse(posts);
+          } catch(err) {
+            data = posts;
+          }
           var hits = data.hits.hits;
           self.renderFacets(data.facets.size.ranges);
           self.renderPosts(hits);
@@ -124,12 +149,19 @@ define ([
     },
 
     renderPosts: function(posts) {
+      // reset only if we are not increasing the posts
+      if(this.startingPost == 0) {
+        this.resetBoard();
+      }
       var $el = $(this.el);
       var $posts = $el.find(".content .posts")
-      $posts.html("");
       _.map(posts, function(post) {
         $posts.append(postHTML(post["_source"]));
       });
+    },
+
+    resetBoard: function() {
+      $(this.el).find(".content .posts").html("");
     }
   });
 });
