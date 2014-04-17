@@ -26,6 +26,8 @@ trait UniversityStore {
   def getByCity(city: String): Option[University]
 
   def getUniversityByName(name: String): Option[University]
+  
+  def getAll: List[University]
 
 }
 
@@ -54,6 +56,12 @@ class UniversityDAL extends UniversityStore with Logging {
         SELECT *
         FROM University
         WHERE name = {name}
+      """.stripMargin)
+  }
+  private[this] val getAllSql = {
+    SQL("""
+        SELECT *
+        FROM University
       """.stripMargin)
   }
 
@@ -92,4 +100,7 @@ class UniversityDAL extends UniversityStore with Logging {
         ).as(universityParser.singleOpt)
   }
 
+  def getAll: List[University] = DB.withConnection { implicit connection =>
+    getAllSql.as(universityParser *)
+  }
 }

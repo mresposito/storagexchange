@@ -11,6 +11,7 @@ import javax.inject.Inject
 case class Post(email: String,
   description: String,
   storageSize: Int,
+  locationID: Long,
   postID: Option[Long] = None)
 
 /**
@@ -21,9 +22,10 @@ trait PostStore {
   def insert(post: Post): Long
   def getById(id: Long): Option[Post]
   def getByEmail(email: String): List[Post]
-
   def removeById(id: Long, email: String): Boolean
   def updateById(id: Long, email: String, description: String, storageSize: Int): Int
+  def getPostsByLocationID(locationID: Long): List[Post]
+  def getPostsByCity(city: String): List[Post]
 }
 
 // Actual implementation of Post Store method
@@ -33,9 +35,9 @@ class PostDAL extends PostStore {
   private[this] val createPostSql = {
     SQL("""
       INSERT INTO Post
-        (email, description, storageSize)
+        (email, description, locationID, storageSize)
       VALUES
-        ({email}, {description},{storageSize})
+        ({email}, {description}, {locationID}, {storageSize})
     """.stripMargin)
   }
 
@@ -46,7 +48,13 @@ class PostDAL extends PostStore {
        WHERE postID = {postID}
     """.stripMargin)
   }
-
+  private[this] val findPostsByLocationID = {
+    SQL("""
+       SELECT * 
+       FROM Post
+       WHERE locationID = {locationID}
+    """.stripMargin)
+  }
   private[this] val findPostByEmailSql = {
     SQL("""
        SELECT *
@@ -63,6 +71,15 @@ class PostDAL extends PostStore {
         email = {email}
     """.stripMargin)
   }
+  
+  private[this] val findPostsByCity = {
+    SQL("""
+       SELECT * 
+       FROM Post
+       WHERE locationID IN 
+       (SELECT id FROM Location WHERE city = {city})
+    """.stripMargin)
+  }
 
   private[this] val removePostByIdSql = {
     SQL("""
@@ -76,16 +93,18 @@ class PostDAL extends PostStore {
     str("email") ~
     str("description") ~
     int("storageSize") ~
+    long("locationID") ~
     long("postID").? map {
-      case email ~ description ~ storageSize ~ postID =>
-        Post(email, description, storageSize,postID)
+      case email ~ description ~ storageSize ~ locationID ~ postID =>
+        Post(email, description, storageSize, locationID, postID)
     }
 
   def insert(post: Post): Long = DB.withConnection { implicit conn =>
     createPostSql.on(
       'email -> post.email,
       'description -> post.description,
-      'storageSize -> post.storageSize
+      'storageSize -> post.storageSize,
+      'locationID -> post.locationID
     ).executeInsert(scalar[Long].single)
   }
 
@@ -100,6 +119,18 @@ class PostDAL extends PostStore {
       'email -> email
     ).as(postParser *)
   }
+  
+  def getPostsByLocationID(locationID: Long): List[Post] = DB.withConnection { implicit conn =>
+    findPostsByLocationID.on(
+      'locationID -> locationID
+    ).as(postParser *)
+  }
+  
+  def getPostsByCity(city: String): List[Post] = DB.withConnection { implicit conn =>
+    findPostsByCity.on(
+      'city -> city
+    ).as(postParser *)
+  }
 
   def removeById(id: Long, email: String): Boolean = DB.withConnection { implicit conn =>
     removePostByIdSql.on(
@@ -109,7 +140,7 @@ class PostDAL extends PostStore {
   }
 
   def updateById(id: Long, email: String, description: String,
-      storageSize: Int): Int = DB.withConnection{ implicit conn =>
+      storageSize: Int): Int = DB.withConnection { implicit conn =>
     updatePostById.on(
         'postID-> id,
         'description-> description,
