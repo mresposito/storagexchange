@@ -1,24 +1,34 @@
 require([
   "jquery",
-  "squire",
-  "sinon"
-], function($, Squire, sinon) {
+  "sinon",
+  "views/post"
+], function($, sinon, Post) {
 
-  $('<div class="content"></div>').appendTo("body");
-  var $el = $(".content");
-  var injector = new Squire();
+  describe("PostSearch view", function() {
 
-  //FIXME: need to wait for Jasmine 2.0
-  // describe("A PostSearch view should", function() {
-  //   var post = {
-  //     description: "my first real post", 
-  //     size: 42809
-  //   }
-      // it("finds content", function() {
-      //   expect($(".content").length).toBe(1);
-      // });
-      // it("render one post", function() {
-      //   expect($el.find(".post").length).toBe(1);
-      // });
-    // });
+    var post, request;
+    var findPostsSpy;
+
+    beforeEach(function() {
+      jasmine.Ajax.useMock();
+
+      post = new Post({
+        el: $("<html></html>")
+      });
+
+      // install spies
+      request = mostRecentAjaxRequest();
+      findPostsSpy = sinon.spy(post, "findPosts");
+    });
+
+    it("calls right URL", function() {
+      expect(request.url).toEqual("/api/search/post");
+    });
+    it("calls find posts on constructor", function() {
+      expect(findPostsSpy.calledWith({})).toBe(false);
+    });
+    it("starts loading 0 post", function() {
+      expect(post.startingPost).toBe(0);
+    });
+  });
 });

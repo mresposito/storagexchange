@@ -116,4 +116,33 @@ class ElasticClientSpec extends FlatSpec with Matchers
     }
     facetToSum(resp) should be(2)
   }
+  
+  "offset" should "return 1 in (0, 1)" in {
+    val resp = client.sync.execute {
+      search in "posts" types "post" start 0 limit 1 
+    }
+    resp.getHits().hits().length should be(1) 
+  }
+  it should "contain 'first' in starting 0" in {
+    val resp = client.sync.execute {
+      search in "posts" types "post" start 0 limit 1 sort {
+        by field "id"
+      }
+    }
+    resp.toString should include(post1.description) 
+  }
+  it should "return 1 in (1, 2)" in {
+    val resp = client.sync.execute {
+      search in "posts" types "post" start 1 limit 1
+    }
+    resp.getHits().hits().length should be(1) 
+  }
+  it should "contain the second post starting at  1" in {
+    val resp = client.sync.execute {
+      search in "posts" types "post" start 1 limit 1 sort {
+        by field "id"
+      }
+    }
+    resp.toString() should include(post2.description)
+  }
 }

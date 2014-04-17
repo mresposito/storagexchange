@@ -9,8 +9,7 @@ require.config({
     underscore: EnvJasmine.libDir + "underscore-min",
     backbone: EnvJasmine.libDir + "backbone-min",
     elastic: EnvJasmine.libDir + "elasticsearch.min",
-    sinon: EnvJasmine.testDir + "sinon-1.9.0",
-    squire: EnvJasmine.testDir + "Squire"
+    sinon: EnvJasmine.testDir + "helpers/" + "sinon-1.9.0"
   },
   shim: {
     jquery: {
@@ -22,7 +21,7 @@ require.config({
     backbone: {
       deps: ["underscore"],
       exports: "Backbone"
-    },
+    }, 
     sinon: {
       exports: "sinon"
     }

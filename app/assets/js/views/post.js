@@ -9,11 +9,18 @@ define ([
 
     events: {
       "change .search": "updateBoard",
-      "click a.storageSize": "sizeRange"
+      "click a.storageSize": "sizeRange",
+      "click .load button": "loadMorePosts"
     },
 
     initialize: function() {
+      this.startingPost = 0;
+      this.stepIncrement = 15;
       this.findPosts({});
+    },
+
+    loadMorePosts: function() {
+      console.log("loading")
     },
 
     sizeRange: function(event) {
@@ -26,12 +33,37 @@ define ([
       this.updateBoard();
     },
 
+    checkBottomPage: function(event) {
+       $('.container').bind('scroll', function() {
+         if($(this).scrollTop() + 
+            $(this).innerHeight()
+            >= $(this)[0].scrollHeight)
+         {
+           alert('end reached');
+         }
+       })
+    },
+
     updateBoard: function() {
       var query = this.queryValue();
       var filters = this.filterValues();
-      this.findPosts(_.extend(query, filters));
+      var starter = this.starterValues();
+      var search = _.reduce([query, filters, starter], _.extend);
+      this.findPosts(search);
     },
 
+    starterValues: function() {
+      return {}
+    },
+
+    textSearch: function(event) {
+      var json = this.queryValue();
+      this.findPosts(json);
+    },
+
+    /**
+     * Prepare json values
+     */
     filterValues: function() {
       var $active = $(".storageControls li.active");
       if($active.length == 0) {
@@ -61,11 +93,9 @@ define ([
       }
     },
 
-    textSearch: function(event) {
-      var json = this.queryValue();
-      this.findPosts(json);
-    },
-
+    /**
+     * Fetch posts from server
+     */
     findPosts: function(queries) {
       var self = this;
       $.ajax({
@@ -82,6 +112,9 @@ define ([
       });
     },
 
+    /**
+     * Render function
+     */ 
     renderFacets: function(facets) {
       _.map(facets, function (facet) {
         var selector = "ul.storageControls [data-from=" + facet.from + "]"
@@ -92,7 +125,7 @@ define ([
 
     renderPosts: function(posts) {
       var $el = $(this.el);
-      var $posts = $el.find(".content")
+      var $posts = $el.find(".content .posts")
       $posts.html("");
       _.map(posts, function(post) {
         $posts.append(postHTML(post["_source"]));
