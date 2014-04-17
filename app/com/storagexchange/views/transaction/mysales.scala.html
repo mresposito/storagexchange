@@ -1,4 +1,4 @@
-@(myPurchases : List[models.TransactionDetails])
+@(mySales : List[models.TransactionDetails])
 @import helper.twitterBootstrap._
 
 @js = {
@@ -46,17 +46,17 @@
   </script>
 }
 
-@views.html.user.main("Storage Exchange", "My Purchases", js) {
+@views.html.user.main("Storage Exchange", "My Sales", js) {
  <div class="post">
     <div class="container">
-        @myPurchases.map { purchase =>
+        @mySales.map { sale =>
         <div class="row well"  data-id="@purchase.postID">
           <div class="col-md-8">
             <b>Storage Size</b><br>
-            <span class="description">@purchase.storageTaken</span>
+            <span class="description">@sale.storageTaken</span>
           </div>
           <div class="col-md-2">
-            <b>Seller: </b><span class="area">@purchase.sellerEmail</span> sq/ft
+            <b>Buyer: </b><span class="area">@sale.buyerEmail</span> sq/ft
           </div>
           <div class="col-md-2 actions">
             <a href="#" class="edit"><i class="fa fa-pencil-square-o"></i></a>
