@@ -50,7 +50,7 @@
  <div class="post">
     <div class="container">
         @mySales.map { sale =>
-        <div class="row well"  data-id="@purchase.postID">
+        <div class="row well"  data-id="@sale.postID">
           <div class="col-md-8">
             <b>Storage Size</b><br>
             <span class="description">@sale.storageTaken</span>
@@ -64,7 +64,7 @@
           </div>
         </div>
       }
-      @if(myPurchases.isEmpty) {
+      @if(mySales.isEmpty) {
         <h3>You have made no purchases</h3>
       }
     </div>

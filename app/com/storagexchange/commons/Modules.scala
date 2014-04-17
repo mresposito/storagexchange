@@ -15,13 +15,10 @@ trait CommodModule extends ScalaModule {
     bind[UniversityStore].to[UniversityDAL]
     bind[LocationStore].to[LocationDAL]
     bind[PostStore].to[PostDAL]
-<<<<<<< HEAD
     bind[TransactionStore].to[TransactionDAL]
-=======
     bind[MessageStore].to[MessageDAL]
     bind[DataGenerator].to[JavaFakerDataGenerator]
     bind[DataSearch].to[ElasticSearch]
->>>>>>> master
     additionalConf
   }
   def additionalConf = {}

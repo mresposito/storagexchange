@@ -16,12 +16,12 @@ POST    /post                       @com.storagexchange.controllers.PostBoard.re
 DELETE  /post/:id                   @com.storagexchange.controllers.PostBoard.delete(id: Long)
 POST    /post/:id/:locId            @com.storagexchange.controllers.PostBoard.modify(id: Long, locId: Long)
 GET     /newpost                    @com.storagexchange.controllers.PostBoard.newPost
-<<<<<<< HEAD
+
 # Transaction urls
 GET     /transaction/:postID        @com.storagexchange.controllers.TransactionLedger.newTransaction(postID : Long)
 POST    /receivenewtransaction/     @com.storagexchange.controllers.TransactionLedger.receiveNewTransaction
 GET     /mypurchases                @com.storagexchange.controllers.TransactionLedger.myPurchases
-=======
+
 # Messaging urls
 GET     /message                    @com.storagexchange.controllers.MessageBoard.myMessages
 POST    /message                    @com.storagexchange.controllers.MessageBoard.receiveNewMessage
@@ -32,7 +32,6 @@ POST    /newreply/:id/:user         @com.storagexchange.controllers.MessageBoard
 # Search API
 POST    /api/search/post            @com.storagexchange.controllers.SearchAPI.getPosts
 GET     /api/uni                    @com.storagexchange.controllers.SearchAPI.getUniversities
->>>>>>> master
 
 # Dynamic pages
 GET     /profile                    @com.storagexchange.controllers.Dynamic.profile
