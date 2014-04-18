@@ -31,6 +31,7 @@ trait DataSearch {
 trait SearchBuilder
 case class SearchFilter(field: String, gt: Int, lt: Int) extends SearchBuilder
 case class Query(term: String) extends SearchBuilder
+case class Offset(start: Int, limit: Int = 10) extends SearchBuilder
 
 @Singleton
 class ElasticSearch @Inject() (clientInjector: ElasticClientInjector) extends DataSearch {
@@ -82,6 +83,8 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector) extends Da
   private def defaultSearch = search in "posts" types "post" facets {
     facet range "size" field "storageSize" range(0 -> 100) range(
       101 -> 300) range(301 ->1000) range(1001->99999)
+  } sort {
+    by field "id"
   }
   
   def getPosts(searches: SearchBuilder*): Future[SearchResponse] = client execute {
@@ -91,6 +94,7 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector) extends Da
 		      rangeFilter(field) lte lt.toString gte gt.toString
 		    }
 		    case Query(term) => red query term
+		    case Offset(at, max) => red start at limit max
 	    }
     }
   }
