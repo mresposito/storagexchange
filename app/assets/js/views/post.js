@@ -14,9 +14,16 @@ define ([
     },
 
     initialize: function() {
+      var self = this;
       this.startingPost = 0;
       this.stepIncrement = 15;
       this.findPosts({});
+
+      $(window).scroll(function () {
+        if ($(window).scrollTop() >= $(document).height() - $(window).height()) {
+          self.loadMorePosts();
+        }
+      });
     },
 
     loadMorePosts: function() {
