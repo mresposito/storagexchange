@@ -1,7 +1,7 @@
 @(mySales : List[models.Transaction])
 @import helper.twitterBootstrap._
 
-@views.html.user.main("Storage Exchange", "My Sales", js) {
+@views.html.user.main("Storage Exchange", "My Sales") {
  <div class="post">
     <div class="container">
         @mySales.map { sale =>

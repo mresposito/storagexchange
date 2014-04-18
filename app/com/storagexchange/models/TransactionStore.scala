@@ -39,7 +39,7 @@ class TransactionDAL extends TransactionStore {
   private[this] val createTransactionSql = {
     SQL("""
       INSERT INTO Transaction
-        (storageTaken, startDate, endDate, buyerID, sellerID, buyerEmail, sellerEmail, postID)
+        (storageTaken, startDate, endDate, postID, buyerEmail, sellerEmail)
       VALUES
         ({storageTaken}, {startDate}, {endDate}, {postID}, {buyerEmail}, 
           (SELECT email FROM Post WHERE postID={postID}))
@@ -66,7 +66,7 @@ class TransactionDAL extends TransactionStore {
     SQL("""
        SELECT *
        FROM Transaction
-       WHERE buyerID = (SELECT userID FROM User WHERE email={buyerEmail})
+       WHERE buyerEmail = {buyerEmail}
     """.stripMargin)
   }
 
