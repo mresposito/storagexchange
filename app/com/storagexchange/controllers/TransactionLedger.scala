@@ -39,7 +39,8 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore)
     newTransactionForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.error404()),
       transactionData => {
-        transactionStore.insertByEmailByPostID(TransactionByEmail(transactionData.storageTaken,"2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0", username,"none",transactionData.postID))
+        transactionStore.insert(Transaction(transactionData.storageTaken, 
+          "2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0", transactionData.postID, username))
         Redirect(routes.PostBoard.myPosts)
       }
     )

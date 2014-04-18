@@ -8,33 +8,16 @@ import play.api.Play.current
 import javax.inject.Singleton
 import javax.inject.Inject
 
-case class Transaction(storageTaken: Int,
-  startDate: String,
-  endDate: String,
-  buyerID: Long,
-  sellerID: Long,
-  postID: Long,
-  transactionID: Option[Long] = None)
-
-case class TransactionByEmail(storageTaken: Int,
-  startDate: String,
-  endDate: String,
-  buyerEmail: String,
-  sellerEmail: String,
-  postID: Long,
-  transactionID: Option[Long] = None)
-
-case class TransactionDetails(transactionID: Long,
+case class Transaction(
   storageTaken: Int,
   startDate: String,
   endDate: String,
-  buyerID: Long,
-  sellerID: Long,
-  buyerEmail: String,
-  sellerEmail: String,
   postID: Long,
-  approved: Boolean,
-  canceled: Int)
+  buyerEmail: String,
+  sellerEmail: Option[String] = None,
+  transactionID: Option[Long] = None,
+  approved: Option[Boolean] = None,
+  canceled: Option[Int] = None)
 
 /**
  * Methods that we will be using from
@@ -42,45 +25,24 @@ case class TransactionDetails(transactionID: Long,
  */
 trait TransactionStore {
   def insert(trasaction: Transaction): Long
-  def insertByEmail(trasaction: TransactionByEmail): Long
-  def insertByEmailByPostID(trasaction: TransactionByEmail): Long
-  def getByID(ID: Long): Option[TransactionDetails]
-  def getByPostID(postID: Long): List[TransactionDetails]
-  def getByBuyerID(buyerID: Long): List[TransactionDetails]
-  def getByBuyerEmail(buyerEmail: String): List[TransactionDetails]
-  def getBySellerID(sellerID: Long): List[TransactionDetails]
-  def getBySellerEmail(sellerEmail: String): List[TransactionDetails]
+  def getByID(ID: Long): Option[Transaction]
+  def getByPostID(postID: Long): List[Transaction]
+  def getByBuyerEmail(buyerEmail: String): List[Transaction]
+  def getBySellerEmail(sellerEmail: String): List[Transaction]
   def approve(transactionID: Long, sellerEmail: String): Int
 }
 
 // Actual implementation of Transaction Store method
 @Singleton
 class TransactionDAL extends TransactionStore {
-  
+
   private[this] val createTransactionSql = {
     SQL("""
       INSERT INTO Transaction
         (storageTaken, startDate, endDate, buyerID, sellerID, buyerEmail, sellerEmail, postID)
       VALUES
-        ({storageTaken}, {startDate}, {endDate}, {buyerID}, {sellerID}, (SELECT email FROM User WHERE userID={buyerID}), (SELECT email FROM User WHERE userID={sellerID}), {postID})
-    """.stripMargin)
-  }
-
-  private[this] val createTransactionByEmailSql = {
-    SQL("""
-      INSERT INTO Transaction
-        (storageTaken, startDate, endDate, buyerID, sellerID, buyerEmail, sellerEmail, postID)
-      VALUES
-        ({storageTaken}, {startDate}, {endDate}, (SELECT userID FROM User WHERE email={buyerEmail}), (SELECT userID FROM User WHERE email={sellerEmail}), {buyerEmail}, {sellerEmail}, {postID})
-    """.stripMargin)
-  }
-
-  private[this] val createTransactionByEmailByPostIDSql = {
-    SQL("""
-      INSERT INTO Transaction
-        (storageTaken, startDate, endDate, buyerID, sellerID, buyerEmail, sellerEmail, postID)
-      VALUES
-        ({storageTaken}, {startDate}, {endDate}, (SELECT userID FROM User WHERE email={buyerEmail}), (SELECT userID FROM Post NATURAL JOIN User WHERE postID={postID}), {buyerEmail}, (SELECT email FROM Post WHERE postID={postID}), {postID})
+        ({storageTaken}, {startDate}, {endDate}, {postID}, {buyerEmail}, 
+          (SELECT email FROM Post WHERE postID={postID}))
     """.stripMargin)
   }
 
@@ -100,27 +62,11 @@ class TransactionDAL extends TransactionStore {
     """.stripMargin)
   }
 
-  private[this] val findTransactionByBuyerIDSql = {
-    SQL("""
-       SELECT *
-       FROM Transaction
-       WHERE buyerID = {buyerID}
-    """.stripMargin)
-  }
-
   private[this] val findTransactionByBuyerEmailSql = {
     SQL("""
        SELECT *
        FROM Transaction
        WHERE buyerID = (SELECT userID FROM User WHERE email={buyerEmail})
-    """.stripMargin)
-  }
-
-  private[this] val findTransactionBySellerIDSql = {
-    SQL("""
-       SELECT *
-       FROM Transaction
-       WHERE sellerID = {sellerID}
     """.stripMargin)
   }
 
@@ -142,8 +88,6 @@ class TransactionDAL extends TransactionStore {
 
   implicit val transactionParser = 
     long("transactionID")~
-    long("buyerID")~
-    long("sellerID")~
     str("buyerEmail")~
     str("sellerEmail")~
     long("postID")~
@@ -152,8 +96,9 @@ class TransactionDAL extends TransactionStore {
     date("endDate")~
     bool("approved")~
     int("canceled") map {
-      case transactionID ~ buyerID ~ sellerID ~buyerEmail ~ sellerEmail ~ postID ~ storageTaken ~ startDate ~ endDate ~ approved ~ canceled =>
-        TransactionDetails(transactionID,storageTaken, startDate.toString(), endDate.toString(),buyerID,sellerID, buyerEmail, sellerEmail, postID,approved,canceled)
+      case transactionID ~buyerEmail ~ sellerEmail ~ postID ~ storageTaken ~ startDate ~ endDate ~ approved ~ canceled =>
+        Transaction(storageTaken, startDate.toString(), endDate.toString(), postID, 
+          buyerEmail, Some(sellerEmail), Some(transactionID), Some(approved),Some(canceled))
     }
 
   def insert(transaction: Transaction): Long = DB.withConnection { implicit conn =>
@@ -161,64 +106,30 @@ class TransactionDAL extends TransactionStore {
       'storageTaken -> transaction.storageTaken,
       'startDate -> transaction.startDate,
       'endDate -> transaction.endDate,
-      'buyerID -> transaction.buyerID,
-      'sellerID -> transaction.sellerID,
-      'postID -> transaction.postID
+      'postID -> transaction.postID,
+      'buyerEmail -> transaction.buyerEmail
     ).executeInsert(scalar[Long].single)
   }
 
-  def insertByEmail(transaction: TransactionByEmail): Long = DB.withConnection { implicit conn =>
-    createTransactionByEmailSql.on(
-      'storageTaken -> transaction.storageTaken,
-      'startDate -> transaction.startDate,
-      'endDate -> transaction.endDate,
-      'buyerEmail -> transaction.buyerEmail,
-      'sellerEmail -> transaction.sellerEmail,
-      'postID -> transaction.postID
-    ).executeInsert(scalar[Long].single)
-  }
-
-  def insertByEmailByPostID(transaction: TransactionByEmail): Long = DB.withConnection { implicit conn =>
-    createTransactionByEmailByPostIDSql.on(
-      'storageTaken -> transaction.storageTaken,
-      'startDate -> transaction.startDate,
-      'endDate -> transaction.endDate,
-      'buyerEmail -> transaction.buyerEmail,
-      'postID -> transaction.postID
-    ).executeInsert(scalar[Long].single)
-  }
-
-  def getByID(ID: Long): Option[TransactionDetails] = DB.withConnection { implicit conn =>
+  def getByID(ID: Long): Option[Transaction] = DB.withConnection { implicit conn =>
     findTransactionByIdSql.on(
       'transactionID -> ID
     ).as(transactionParser.singleOpt)
   }
 
-  def getByPostID(postID: Long): List[TransactionDetails] = DB.withConnection { implicit conn =>
+  def getByPostID(postID: Long): List[Transaction] = DB.withConnection { implicit conn =>
     findTransactionByPostIDSql.on(
       'postID -> postID
     ).as(transactionParser *)
   }
 
-  def getByBuyerID(buyerID: Long): List[TransactionDetails] = DB.withConnection { implicit conn =>
-    findTransactionByBuyerIDSql.on(
-      'buyerID -> buyerID
-    ).as(transactionParser *)
-  }
-
-  def getByBuyerEmail(buyerEmail: String): List[TransactionDetails] = DB.withConnection { implicit conn =>
+  def getByBuyerEmail(buyerEmail: String): List[Transaction] = DB.withConnection { implicit conn =>
     findTransactionByBuyerEmailSql.on(
       'buyerEmail -> buyerEmail
     ).as(transactionParser *)
   }
 
-  def getBySellerID(sellerID: Long): List[TransactionDetails] = DB.withConnection { implicit conn =>
-    findTransactionBySellerIDSql.on(
-      'sellerID -> sellerID
-    ).as(transactionParser *)
-  }
-
-  def getBySellerEmail(sellerEmail: String): List[TransactionDetails] = DB.withConnection { implicit conn =>
+  def getBySellerEmail(sellerEmail: String): List[Transaction] = DB.withConnection { implicit conn =>
     findTransactionBySellerEmailSql.on(
       'sellerEmail -> sellerEmail
     ).as(transactionParser *)
