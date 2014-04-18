@@ -16,7 +16,7 @@ case class TransactionRequest(
   storageTaken: Int,
   startDate: String,
   endDate: String,
-  postID: Long)
+  postID: Int)
 
 @Singleton
 class TransactionLedger @Inject()(transactionStore: TransactionStore) 
@@ -27,7 +27,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore)
       "storageTaken" -> number(min=0),
       "startDate" -> nonEmptyText(minLength = 4),
       "endDate" -> nonEmptyText(minLength = 4),
-      "postID" -> of[Long]
+      "postID" -> number(min=0)
       )(TransactionRequest.apply)(TransactionRequest.unapply)
     )
 
@@ -39,8 +39,6 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore)
     newTransactionForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.error404()),
       transactionData => {
-        println(transactionData.storageTaken)
-        println(transactionData.postID)
         transactionStore.insertByEmailByPostID(TransactionByEmail(transactionData.storageTaken,"2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0", username,"none",transactionData.postID))
         Redirect(routes.PostBoard.myPosts)
       }
