@@ -23,9 +23,9 @@ class TransactionStoreSpec extends Specification with UserTest {
   val post2Copy = post2.copy()
 
   val transactionStore: TransactionStore = new TransactionDAL
-  val transaction1 = Transaction(10, "2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0",
+  val transaction1 = Transaction(10,new Timestamp(1397857973), new Timestamp(1397857973),
     1, user1.email, Some(user2.email), Some(1))
-  val transaction2 = Transaction(3, "2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0", 
+  val transaction2 = Transaction(3, new Timestamp(1397857973), new Timestamp(1397857973), 
     1, user1.email, Some(user2.email), Some(2))
 
   val transaction1Check = Transaction(transaction1.storageTaken, 

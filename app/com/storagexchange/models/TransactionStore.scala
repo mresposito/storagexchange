@@ -97,15 +97,15 @@ class TransactionDAL extends TransactionStore {
     bool("approved")~
     int("canceled") map {
       case transactionID ~buyerEmail ~ sellerEmail ~ postID ~ storageTaken ~ startDate ~ endDate ~ approved ~ canceled =>
-        Transaction(storageTaken, new Timestamp(startDate), new Timestamp(endDate), postID, 
+        Transaction(storageTaken, new Timestamp(1397857973), new Timestamp(1397857973), postID, 
           buyerEmail, Some(sellerEmail), Some(transactionID), Some(approved),Some(canceled))
     }
 
   def insert(transaction: Transaction): Long = DB.withConnection { implicit conn =>
     createTransactionSql.on(
       'storageTaken -> transaction.storageTaken,
-      'startDate -> transaction.startDate,
-      'endDate -> transaction.endDate,
+      'startDate -> transaction.startDate.getTime(),
+      'endDate -> transaction.endDate.getTime(),
       'postID -> transaction.postID,
       'buyerEmail -> transaction.buyerEmail
     ).executeInsert(scalar[Long].single)

@@ -42,8 +42,8 @@ CREATE TABLE Transaction (
   buyerEmail VARCHAR(50) NOT NULL,
   sellerEmail VARCHAR(50) NOT NULL,
   storageTaken INT NOT NULL,
-  startDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  endDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  startDate BIGINT,
+  endDate BIGINT,
   approved BOOLEAN NOT NULL DEFAULT 0,
   canceled INT  NOT NULL DEFAULT 0,
   timestamp TIMESTAMP);
