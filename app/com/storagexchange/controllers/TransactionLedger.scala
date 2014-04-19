@@ -11,6 +11,7 @@ import play.api.data.format.Formats._
 import com.typesafe.scalalogging.slf4j.Logging
 import javax.inject.Singleton
 import javax.inject.Inject
+import java.sql.Timestamp
 
 case class TransactionRequest(
   storageTaken: Int,
@@ -20,7 +21,7 @@ case class TransactionRequest(
 
 @Singleton
 class TransactionLedger @Inject()(transactionStore: TransactionStore) 
-  extends Controller with Secured {
+  extends Controller with Secured{
 
   val newTransactionForm = Form(
     mapping(
@@ -40,7 +41,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore)
       formWithErrors => BadRequest(views.html.error404()),
       transactionData => {
         transactionStore.insert(Transaction(transactionData.storageTaken, 
-          "2014-01-19 03:14:07.0", "2014-01-19 03:14:07.0", transactionData.postID, username))
+          new Timestamp(1397857973),new Timestamp(1397857973), transactionData.postID, username))
         Redirect(routes.PostBoard.myPosts)
       }
     )

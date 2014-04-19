@@ -10,8 +10,8 @@ import javax.inject.Inject
 
 case class Transaction(
   storageTaken: Int,
-  startDate: String,
-  endDate: String,
+  startDate: Timestamp,
+  endDate: Timestamp,
   postID: Long,
   buyerEmail: String,
   sellerEmail: Option[String] = None,
@@ -92,12 +92,12 @@ class TransactionDAL extends TransactionStore {
     str("sellerEmail")~
     long("postID")~
     int("storageTaken") ~
-    date("startDate") ~
-    date("endDate")~
+    long("startDate") ~
+    long("endDate")~
     bool("approved")~
     int("canceled") map {
       case transactionID ~buyerEmail ~ sellerEmail ~ postID ~ storageTaken ~ startDate ~ endDate ~ approved ~ canceled =>
-        Transaction(storageTaken, startDate.toString(), endDate.toString(), postID, 
+        Transaction(storageTaken, new Timestamp(startDate), new Timestamp(endDate), postID, 
           buyerEmail, Some(sellerEmail), Some(transactionID), Some(approved),Some(canceled))
     }
 
