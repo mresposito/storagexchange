@@ -18,8 +18,8 @@ POST    /post/:id/:locId            @com.storagexchange.controllers.PostBoard.mo
 GET     /newpost                    @com.storagexchange.controllers.PostBoard.newPost
 
 # Transaction urls
-GET     /transaction/:postID        @com.storagexchange.controllers.TransactionLedger.newTransaction(postID : Long)
-POST    /receivenewtransaction/     @com.storagexchange.controllers.TransactionLedger.receiveNewTransaction
+GET     /post/:postID/reserve       @com.storagexchange.controllers.TransactionLedger.newTransaction(postID : Long)
+POST    /post/:postID/reserve       @com.storagexchange.controllers.TransactionLedger.receiveNewTransaction(postID : Long)
 GET     /mypurchases                @com.storagexchange.controllers.TransactionLedger.myPurchases
 
 # Messaging urls

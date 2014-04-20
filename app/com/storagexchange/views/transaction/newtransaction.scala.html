@@ -15,7 +15,7 @@
             </div>
           }
 
-        @helper.form(controllers.routes.TransactionLedger.receiveNewTransaction, 'class->"form-horizontal") {
+        @helper.form(controllers.routes.TransactionLedger.receiveNewTransaction(postID), 'class->"form-horizontal") {
 
           <div class="form-group">
             <label for="inputStorageSize3" class="col-sm-2 control-label">Storage Size Request</label>
@@ -33,11 +33,6 @@
             <label for="inputDescription3" class="col-sm-2 control-label">End Date</label>
             <div class="col-sm-9">
               <input type="textfield" class="form-control" id="inputDescription" name="endDate"  value="@form("endDate").value">
-            </div>
-          </div>
-          <div class="form-group">
-            <div class="col-sm-9">
-              <input type="hidden" class="form-control" id="inputDescription" name="postID"  value=@postID>
             </div>
           </div>
           <div class="form-group">

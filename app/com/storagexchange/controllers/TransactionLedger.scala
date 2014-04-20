@@ -16,8 +16,10 @@ import java.sql.Timestamp
 case class TransactionRequest(
   storageTaken: Int,
   startDate: Int,
-  endDate: Int,
-  postID: Int)
+  endDate: Int)
+
+case class TransactionApproveRequest(
+  transactionID: Int)
 
 @Singleton
 class TransactionLedger @Inject()(transactionStore: TransactionStore) 
@@ -27,21 +29,26 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore)
     mapping(
       "storageTaken" -> number(min=0),
       "startDate" -> number(min=0),
-      "endDate" -> number(min=0),
-      "postID" -> number(min=0)
+      "endDate" -> number(min=0)
       )(TransactionRequest.apply)(TransactionRequest.unapply)
+    )
+
+  val transactionApproveForm = Form(
+    mapping(
+      "transactionID" -> number(min=0)
+      )(TransactionApproveRequest.apply)(TransactionApproveRequest.unapply)
     )
 
   def newTransaction(postID: Long) = IsAuthenticated { username => _ =>
     Ok(views.html.transaction.newtransaction(newTransactionForm,postID))
   }
 
-  def receiveNewTransaction  = IsAuthenticated { username => implicit request =>
+  def receiveNewTransaction(postID: Long)  = IsAuthenticated { username => implicit request =>
     newTransactionForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.error404()),
       transactionData => {
         transactionStore.insert(Transaction(transactionData.storageTaken, 
-          new Timestamp(transactionData.startDate), new Timestamp(transactionData.endDate), transactionData.postID, username))
+          new Timestamp(transactionData.startDate), new Timestamp(transactionData.endDate), postID, username))
         Redirect(routes.PostBoard.myPosts)
       }
     )
@@ -50,5 +57,15 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore)
   def myPurchases =  IsAuthenticated { username => _ =>
     val purchaselist = transactionStore.getByBuyerEmail(username)
     Ok(views.html.transaction.mypurchases(purchaselist))
+  }
+
+  def approvedTransaction =  IsAuthenticated { username => implicit request =>
+    transactionApproveForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(views.html.error404()),
+      transactionApproveData => {
+        transactionStore.approve(transactionApproveData.transactionID, username)
+        Redirect(routes.PostBoard.myPosts)
+      }
+    )
   }
 }
