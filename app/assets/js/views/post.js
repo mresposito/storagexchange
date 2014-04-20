@@ -9,8 +9,7 @@ define ([
 
     events: {
       "change .search": "searchCallback",
-      "click a.storageSize": "sizeRange",
-      "click .load button": "loadMorePosts"
+      "click a.storageSize": "sizeRange"
     },
 
     initialize: function() {
