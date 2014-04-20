@@ -17,7 +17,7 @@ case class Transaction(
   sellerEmail: Option[String] = None,
   transactionID: Option[Long] = None,
   approved: Option[Boolean] = None,
-  canceled: Option[Boolean] = None)
+  canceled: Option[Int] = None)
 
 /**
  * Methods that we will be using from
@@ -95,9 +95,9 @@ class TransactionDAL extends TransactionStore {
     long("startDate") ~
     long("endDate")~
     bool("approved")~
-    bool("canceled") map {
+    int("canceled") map {
       case transactionID ~buyerEmail ~ sellerEmail ~ postID ~ storageTaken ~ startDate ~ endDate ~ approved ~ canceled =>
-        Transaction(storageTaken, new Timestamp(startDate), new Timestamp(endDate), postID, 
+        Transaction(storageTaken, new Timestamp(1397857973), new Timestamp(1397857973), postID, 
           buyerEmail, Some(sellerEmail), Some(transactionID), Some(approved),Some(canceled))
     }
 
