@@ -45,7 +45,7 @@ CREATE TABLE Transaction (
   startDate BIGINT,
   endDate BIGINT,
   approved BOOLEAN NOT NULL DEFAULT 0,
-  canceled INT  NOT NULL DEFAULT 0,
+  canceled BOOLEAN  NOT NULL DEFAULT 0,
   timestamp TIMESTAMP);
 
 # --- !Downs
