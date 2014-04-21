@@ -61,7 +61,8 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, da
             postData.zip))
         val post = Post(username, postData.description, postData.storageSize, locID)
         val id = postStore.insert(post)
-        dataSearch.insertPost(post.copy(postID = Some(id))) 
+        //dataSearch.insertPost(post.copy(postID = Some(id)))
+        dataSearch.insertPostLoc(post.copy(postID = Some(id)))
         Redirect(routes.PostBoard.myPosts)
       }
     )

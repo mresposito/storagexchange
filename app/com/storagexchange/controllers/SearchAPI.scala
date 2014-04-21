@@ -38,10 +38,12 @@ class SearchAPI @Inject()(dataSearch: DataSearch,
   universityStore: UniversityStore) extends Controller with Secured {
   
   import JsonSearchFormatters._
-  
+
   def getPosts = Action.async(parse.json) { request =>
    request.body.asOpt[SearchQuery].map { search: SearchQuery =>
-	    dataSearch.getPosts(search.allQueries:_*).map { posts => 
+      println(search)
+	    dataSearch.getPosts(search.allQueries:_*).map { posts =>
+        println(posts.toString())
 		    Ok(posts.toString())
 	    }
     }.getOrElse {

@@ -12,7 +12,7 @@ trait ElasticClientInjector {
   def close = client.close
 }
 
-class LocalElasticClient extends ElasticClientInjector {
+class LocalElasticClient extends ElasticClientInjector {33.858878
   val client = ElasticClient.local
 }
 

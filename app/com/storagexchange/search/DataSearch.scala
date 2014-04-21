@@ -14,10 +14,12 @@ import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.update.UpdateResponse
 import org.elasticsearch.action.delete.DeleteResponse
+import java.math.BigDecimal
 
 trait DataSearch {
 
   def insertPost(post: Post): Future[IndexResponse]
+  def insertPostLoc(post: Post): Future[IndexResponse]
   def getPosts: Future[SearchResponse] = getPosts()
   def getPosts(searches: SearchBuilder*): Future[SearchResponse]
 
@@ -31,25 +33,40 @@ trait DataSearch {
 trait SearchBuilder
 case class SearchFilter(field: String, gt: Int, lt: Int) extends SearchBuilder
 case class Query(term: String) extends SearchBuilder
+case class LatQuery(term: Long) extends SearchBuilder
 case class Offset(start: Int, limit: Int = 10) extends SearchBuilder
 
 @Singleton
-class ElasticSearch @Inject() (clientInjector: ElasticClientInjector) extends DataSearch {
+class ElasticSearch @Inject() (clientInjector: ElasticClientInjector, postStore: PostStore) extends DataSearch {
   import clientInjector._
   
   def insertPost(post: Post): Future[IndexResponse] = client execute {
     index into "posts" -> "post" fields (
       "id" -> post.postID.get,
       "description" -> post.description,
-      "storageSize" -> post.storageSize)
+      "storageSize" -> post.storageSize,
+      "lat" -> 0,
+      "lng" -> 0)
   }
-  
+
+  def insertPostLoc(post: Post): Future[IndexResponse] = client execute {
+    val postLoc: Option[PostLocation] = postStore.createPostLocation(post.postID.get)
+    index into "posts" -> "post" fields (
+      "id" -> post.postID.get,
+      "description" -> post.description,
+      "storageSize" -> post.storageSize,
+      "lat" -> postLoc.get.lat.doubleValue(),
+      "lng" -> postLoc.get.lng.doubleValue())
+  }
+
   def createIndices: Future[CreateIndexResponse] = client execute {
     create index "posts" mappings (
       "post" as (
         "id" typed IntegerType,
         "description" typed StringType,
-        "storageSize" typed IntegerType)
+        "storageSize" typed IntegerType,
+        "lat" typed DoubleType,
+        "lng" typed DoubleType)
     )
   }
   def deleteIndices = client execute {
@@ -93,7 +110,7 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector) extends Da
 		    case SearchFilter(field, gt, lt) => red filter {
 		      rangeFilter(field) lte lt.toString gte gt.toString
 		    }
-		    case Query(term) => red query term
+		    case Query(term) => println("query");red query term
 		    case Offset(at, max) => red start at limit max
 	    }
     }

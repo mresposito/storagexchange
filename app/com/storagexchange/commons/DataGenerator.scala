@@ -53,8 +53,9 @@ class JavaFakerDataGenerator @Inject()(userStore: UserStore,
 
 	private def insertPost(post: Post) = {
 	  val id = postStore.insert(post)
-	  search.insertPost(post.copy(postID = Some(id)))
-	}
+	  search.insertPostLoc(post.copy(postID = Some(id)))
+  }
+
   private def insertUser(user: User) = try { 
 	  val userId = userStore.insert(user)
   } catch {

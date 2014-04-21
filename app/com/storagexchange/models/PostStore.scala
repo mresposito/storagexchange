@@ -7,6 +7,7 @@ import play.api.db._
 import play.api.Play.current
 import javax.inject.Singleton
 import javax.inject.Inject
+import java.math.BigDecimal
 
 case class Post(email: String,
   description: String,
@@ -14,6 +15,19 @@ case class Post(email: String,
   locationID: Long,
   postID: Option[Long] = None)
 
+case class PostLocation(email: String,
+  description: String,
+  storageSize: Int,
+  locationID: Long,
+  postID: Option[Long] = None,
+  name: String,
+  lat: BigDecimal,
+  lng: BigDecimal,
+  city: String,
+  state: String,
+  address: String,
+  zip: String,
+  id: Option[Long] = None)
 /**
  * Methods that we will be using from
  * the interface to the database
@@ -26,6 +40,7 @@ trait PostStore {
   def updateById(id: Long, email: String, description: String, storageSize: Int): Int
   def getPostsByLocationID(locationID: Long): List[Post]
   def getPostsByCity(city: String): List[Post]
+  def createPostLocation(id: Long): Option[PostLocation]
 }
 
 // Actual implementation of Post Store method
@@ -89,6 +104,15 @@ class PostDAL extends PostStore {
     """.stripMargin)
   }
 
+  private[this] val joinPostLocation = {
+    SQL(
+      """
+        SELECT *
+        FROM Post, Location
+        WHERE locationID = id AND postID = {postID}
+      """.stripMargin)
+  }
+
   implicit val postParser = 
     str("email") ~
     str("description") ~
@@ -97,6 +121,24 @@ class PostDAL extends PostStore {
     long("postID").? map {
       case email ~ description ~ storageSize ~ locationID ~ postID =>
         Post(email, description, storageSize, locationID, postID)
+    }
+
+  implicit val postLocationParser =
+    str("email") ~
+    str("description") ~
+    int("storageSize") ~
+    long("locationID") ~
+    long("postID").? ~
+    str("name") ~
+    get[BigDecimal]("lat") ~
+    get[BigDecimal]("lng") ~
+    str("city") ~
+    str("state") ~
+    str("address") ~
+    str("zip") ~
+    long("id").? map {
+      case email ~ description ~ storageSize ~ locationID ~ postID ~ name ~ lat ~ lng ~ city ~ state ~ address ~ zip ~ id =>
+        PostLocation(email, description, storageSize, locationID, postID, name, lat, lng, city, state, address, zip, id)
     }
 
   def insert(post: Post): Long = DB.withConnection { implicit conn =>
@@ -147,5 +189,11 @@ class PostDAL extends PostStore {
         'storageSize-> storageSize,
         'email -> email
       ).executeUpdate()
+  }
+
+  def createPostLocation(id: Long): Option[PostLocation] = DB.withConnection { implicit conn =>
+    joinPostLocation.on(
+      'postID -> id
+    ).as(postLocationParser.singleOpt)
   }
 }
