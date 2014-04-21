@@ -1,7 +1,6 @@
 @(myPurchases : List[models.Transaction])
 @import helper.twitterBootstrap._
 
-
 @views.html.user.main("Storage Exchange", "My Purchases") {
  <div class="post">
     <div class="container">
@@ -14,10 +13,11 @@
           <div class="col-md-2">
             <b>Seller: </b><span class="area">@purchase.sellerEmail</span> sq/ft
           </div>
-          <div class="col-md-2 actions">
-            <a href="#" class="edit"><i class="fa fa-pencil-square-o"></i></a>
-            <a href="#" class="delete"><i class="fa fa-trash-o"></i></a>
-          </div>
+          @if(!purchase.approved){
+            <div>
+              <b>Approval Pending...</b>
+            </div>
+          }
         </div>
       }
       @if(myPurchases.isEmpty) {

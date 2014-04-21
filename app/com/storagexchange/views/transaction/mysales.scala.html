@@ -1,0 +1,33 @@
+@(mySales : List[models.Transaction])
+@import helper.twitterBootstrap._
+
+@views.html.user.main("Storage Exchange", "My Sales") {
+ <div class="post">
+    <div class="container">
+        @mySales.map { sale =>
+        <div class="row well"  data-id="@sale.postID">
+          <div class="col-md-8">
+            <b>Storage Size</b><br>
+            <span class="description">@sale.storageTaken</span>
+          </div>
+          <div class="col-md-2">
+            <b>Seller: </b><span class="area">@sale.sellerEmail</span> sq/ft
+          </div>
+          @if(!sale.approved){
+            @helper.form(controllers.routes.TransactionLedger.approveTransaction, 'class->"form-horizontal") {
+            <input type="hidden" class="form-control" id="inputDescription" name="endDate"  value="@sale.transactionID">
+            <div class="form-group">
+              <div class="col-sm-offset-1 col-sm-10">
+                <button type="submit" class="btn btn-block btn-lg btn-flashy">Approve</button>
+              </div>
+            </div>
+          }
+          }
+        </div>
+      }
+      @if(mySales.isEmpty) {
+        <h3>You have made no purchases</h3>
+      }
+    </div>
+  </div>
+}

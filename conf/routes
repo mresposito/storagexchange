@@ -21,6 +21,8 @@ GET     /newpost                    @com.storagexchange.controllers.PostBoard.ne
 GET     /post/:postID/reserve       @com.storagexchange.controllers.TransactionLedger.newTransaction(postID : Long)
 POST    /post/:postID/reserve       @com.storagexchange.controllers.TransactionLedger.receiveNewTransaction(postID : Long)
 GET     /mypurchases                @com.storagexchange.controllers.TransactionLedger.myPurchases
+GET     /mySales                    @com.storagexchange.controllers.TransactionLedger.mySales
+POST    /mySales                    @com.storagexchange.controllers.TransactionLedger.approveTransaction
 
 # Messaging urls
 GET     /message                    @com.storagexchange.controllers.MessageBoard.myMessages

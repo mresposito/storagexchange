@@ -54,12 +54,17 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore)
     )
   }
 
-  def myPurchases =  IsAuthenticated { username => _ =>
+  def myPurchases = IsAuthenticated { username => _ =>
     val purchaselist = transactionStore.getByBuyerEmail(username)
     Ok(views.html.transaction.mypurchases(purchaselist))
   }
 
-  def approvedTransaction =  IsAuthenticated { username => implicit request =>
+  def mySales = IsAuthenticated { username => _ =>
+    val salelist = transactionStore.getByBuyerEmail(username)
+    Ok(views.html.transaction.mysales(salelist))
+  }
+
+  def approveTransaction =  IsAuthenticated { username => implicit request =>
     transactionApproveForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.error404()),
       transactionApproveData => {
