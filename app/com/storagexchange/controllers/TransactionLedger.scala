@@ -23,7 +23,7 @@ case class TransactionApproveRequest(
 
 @Singleton
 class TransactionLedger @Inject()(transactionStore: TransactionStore) 
-  extends Controller with Secured{
+  extends Controller with Secured {
 
   val newTransactionForm = Form(
     mapping(
@@ -49,14 +49,13 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore)
       transactionData => {
         transactionStore.insert(Transaction(transactionData.storageTaken, 
           new Timestamp(transactionData.startDate), new Timestamp(transactionData.endDate), postID, username))
-        Redirect(routes.PostBoard.myPosts)
+        Redirect(routes.TransactionLedger.myPurchases)
       }
     )
   }
 
   def myPurchases = IsAuthenticated { username => _ =>
     val purchaselist = transactionStore.getByBuyerEmail(username)
-    println(purchaselist(0).approved)
     Ok(views.html.transaction.mypurchases(purchaselist))
   }
 
@@ -65,13 +64,8 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore)
     Ok(views.html.transaction.mysales(salelist))
   }
 
-  def approveTransaction =  IsAuthenticated { username => implicit request =>
-    transactionApproveForm.bindFromRequest.fold(
-      formWithErrors => BadRequest(views.html.error404()),
-      transactionApproveData => {
-        transactionStore.approve(transactionApproveData.transactionID, username)
-        Redirect(routes.PostBoard.myPosts)
-      }
-    )
+  def approveTransaction(transactionID : Long) =  IsAuthenticated { username => implicit request =>
+    transactionStore.approve(transactionID, username)
+    Redirect(routes.TransactionLedger.mySales)
   }
 }

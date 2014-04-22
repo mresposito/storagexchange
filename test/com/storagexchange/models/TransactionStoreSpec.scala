@@ -24,14 +24,14 @@ class TransactionStoreSpec extends Specification with PostTest {
 
   val transaction1Check = Transaction(transaction1.storageTaken, 
     transaction1.startDate, transaction1.endDate, transaction1.postID,
-     "buyer@user.com", Some(post1.email), Some(1), Some(false), Some(false))
+     "buyer@user.com", Some(post1.email), Some(1), false, false)
   val transaction2Check = Transaction(transaction2.storageTaken,
    transaction2.startDate, transaction2.endDate, transaction2.postID,
-    "buyer@user.com", Some(post1.email), Some(2), Some(false), Some(false))
+    "buyer@user.com", Some(post1.email), Some(2), false, false)
 
    val transaction1ApprovedCheck = Transaction(transaction1.storageTaken,
     transaction1.startDate, transaction1.endDate, transaction1.postID,
-     "buyer@user.com", Some(post1.email), Some(1), Some(true), Some(false))
+     "buyer@user.com", Some(post1.email), Some(1), true, false)
 
   val InsertTransaction = BeforeHook {
     DB.withConnection { implicit conn =>

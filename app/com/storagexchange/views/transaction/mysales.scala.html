@@ -14,19 +14,17 @@
             <b>Buyer: </b><span class="area">@sale.buyerEmail</span> sq/ft
           </div>
           @if(!sale.approved){
-            @helper.form(controllers.routes.TransactionLedger.approveTransaction, 'class->"form-horizontal") {
-            <input type="hidden" class="form-control" id="inputDescription" name="endDate"  value="@sale.transactionID">
             <div class="form-group">
               <div class="col-sm-offset-1 col-sm-10">
-                <button type="submit" class="btn btn-block btn-lg btn-flashy">Approve</button>
+                <li href="@controllers.routes.TransactionLedger.approveTransaction(sale.transactionID.get)">
+                  <button type="submit" class="btn btn-block btn-lg btn-flashy">Approve</button>
+                </li>
               </div>
             </div>
           }
-          }
-        </div>
       }
       @if(mySales.isEmpty) {
-        <h3>You have made no purchases</h3>
+        <h3>You have made no sales</h3>
       }
     </div>
   </div>

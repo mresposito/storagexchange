@@ -22,7 +22,7 @@ GET     /reserve/:postID            @com.storagexchange.controllers.TransactionL
 POST    /reserve/:postID            @com.storagexchange.controllers.TransactionLedger.receiveNewTransaction(postID : Long)
 GET     /mypurchases                @com.storagexchange.controllers.TransactionLedger.myPurchases
 GET     /mysales                    @com.storagexchange.controllers.TransactionLedger.mySales
-POST    /mysales                    @com.storagexchange.controllers.TransactionLedger.approveTransaction
+POST    /mysales/approve/:id        @com.storagexchange.controllers.TransactionLedger.approveTransaction(id : Long)
 
 # Messaging urls
 GET     /message                    @com.storagexchange.controllers.MessageBoard.myMessages
