@@ -11,7 +11,7 @@
             <span class="description">@sale.storageTaken</span>
           </div>
           <div class="col-md-2">
-            <b>Seller: </b><span class="area">@sale.sellerEmail</span> sq/ft
+            <b>Buyer: </b><span class="area">@sale.buyerEmail</span> sq/ft
           </div>
           @if(!sale.approved){
             @helper.form(controllers.routes.TransactionLedger.approveTransaction, 'class->"form-horizontal") {

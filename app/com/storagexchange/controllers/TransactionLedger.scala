@@ -56,11 +56,12 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore)
 
   def myPurchases = IsAuthenticated { username => _ =>
     val purchaselist = transactionStore.getByBuyerEmail(username)
+    println(purchaselist(0).approved)
     Ok(views.html.transaction.mypurchases(purchaselist))
   }
 
   def mySales = IsAuthenticated { username => _ =>
-    val salelist = transactionStore.getByBuyerEmail(username)
+    val salelist = transactionStore.getBySellerEmail(username)
     Ok(views.html.transaction.mysales(salelist))
   }
 
