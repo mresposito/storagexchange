@@ -9,6 +9,7 @@ define ([
 
     events: {
       "change .search": "searchCallback",
+      "change .addressSearch": "addressCallback",
       "click a.storageSize": "sizeRange",
       "click .load button": "loadMorePosts"
     },
@@ -53,6 +54,11 @@ define ([
        })
     },
 
+    addressCallback: function() {
+      this.startingPost = 0;
+      this.updateBoard()
+    },
+
     searchCallback: function() {
       this.startingPost = 0;
       this.updateBoard()
@@ -60,9 +66,10 @@ define ([
 
     updateBoard: function() {
       var query = this.queryValue();
+      var addr = this.addressValue();
       var filters = this.filterValues();
       var starter = this.starterValues();
-      var search = _.extend(query, _.extend(filters, starter));
+      var search = _.extend(query, addr, _.extend(filters, starter));
       this.findPosts(search);
     },
 
@@ -81,6 +88,11 @@ define ([
 
     textSearch: function(event) {
       var json = this.queryValue();
+      this.findPosts(json);
+    },
+
+    addrSearch: function(event) {
+      var json = this.addressValue();
       this.findPosts(json);
     },
 
@@ -107,8 +119,26 @@ define ([
       return $(this.el).find(".search").val();
     },
 
+    getAddressSearchBox: function() {
+      return $(this.el).find(".addressSearch").val();
+    },
+
+    addressValue: function() {
+      var value = this.getAddressSearchBox()
+      if (value.length > 2) {
+        return {
+          addressQuery: {
+            lat: 30,
+            lon: 29
+          }
+        }
+      } else {
+        return {};
+      }
+    },
+
     queryValue: function() {
-      var value = this.getTextSearchBox()
+      var value = this.getTextSearchBox();
       if(value.length > 2) {
         return {
           query: {

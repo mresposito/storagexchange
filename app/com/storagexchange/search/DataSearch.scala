@@ -33,7 +33,7 @@ trait DataSearch {
 trait SearchBuilder
 case class SearchFilter(field: String, gt: Int, lt: Int) extends SearchBuilder
 case class Query(term: String) extends SearchBuilder
-case class LatQuery(term: Long) extends SearchBuilder
+case class AddressQuery(lat: Double, lon: Double) extends SearchBuilder
 case class Offset(start: Int, limit: Int = 10) extends SearchBuilder
 
 @Singleton
@@ -46,7 +46,7 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector, postStore:
       "description" -> post.description,
       "storageSize" -> post.storageSize,
       "lat" -> 0,
-      "lng" -> 0)
+      "lon" -> 0)
   }
 
   def insertPostLoc(post: Post): Future[IndexResponse] = client execute {
@@ -56,7 +56,7 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector, postStore:
       "description" -> post.description,
       "storageSize" -> post.storageSize,
       "lat" -> postLoc.get.lat.doubleValue(),
-      "lng" -> postLoc.get.lng.doubleValue())
+      "lon" -> postLoc.get.lng.doubleValue())
   }
 
   def createIndices: Future[CreateIndexResponse] = client execute {
@@ -66,7 +66,7 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector, postStore:
         "description" typed StringType,
         "storageSize" typed IntegerType,
         "lat" typed DoubleType,
-        "lng" typed DoubleType)
+        "lon" typed DoubleType)
     )
   }
   def deleteIndices = client execute {
@@ -103,14 +103,34 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector, postStore:
   } sort {
     by field "id"
   }
-  
+
   def getPosts(searches: SearchBuilder*): Future[SearchResponse] = client execute {
     searches.foldLeft(defaultSearch) {
       (red: SearchDefinition, build: SearchBuilder) => build match {
 		    case SearchFilter(field, gt, lt) => red filter {
 		      rangeFilter(field) lte lt.toString gte gt.toString
 		    }
-		    case Query(term) => println("query");red query term
+        case AddressQuery(lat, lon) => red rawQuery {
+          s"""
+              {
+              "filtered" : {
+                  "query" : {
+                      "match_all" : {}
+                  },
+                  "filter" : {
+                      "geo_distance" : {
+                          "distance" : "200km",
+                          "pin.location" : {
+                              "lat" : $lat,
+                              "lon" : $lon
+                          }
+                      }
+                  }
+              }
+          }
+          """.stripMargin
+        } searchType SearchType.Scan
+        case Query(term) => red query term
 		    case Offset(at, max) => red start at limit max
 	    }
     }
