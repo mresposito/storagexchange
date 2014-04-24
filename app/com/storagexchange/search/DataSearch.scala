@@ -5,6 +5,7 @@ import com.sksamuel.elastic4s._
 import com.sksamuel.elastic4s.KeywordAnalyzer
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.mapping.FieldType._
+import com.sksamuel.elastic4s.ElasticClient._
 import javax.inject.Inject
 import javax.inject.Singleton
 import scala.concurrent.Future
@@ -39,7 +40,7 @@ case class Offset(start: Int, limit: Int = 10) extends SearchBuilder
 @Singleton
 class ElasticSearch @Inject() (clientInjector: ElasticClientInjector, postStore: PostStore) extends DataSearch {
   import clientInjector._
-  
+
   def insertPost(post: Post): Future[IndexResponse] = client execute {
     index into "posts" -> "post" fields (
       "id" -> post.postID.get,
@@ -136,5 +137,5 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector, postStore:
 		    case Offset(at, max) => red start at limit max
 	    }
     }
-  }
+  }; client.client.admin.indices.prepareRefresh("posts").execute()
 }
