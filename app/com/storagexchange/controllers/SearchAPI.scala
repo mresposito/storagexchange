@@ -21,7 +21,7 @@ import com.storagexchange.models.UniversityStore
 
 case class SearchQuery(query: Option[Query], addressQuery: Option[AddressQuery], filters: Option[List[SearchFilter]],
   offset: Option[Offset]) {
-  println(addressQuery.toString())
+  println(addressQuery.toString()) //comes out as None
   lazy val all = List(query, addressQuery, offset).filter(_.isDefined).map(_.get)
   lazy val unfilters = filters.getOrElse(List())
   def allQueries: List[SearchBuilder] = all ++ unfilters
@@ -45,7 +45,7 @@ class SearchAPI @Inject()(dataSearch: DataSearch,
   def getPosts = Action.async(parse.json) { request =>
    println(request.body)
    request.body.asOpt[SearchQuery].map { search: SearchQuery =>
-      println(search.allQueries)
+      println("All Queries " + search.allQueries)
       println(search.unfilters)
 	    dataSearch.getPosts(search.allQueries:_*).map { posts =>
         println(posts.toString())

@@ -55,6 +55,8 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector, postStore:
       "id" -> post.postID.get,
       "description" -> post.description,
       "storageSize" -> post.storageSize,
+      //"location" -> (postLoc.get.lng.doubleValue().toString() + ", " + postLoc.get.lat.doubleValue().toString()),
+      "location" -> (postLoc.get.lat.doubleValue().toString() + "," + postLoc.get.lng.doubleValue().toString()),
       "lat" -> postLoc.get.lat.doubleValue(),
       "lon" -> postLoc.get.lng.doubleValue())
   }
@@ -65,10 +67,12 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector, postStore:
         "id" typed IntegerType,
         "description" typed StringType,
         "storageSize" typed IntegerType,
+        "location" typed GeoPointType,
         "lat" typed DoubleType,
         "lon" typed DoubleType)
     )
   }
+
   def deleteIndices = client execute {
     delete index "posts"
   }
@@ -110,9 +114,10 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector, postStore:
 		    case SearchFilter(field, gt, lt) => red filter {
 		      rangeFilter(field) lte lt.toString gte gt.toString
 		    }
-        case AddressQuery(lat, lon) => red rawQuery {
+        case AddressQuery(lat, lon) => //red query lat.toString()
+        red rawQuery {
           s"""
-              {
+          {
               "filtered" : {
                   "query" : {
                       "match_all" : {}
@@ -120,16 +125,13 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector, postStore:
                   "filter" : {
                       "geo_distance" : {
                           "distance" : "200km",
-                          "pin.location" : {
-                              "lat" : $lat,
-                              "lon" : $lon
-                          }
+                          "location" : "40.1105,-88.2284"
                       }
                   }
               }
           }
           """.stripMargin
-        } searchType SearchType.Scan
+        } searchType SearchType.Scan scroll "10"
         case Query(term) => red query term
 		    case Offset(at, max) => red start at limit max
 	    }

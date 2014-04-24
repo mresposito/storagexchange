@@ -128,8 +128,8 @@ define ([
       if (value.length > 2) {
         return {
           addressQuery: {
-            lat: 30,
-            lon: 29
+            lat: 40.11374,
+            lon: -88.219657
           }
         }
       } else {
@@ -168,6 +168,9 @@ define ([
             data = posts;
           }
           var hits = data.hits.hits;
+          var total = data.hits.total;
+          console.log("eric sucks");
+          console.log(hits);
           self.renderFacets(data.facets.size.ranges);
           self.renderPosts(hits);
         }
