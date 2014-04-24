@@ -1,5 +1,6 @@
 package com.storagexchange.controllers
 
+import org.mockito.Mockito.{mock, when}
 import java.sql.Timestamp
 import com.storagexchange.models._
 import com.storagexchange.utils._
@@ -11,8 +12,16 @@ import play.api.test._
 import play.api.test.Helpers._
 
 trait TransactionTest extends Specification with PostTest{
+
+  val today = new Timestamp(600)
+  val tomorrow = new Timestamp(100430600)
+  val clock = mock(classOf[Clock])
+  // mock the class
+  when(clock.now).thenReturn(today)
+  val now = clock.now
+
   val postStore: PostStore = new PostDAL
-  val transaction1 = Transaction(10,new Timestamp(1397857973), new Timestamp(1397857973),
+  val transaction1 = Transaction(10, now, now,
     1, "buyer@user.com", Some(post1.email), Some(1))
 
   val CreateTransactions = BeforeHook {
@@ -41,6 +50,14 @@ trait TransactionTest extends Specification with PostTest{
 
 class TransactionLedgerSpec extends Specification with TransactionTest {
   "Transaction Ledger" should {
+    "accept valid new transaction url" in CreatePostsTransactions {
+      val Some(createForm) =  route(requestWithSessionTransaction(routes.TransactionLedger.newTransaction(1).url, transaction1.buyerEmail))
+      status(createForm) must beEqualTo(OK)
+    }
+    "reject invalid new transaction url" in CreatePostsTransactions {
+      val Some(createForm) =  route(requestWithSessionTransaction(routes.TransactionLedger.newTransaction(2342132).url, transaction1.buyerEmail))
+      status(createForm) must beEqualTo(BAD_REQUEST)
+    }
     "accept valid transaction" in CreatePostsTransactions {
       val Some(create) = route(createRequest(transaction1,1))
       status(create) must beEqualTo(SEE_OTHER)
