@@ -18,11 +18,8 @@ case class TransactionRequest(
   startDate: Int,
   endDate: Int)
 
-case class TransactionApproveRequest(
-  transactionID: Int)
-
 @Singleton
-class TransactionLedger @Inject()(transactionStore: TransactionStore) 
+class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore: PostStore) 
   extends Controller with Secured {
 
   val newTransactionForm = Form(
@@ -33,23 +30,29 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore)
       )(TransactionRequest.apply)(TransactionRequest.unapply)
     )
 
-  val transactionApproveForm = Form(
-    mapping(
-      "transactionID" -> number(min=0)
-      )(TransactionApproveRequest.apply)(TransactionApproveRequest.unapply)
-    )
-
   def newTransaction(postID: Long) = IsAuthenticated { username => _ =>
-    Ok(views.html.transaction.newtransaction(newTransactionForm,postID))
+    if (postStore.getById(postID).isEmpty){
+      BadRequest(views.html.error404())
+    }
+    else{
+      Ok(views.html.transaction.newtransaction(newTransactionForm,postID))
+    }
+    
   }
 
   def receiveNewTransaction(postID: Long)  = IsAuthenticated { username => implicit request =>
     newTransactionForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.error404()),
       transactionData => {
-        transactionStore.insert(Transaction(transactionData.storageTaken, 
-          new Timestamp(transactionData.startDate), new Timestamp(transactionData.endDate), postID, username))
-        Redirect(routes.TransactionLedger.myPurchases)
+
+        if (postStore.getById(postID).isEmpty){
+          BadRequest(views.html.error404())
+        }
+        else{
+          transactionStore.insert(Transaction(transactionData.storageTaken, 
+            new Timestamp(transactionData.startDate), new Timestamp(transactionData.endDate), postID, username))
+          Redirect(routes.TransactionLedger.myPurchases)
+        }
       }
     )
   }
@@ -65,7 +68,12 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore)
   }
 
   def approveTransaction(transactionID : Long) =  IsAuthenticated { username => implicit request =>
-    transactionStore.approve(transactionID, username)
-    Redirect(routes.TransactionLedger.mySales)
+    if (transactionStore.getByID(transactionID).isEmpty){
+      BadRequest(views.html.error404())
+    }
+    else{
+      transactionStore.approve(transactionID, username)
+      Redirect(routes.TransactionLedger.mySales)
+    }
   }
 }
