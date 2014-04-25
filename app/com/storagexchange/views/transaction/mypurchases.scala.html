@@ -6,26 +6,31 @@
  <div class="post">
     <div class="container">
         @myPurchases.map { purchase =>
-        <div class="row well"  data-id="@purchase.postID">
-          <div class="col-md-2">
-            <b>Storage Size</b><br>
-            <span class="description">@purchase.storageTaken</span> sq/ft
-          </div>
-          <div class="col-md-2">
-            <b>Start Date: </b><span class="area">@purchase.startDate.toString.substring(0,10)</span>
-          </div>
-          <div class="col-md-4">
-            <b>End Date: </b><span class="area">@purchase.endDate.toString.substring(0,10)</span>
-          </div>
-          <div class="col-md-2">
-            <b>Seller: </b><span class="area">@purchase.sellerEmail</span>
-          </div>
-          @if(!purchase.approved){
-            <div>
-              <b>Approval Pending...</b>
+        @if(!purchase.canceled){
+          <div class="row well"  data-id="@purchase.transactionID">
+            <div class="col-md-2">
+              <b>Storage Size</b><br>
+              <span class="description">@purchase.storageTaken</span> sq/ft
             </div>
-          }
-        </div>
+            <div class="col-md-2">
+              <b>Start Date: </b><span class="area">@purchase.startDate.toString.substring(0,10)</span>
+            </div>
+            <div class="col-md-4">
+              <b>End Date: </b><span class="area">@purchase.endDate.toString.substring(0,10)</span>
+            </div>
+            <div class="col-md-2">
+              <b>Seller: </b><span class="area">@purchase.sellerEmail</span>
+            </div>
+            <div class="col-md-2">
+              @if(!purchase.approved){
+                <b>Approval Pending...</b>
+              }
+              <a href="@controllers.routes.TransactionLedger.cancelTransactionAsBuyer(purchase.transactionID.get)">
+                <button type="submit" class="btn btn-block">Cancel</button>
+              </a>
+            </div>  
+          </div>
+        }
       }
       @if(myPurchases.isEmpty) {
         <h3>You have made no purchases</h3>

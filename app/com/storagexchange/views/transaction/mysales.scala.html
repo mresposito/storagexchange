@@ -5,24 +5,29 @@
  <div class="post">
     <div class="container">
         @mySales.map { sale =>
-        <div class="row well"  data-id="@sale.postID">
-          <div class="col-md-2">
-            <b>Storage Size</b><br>
-            <span class="description">@sale.storageTaken</span> sq/ft
-          </div>
-          <div class="col-md-2">
-            <b>Start Date: </b><span class="area">@sale.startDate.toString.substring(0,10)</span>
-          </div>
-          <div class="col-md-4">
-            <b>End Date: </b><span class="area">@sale.endDate.toString.substring(0,10)</span>
-          </div>
-          <div class="col-md-2">
-            <b>Buyer: </b><span class="area">@sale.buyerEmail</span>
-          </div>
-          @if(!sale.approved){
+        @if(!sale.canceled){
+          <div class="row well"  data-id="@sale.transactionID">
             <div class="col-md-2">
-              <a href="@controllers.routes.TransactionLedger.approveTransaction(sale.transactionID.get)">
-                <button type="submit" class="btn btn-block btn-flashy">Approve</button>
+              <b>Storage Size</b><br>
+              <span class="description">@sale.storageTaken</span> sq/ft
+            </div>
+            <div class="col-md-2">
+              <b>Start Date: </b><span class="area">@sale.startDate.toString.substring(0,10)</span>
+            </div>
+            <div class="col-md-4">
+              <b>End Date: </b><span class="area">@sale.endDate.toString.substring(0,10)</span>
+            </div>
+            <div class="col-md-2">
+              <b>Buyer: </b><span class="area">@sale.buyerEmail</span>
+            </div>
+            <div class="col-md-2">
+              @if(!sale.approved){
+                <a href="@controllers.routes.TransactionLedger.approveTransaction(sale.transactionID.get)">
+                  <button type="submit" class="btn btn-block btn-flashy">Approve</button>
+                </a>
+              }
+              <a href="@controllers.routes.TransactionLedger.cancelTransactionAsSeller(sale.transactionID.get)">
+                <button type="submit" class="btn btn-block">Cancel</button>
               </a>
             </div>
           }
