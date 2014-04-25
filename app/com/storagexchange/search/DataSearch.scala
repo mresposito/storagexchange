@@ -16,11 +16,13 @@ import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.update.UpdateResponse
 import org.elasticsearch.action.delete.DeleteResponse
 import java.math.BigDecimal
+import org.elasticsearch.common.unit.DistanceUnit
 
 trait DataSearch {
 
   def insertPost(post: Post): Future[IndexResponse]
-  def insertPostLoc(post: Post): Future[IndexResponse]
+  def insertPost(post: Post, lat: Double, lng: Double): Future[IndexResponse]
+
   def getPosts: Future[SearchResponse] = getPosts()
   def getPosts(searches: SearchBuilder*): Future[SearchResponse]
 
@@ -34,32 +36,30 @@ trait DataSearch {
 trait SearchBuilder
 case class SearchFilter(field: String, gt: Int, lt: Int) extends SearchBuilder
 case class Query(term: String) extends SearchBuilder
-case class AddressQuery(lat: Double, lon: Double) extends SearchBuilder
+case class LocationQuery(lat: Double, lng: Double, range: Double) extends SearchBuilder
 case class Offset(start: Int, limit: Int = 10) extends SearchBuilder
 
 @Singleton
-class ElasticSearch @Inject() (clientInjector: ElasticClientInjector, postStore: PostStore) extends DataSearch {
-  import clientInjector._
+class ElasticSearch @Inject() (clientInjector: ElasticClientInjector,
+   locationStore: LocationStore) extends DataSearch {
+   import clientInjector._
 
-  def insertPost(post: Post): Future[IndexResponse] = client execute {
+  def insertPost(post: Post, lat: Double, lng: Double): Future[IndexResponse] = client execute {
     index into "posts" -> "post" fields (
       "id" -> post.postID.get,
       "description" -> post.description,
       "storageSize" -> post.storageSize,
-      "lat" -> 0,
-      "lon" -> 0)
+      "location" -> (lat.doubleValue().toString() + ", " + lng.doubleValue().toString()))
   }
 
-  def insertPostLoc(post: Post): Future[IndexResponse] = client execute {
-    val postLoc: Option[PostLocation] = postStore.createPostLocation(post.postID.get)
+  def insertPost(post: Post): Future[IndexResponse] = client execute {
+    val location: Option[Location] = locationStore.getById(post.locationID)
     index into "posts" -> "post" fields (
       "id" -> post.postID.get,
       "description" -> post.description,
       "storageSize" -> post.storageSize,
-      //"location" -> (postLoc.get.lng.doubleValue().toString() + ", " + postLoc.get.lat.doubleValue().toString()),
-      "location" -> (postLoc.get.lat.doubleValue().toString() + "," + postLoc.get.lng.doubleValue().toString()),
-      "lat" -> postLoc.get.lat.doubleValue(),
-      "lon" -> postLoc.get.lng.doubleValue())
+      "location" -> location.map(_.toGeo).getOrElse("0, 0")
+    )
   }
 
   def createIndices: Future[CreateIndexResponse] = client execute {
@@ -68,9 +68,7 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector, postStore:
         "id" typed IntegerType,
         "description" typed StringType,
         "storageSize" typed IntegerType,
-        "location" typed GeoPointType,
-        "lat" typed DoubleType,
-        "lon" typed DoubleType)
+        "location" typed GeoPointType)
     )
   }
 
@@ -115,27 +113,12 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector, postStore:
 		    case SearchFilter(field, gt, lt) => red filter {
 		      rangeFilter(field) lte lt.toString gte gt.toString
 		    }
-        case AddressQuery(lat, lon) => //red query lat.toString()
-        red rawQuery {
-          s"""
-          {
-              "filtered" : {
-                  "query" : {
-                      "match_all" : {}
-                  },
-                  "filter" : {
-                      "geo_distance" : {
-                          "distance" : "200km",
-                          "location" : "40.1105,-88.2284"
-                      }
-                  }
-              }
-          }
-          """.stripMargin
-        } searchType SearchType.Scan scroll "10"
+        case LocationQuery(latit, long, range) => red filter {
+          geoDistance("location") lat latit lon long distance (range, DistanceUnit.MILES) 
+        }
         case Query(term) => red query term
 		    case Offset(at, max) => red start at limit max
 	    }
     }
-  }; client.client.admin.indices.prepareRefresh("posts").execute()
+  }
 }

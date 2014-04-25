@@ -21,8 +21,10 @@ case class Location(name: String,
   state: String,
   address: String,
   zip: String,
-  id: Option[Long] = None)
-
+  id: Option[Long] = None) {
+  
+  def toGeo: String = s"${lat.doubleValue()}, ${lng.doubleValue()}"
+}
 
 trait LocationStore {
   def insert(location: Location): Long
@@ -80,5 +82,4 @@ class LocationDAL extends LocationStore {
       'id -> id
     ).as(locationParser.singleOpt)
   }
-
 }

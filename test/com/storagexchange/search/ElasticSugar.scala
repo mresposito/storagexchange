@@ -19,8 +19,7 @@ trait ElasticSugar extends BeforeAndAfterAll with Logging {
   this: Suite =>
 
   val clientInjector = new EmbeddedElasticClient
-  val postStore = new PostDAL
-  val dataSearch = new ElasticSearch(clientInjector, postStore)
+  val dataSearch = new ElasticSearch(clientInjector, new LocationDAL)
   implicit val client = clientInjector.client
 
   val atMost: Duration = Duration(10, "seconds")

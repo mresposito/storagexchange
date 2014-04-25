@@ -2,7 +2,7 @@ package com.storagexchange.controllers
 
 import com.storagexchange.search.SearchBuilder
 import com.storagexchange.search.SearchFilter
-import com.storagexchange.search.AddressQuery
+import com.storagexchange.search.LocationQuery
 import com.storagexchange.search.Query
 import com.storagexchange.search.DataSearch
 import com.storagexchange.search.Offset
@@ -19,9 +19,9 @@ import scala.concurrent.Future
 import com.storagexchange.models.University
 import com.storagexchange.models.UniversityStore
 
-case class SearchQuery(query: Option[Query], addressQuery: Option[AddressQuery], filters: Option[List[SearchFilter]],
-  offset: Option[Offset]) {
-  println(addressQuery.toString()) //comes out as None
+case class SearchQuery(query: Option[Query], addressQuery: Option[LocationQuery],
+  filters: Option[List[SearchFilter]], offset: Option[Offset]) {
+
   lazy val all = List(query, addressQuery, offset).filter(_.isDefined).map(_.get)
   lazy val unfilters = filters.getOrElse(List())
   def allQueries: List[SearchBuilder] = all ++ unfilters
@@ -30,7 +30,7 @@ case class SearchQuery(query: Option[Query], addressQuery: Option[AddressQuery],
 object JsonSearchFormatters {
   implicit val place = Json.format[SearchFilter]
   implicit val query = Json.format[Query]
-  implicit val addressQuery = Json.format[AddressQuery]
+  implicit val addressQuery = Json.format[LocationQuery]
   implicit val offsetQuery = Json.format[Offset]
   implicit val searchQuery = Json.format[SearchQuery]
   implicit val uniJson = Json.format[University]
@@ -43,12 +43,8 @@ class SearchAPI @Inject()(dataSearch: DataSearch,
   import JsonSearchFormatters._
 
   def getPosts = Action.async(parse.json) { request =>
-   println(request.body)
    request.body.asOpt[SearchQuery].map { search: SearchQuery =>
-      println("All Queries " + search.allQueries)
-      println(search.unfilters)
 	    dataSearch.getPosts(search.allQueries:_*).map { posts =>
-        println(posts.toString())
 		    Ok(posts.toString())
 	    }
     }.getOrElse {
