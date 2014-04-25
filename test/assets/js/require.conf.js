@@ -9,6 +9,7 @@ require.config({
     underscore: EnvJasmine.libDir + "underscore-min",
     backbone: EnvJasmine.libDir + "backbone-min",
     elastic: EnvJasmine.libDir + "elasticsearch.min",
+    typeahead: EnvJasmine.libDir + "typeahead.bundle.min",
     sinon: EnvJasmine.testDir + "helpers/" + "sinon-1.9.0"
   },
   shim: {
@@ -22,6 +23,7 @@ require.config({
       deps: ["underscore"],
       exports: "Backbone"
     }, 
+    typeahead: ["jquery"],
     sinon: {
       exports: "sinon"
     }

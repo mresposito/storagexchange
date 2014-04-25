@@ -18,9 +18,11 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 import com.storagexchange.models.University
 import com.storagexchange.models.UniversityStore
+import com.storagexchange.models.Location
+import com.storagexchange.models.LocationConversions
 
 case class SearchQuery(query: Option[Query], addressQuery: Option[LocationQuery],
-  filters: Option[List[SearchFilter]], offset: Option[Offset]) {
+  filters: Option[List[SearchFilter]], offset: Option[Offset], university: Option[String]) {
 
   lazy val all = List(query, addressQuery, offset).filter(_.isDefined).map(_.get)
   lazy val unfilters = filters.getOrElse(List())
@@ -38,18 +40,28 @@ object JsonSearchFormatters {
 
 @Singleton
 class SearchAPI @Inject()(dataSearch: DataSearch,
-  universityStore: UniversityStore) extends Controller with Secured {
+  universityStore: UniversityStore) extends Controller with Secured with LocationConversions {
   
   import JsonSearchFormatters._
 
   def getPosts = Action.async(parse.json) { request =>
    request.body.asOpt[SearchQuery].map { search: SearchQuery =>
-	    dataSearch.getPosts(search.allQueries:_*).map { posts =>
+     val queries = makeQueries(search)
+	    dataSearch.getPosts(queries:_*).map { posts =>
 		    Ok(posts.toString())
 	    }
     }.getOrElse {
       Future(BadRequest("""{"error": "Could not parse Json"}"""))
     }
+  }
+  
+  private def makeQueries(search: SearchQuery): List[SearchBuilder] = {
+    val loc: Option[Location] = search.university.map { 
+      universityStore.getUniversityLocation
+    }.getOrElse(None)
+    loc.map { l =>
+      (LocationQuery(l.lat, l.lng, 100)) :: search.allQueries
+    }.getOrElse(search.allQueries)
   }
   
   def getUniversities = IsAuthenticated { _ => _ => 

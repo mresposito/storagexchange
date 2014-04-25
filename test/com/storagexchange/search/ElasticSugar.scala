@@ -47,9 +47,7 @@ trait ElasticSugar extends BeforeAndAfterAll with Logging {
     listener.actionGet()
   }
 
-  def blockUntilCount(expected: Long,
-                      index: String,
-                      types: String*) {
+  def blockUntilCount(expected: Long, index: String, types: String*) {
 
     var backoff = 0
     var actual = 0l

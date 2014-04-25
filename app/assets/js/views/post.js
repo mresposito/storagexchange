@@ -10,8 +10,9 @@ define ([
     events: {
       "change .search": "searchCallback",
       "change .addressSearch": "addressCallback",
+      "change input.universitySearch": "uniCallback",
       "click a.storageSize": "sizeRange",
-      "click .load button": "loadMorePosts"
+      "click .tt-dropdown-menu": "uniCallback"
     },
 
     initialize: function() {
@@ -43,17 +44,6 @@ define ([
       this.updateBoard();
     },
 
-    checkBottomPage: function(event) {
-       $('.container').bind('scroll', function() {
-         if($(this).scrollTop() + 
-            $(this).innerHeight()
-            >= $(this)[0].scrollHeight)
-         {
-           alert('end reached');
-         }
-       })
-    },
-
     addressCallback: function() {
       this.startingPost = 0;
       this.updateBoard()
@@ -64,13 +54,30 @@ define ([
       this.updateBoard()
     },
 
+    uniCallback: function() {
+      this.startingPost = 0;
+      this.updateBoard()
+    },
+
     updateBoard: function() {
       var query = this.queryValue();
       var addr = this.addressValue();
       var filters = this.filterValues();
       var starter = this.starterValues();
-      var search = _.extend(query, addr, _.extend(filters, starter));
+      var university = this.universityValues();
+      var search = _.extend(query, addr, university, filters, starter);
       this.findPosts(search);
+    },
+
+    universityValues: function() {
+      var name = this.$el.find(".universitySearch.tt-input").val();
+      if(name.length > 2) {
+        return {
+          university: name
+        }
+      } else {
+        return {}
+      }
     },
 
     starterValues: function() {

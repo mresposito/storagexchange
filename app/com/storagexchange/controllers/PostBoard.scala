@@ -24,8 +24,8 @@ case class PostRequest(
   lng: String)
 
 @Singleton
-class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, dataSearch: DataSearch) 
-  extends Controller with Secured {
+class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore,
+  dataSearch: DataSearch) extends Controller with Secured with LocationConversions {
 
   val newPostForm = Form(
     mapping(
@@ -60,7 +60,7 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, da
         val post = Post(username, postData.description, postData.storageSize, locID)
         val id = postStore.insert(post)
         dataSearch.insertPost(post.copy(postID = Some(id)),
-          location.lat.doubleValue(), location.lng.doubleValue())
+          location.lat, location.lng)
         Redirect(routes.PostBoard.myPosts)
       }
     )

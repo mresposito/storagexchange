@@ -9,13 +9,9 @@ import play.api.db._
 import play.api.Play.{current => curr}
 import java.sql.Timestamp
 import org.h2.jdbc.JdbcSQLException
-import java.math.BigDecimal
 
-trait LocationTest {
+trait LocationTest extends LocationConversions {
   // conversions for BigDecimal
-  implicit def convert(u: Double): BigDecimal = new BigDecimal(u).
-    setScale(6,BigDecimal.ROUND_HALF_UP)
-  implicit def toDouble(b: java.math.BigDecimal): Double = b.doubleValue()
   
   val locationStore: LocationStore = new LocationDAL()
   val universityStore: UniversityStore = new UniversityDAL()
