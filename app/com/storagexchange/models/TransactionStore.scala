@@ -30,6 +30,8 @@ trait TransactionStore {
   def getByBuyerEmail(buyerEmail: String): List[Transaction]
   def getBySellerEmail(sellerEmail: String): List[Transaction]
   def approve(transactionID: Long, sellerEmail: String): Int
+  def cancelAsBuyer(transactionID: Long, userEmail: String): Int
+  def cancelAsSeller(transactionID: Long, userEmail: String): Int
 }
 
 // Actual implementation of Transaction Store method
@@ -83,6 +85,22 @@ class TransactionDAL extends TransactionStore {
        Update Transaction
        SET approved=1
        WHERE transactionID = {transactionID} AND sellerEmail = {sellerEmail}
+    """.stripMargin)
+  }
+
+  private[this] val cancelAsBuyerSql = {
+    SQL("""
+       Update Transaction
+       SET canceled=1
+       WHERE transactionID = {transactionID} AND buyerEmail = {userEmail}
+    """.stripMargin)
+  }
+
+  private[this] val cancelAsSellerSql = {
+    SQL("""
+       Update Transaction
+       SET canceled=1
+       WHERE transactionID = {transactionID} AND sellerEmail = {userEmail}
     """.stripMargin)
   }
 
@@ -140,6 +158,20 @@ class TransactionDAL extends TransactionStore {
     approveSql.on(
       'transactionID -> transactionID,
       'sellerEmail -> sellerEmail
+      ).executeUpdate()
+  }
+
+  def cancelAsBuyer(transactionID: Long, buyerEmail: String): Int = DB.withConnection { implicit conn =>
+    cancelAsBuyerSql.on(
+      'transactionID -> transactionID,
+      'userEmail -> buyerEmail
+      ).executeUpdate()
+  }
+
+  def cancelAsSeller(transactionID: Long, sellerEmail: String): Int = DB.withConnection { implicit conn =>
+    cancelAsSellerSql.on(
+      'transactionID -> transactionID,
+      'userEmail -> sellerEmail
       ).executeUpdate()
   }
 }

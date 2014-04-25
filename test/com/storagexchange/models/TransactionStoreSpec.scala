@@ -29,6 +29,10 @@ class TransactionStoreSpec extends Specification with PostTest {
    transaction2.startDate, transaction2.endDate, transaction2.postID,
     "buyer@user.com", Some(post1.email), Some(2), false, false)
 
+  val transaction1CanceledCheck = Transaction(transaction1.storageTaken, 
+    transaction1.startDate, transaction1.endDate, transaction1.postID,
+     "buyer@user.com", Some(post1.email), Some(1), false, true)
+
    val transaction1ApprovedCheck = Transaction(transaction1.storageTaken,
     transaction1.startDate, transaction1.endDate, transaction1.postID,
      "buyer@user.com", Some(post1.email), Some(1), true, false)
@@ -80,11 +84,27 @@ class TransactionStoreSpec extends Specification with PostTest {
       transactionStore.getBySellerEmail("asdfasd@user.com") must beEmpty
     }
     "approved a transaction" in InsertTransaction {
-      transactionStore.approve(1,post1.email)
+      transactionStore.approve(1, post1.email)
       transactionStore.getByID(1) must beSome(transaction1ApprovedCheck)
     }
     "can't approved a transaction as non-seller" in InsertTransaction {
       transactionStore.approve(1,"buyer@user.com")
+      transactionStore.getByID(1) must beSome(transaction1Check)
+    }
+    "cancel a transaction as buyer" in InsertTransaction {
+      transactionStore.cancelAsBuyer(1, "buyer@user.com")
+      transactionStore.getByID(1) must beSome(transaction1CanceledCheck)
+    }
+    "cancel a transaction as seller" in InsertTransaction {
+      transactionStore.cancelAsSeller(1, post1.email)
+      transactionStore.getByID(1) must beSome(transaction1CanceledCheck)
+    }
+    "reject cancel a transaction as buyer by non-buyer" in InsertTransaction {
+      transactionStore.cancelAsBuyer(1, post1.email)
+      transactionStore.getByID(1) must beSome(transaction1Check)
+    }
+    "reject cancel a transaction as seller by non-seller" in InsertTransaction {
+      transactionStore.cancelAsSeller(1, "buyer@user.com")
       transactionStore.getByID(1) must beSome(transaction1Check)
     }
   }

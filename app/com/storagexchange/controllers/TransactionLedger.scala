@@ -77,4 +77,25 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
       Redirect(routes.TransactionLedger.mySales)
     }
   }
+
+  def cancelTransactionAsBuyer(transactionID : Long) =  IsAuthenticated { username => implicit request =>
+    if (transactionStore.getByID(transactionID).isEmpty){
+      BadRequest(views.html.error404())
+    }
+    else{
+      transactionStore.cancelAsBuyer(transactionID, username)
+      Redirect(routes.TransactionLedger.myPurchases)
+    }
+  }
+
+  def cancelTransactionAsSeller(transactionID : Long) =  IsAuthenticated { username => implicit request =>
+    if (transactionStore.getByID(transactionID).isEmpty){
+      BadRequest(views.html.error404())
+    }
+    else{
+      transactionStore.cancelAsSeller(transactionID, username)
+      Redirect(routes.TransactionLedger.mySales)
+    }
+  }
+
 }
