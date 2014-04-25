@@ -6,20 +6,24 @@
     <div class="container">
         @mySales.map { sale =>
         <div class="row well"  data-id="@sale.postID">
-          <div class="col-md-8">
+          <div class="col-md-2">
             <b>Storage Size</b><br>
-            <span class="description">@sale.storageTaken</span>
+            <span class="description">@sale.storageTaken</span> sq/ft
           </div>
           <div class="col-md-2">
-            <b>Buyer: </b><span class="area">@sale.buyerEmail</span> sq/ft
+            <b>Start Date: </b><span class="area">@sale.startDate.toString.substring(0,10)</span>
+          </div>
+          <div class="col-md-4">
+            <b>End Date: </b><span class="area">@sale.endDate.toString.substring(0,10)</span>
+          </div>
+          <div class="col-md-2">
+            <b>Buyer: </b><span class="area">@sale.buyerEmail</span>
           </div>
           @if(!sale.approved){
-            <div class="form-group">
-              <div class="col-sm-offset-1 col-sm-10">
-                <li href="@controllers.routes.TransactionLedger.approveTransaction(sale.transactionID.get)">
-                  <button type="submit" class="btn btn-block btn-lg btn-flashy">Approve</button>
-                </li>
-              </div>
+            <div class="col-md-2">
+              <a href="@controllers.routes.TransactionLedger.approveTransaction(sale.transactionID.get)">
+                <button type="submit" class="btn btn-block btn-flashy">Approve</button>
+              </a>
             </div>
           }
       }

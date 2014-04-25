@@ -12,6 +12,7 @@ import com.typesafe.scalalogging.slf4j.Logging
 import javax.inject.Singleton
 import javax.inject.Inject
 import java.sql.Timestamp
+import java.util.Calendar
 
 case class TransactionRequest(
   storageTaken: Int,

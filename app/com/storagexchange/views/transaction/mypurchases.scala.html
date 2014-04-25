@@ -1,14 +1,21 @@
 @(myPurchases : List[models.Transaction])
 @import helper.twitterBootstrap._
+@import java.util.Calendar
 
 @views.html.user.main("Storage Exchange", "My Purchases") {
  <div class="post">
     <div class="container">
         @myPurchases.map { purchase =>
         <div class="row well"  data-id="@purchase.postID">
-          <div class="col-md-8">
+          <div class="col-md-2">
             <b>Storage Size</b><br>
-            <span class="description">@purchase.storageTaken</span>
+            <span class="description">@purchase.storageTaken</span> sq/ft
+          </div>
+          <div class="col-md-2">
+            <b>Start Date: </b><span class="area">@purchase.startDate.toString.substring(0,10)</span>
+          </div>
+          <div class="col-md-4">
+            <b>End Date: </b><span class="area">@purchase.endDate.toString.substring(0,10)</span>
           </div>
           <div class="col-md-2">
             <b>Seller: </b><span class="area">@purchase.sellerEmail</span>
