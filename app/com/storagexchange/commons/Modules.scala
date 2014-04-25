@@ -30,7 +30,7 @@ class ProdModule extends CommodModule {
     bind[PasswordHelper].to[PlayWithBCryptHelper]
     bind[IdHasher].to[Base64AES]
     bind[Clock].to[RealClock]
-    bind[ElasticClientInjector].to[LocalElasticClient] // TODO: bind to remote module
+    bind[ElasticClientInjector].to[RemoteElasticClient] 
   }
 }
 

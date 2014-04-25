@@ -132,4 +132,17 @@ class PostSearchSpec extends FlatSpec with Matchers
     val resp: SearchResponse = dataSearch.getPosts(Query("I love ES"))
     countFacets(resp) should be(4)
   }
+  it should "not be effected by offsets" in {
+    val resp: SearchResponse = dataSearch.getPosts(Offset(0, 1))
+    facetToSum(resp) should be(2)
+  }
+  
+  "offsets" should "find 1 post in offset (0,1)" in {
+    val resp: SearchResponse = dataSearch.getPosts(Offset(0,1))
+    resp.getHits().hits().length should be(1) 
+  } 
+  it should "find 1 post in offset (1,1)" in {
+    val resp: SearchResponse = dataSearch.getPosts(Offset(1,1))
+    resp.getHits().hits().length should be(1) 
+  }
 }

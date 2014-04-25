@@ -82,7 +82,6 @@ class JavaFakerDataGenerator @Inject()(userStore: UserStore,
     website: String,
     colors: String,
     logo: String,
-    locationID: Long,
     lat: BigDecimal,
     lng: BigDecimal,
     city: String,
@@ -95,7 +94,6 @@ class JavaFakerDataGenerator @Inject()(userStore: UserStore,
     (__ \ "website").read[String] and
     (__ \ "colors").read[String] and
     (__ \ "logo").read[String] and
-    (__ \ "locationID").read[Long] and
     (__ \ "lat").read[BigDecimal] and
     (__ \ "lng").read[BigDecimal] and
     (__ \ "city").read[String] and
@@ -116,10 +114,10 @@ class JavaFakerDataGenerator @Inject()(userStore: UserStore,
     //insert json content into universities table
     universities.map{ university => university match {
       case UniversityInformation(name, website, colors,
-          logo, locationID, lat,
-          lng, city, state, address, zip) => {
-          locationStore.insert(Location(name,lat,lng,city,state,address,zip,None))
-          universityStore.insert(University(locationID,name,website,logo,colors,None))
+          logo, lat, lng,
+          city, state, address, zip) => {
+          val locID = locationStore.insert(Location(name,lat,lng,city,state,address,zip,None))
+          universityStore.insert(University(locID,name,website,logo,colors,None))
         }
         case _ => logger.error("Invalid JSON formatting")
       } 
