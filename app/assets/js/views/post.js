@@ -125,7 +125,7 @@ define ([
 
     addressValue: function() {
       var value = this.getAddressSearchBox()
-      if (value.length > 2) {
+      if (value) {
         return {
           addressQuery: {
             lat: 40.11374,
@@ -169,8 +169,6 @@ define ([
           }
           var hits = data.hits.hits;
           var total = data.hits.total;
-          console.log("eric sucks");
-          console.log(hits);
           self.renderFacets(data.facets.size.ranges);
           self.renderPosts(hits);
         }

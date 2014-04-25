@@ -125,7 +125,7 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector, postStore:
                   },
                   "filter" : {
                       "geo_distance" : {
-                          "distance" : "200km",
+                          "distance" : "0km",
                           "location" : "40.1105,-88.2284"
                       }
                   }
