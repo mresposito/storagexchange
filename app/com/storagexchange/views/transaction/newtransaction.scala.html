@@ -1,11 +1,27 @@
 @(form: Form[controllers.TransactionRequest], postID: Long)
 @import helper.twitterBootstrap._
 
-@views.html.user.main("Storage Exchange", "Reserve Space") {
+@js = {
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+  <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+  <script>
+    $( "#startDateDisplay" ).datepicker({
+      altField : "#startDate",
+      altFormat : "@@"
+    });
+    $( "#endDateDisplay" ).datepicker({
+      altField : "#endDate",
+      altFormat : "@@"
+    });
+  </script>
+}
+
+@views.html.user.main("Storage Exchange", "Reserve Space", js) {
  <div class="page loginPage">
     <div class="container">
       <div class="text-center">
-        <h1>Post</h1>
+        <h1>Reserve Storage Space</h1>
 
         @form.globalError.map { error =>
             <div class="row">
@@ -26,15 +42,17 @@
           <div class="form-group">
             <label for="inputDescription3" class="col-sm-2 control-label">Start Date</label>
             <div class="col-sm-9">
-              <input type="textfield" class="form-control" id="inputDescription" name="startDate"  value="@form("startDate").value">
+              <input type="textfield" class="form-control" id="startDateDisplay">
             </div>
           </div>
           <div class="form-group">
             <label for="inputDescription3" class="col-sm-2 control-label">End Date</label>
             <div class="col-sm-9">
-              <input type="textfield" class="form-control" id="inputDescription" name="endDate"  value="@form("endDate").value">
+              <input type="textfield" class="form-control" id="endDateDisplay">
             </div>
           </div>
+          <input type="hidden" name="startDate" id="startDate">
+          <input type="hidden" name="endDate" id="endDate">
           <div class="form-group">
             <div class="col-sm-offset-1 col-sm-10">
               <button type="submit" class="btn btn-block btn-lg btn-flashy">Submit</button>

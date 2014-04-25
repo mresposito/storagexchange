@@ -15,8 +15,8 @@ import java.sql.Timestamp
 
 case class TransactionRequest(
   storageTaken: Int,
-  startDate: Int,
-  endDate: Int)
+  startDate: Long,
+  endDate: Long)
 
 @Singleton
 class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore: PostStore) 
@@ -25,8 +25,8 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
   val newTransactionForm = Form(
     mapping(
       "storageTaken" -> number(min=0),
-      "startDate" -> number(min=0),
-      "endDate" -> number(min=0)
+      "startDate" -> longNumber(min=0),
+      "endDate" -> longNumber(min=0)
       )(TransactionRequest.apply)(TransactionRequest.unapply)
     )
 
@@ -42,7 +42,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
 
   def receiveNewTransaction(postID: Long)  = IsAuthenticated { username => implicit request =>
     newTransactionForm.bindFromRequest.fold(
-      formWithErrors => BadRequest(views.html.error404()),
+      formWithErrors => BadRequest(views.html.transaction.newtransaction(formWithErrors,postID)),
       transactionData => {
 
         if (postStore.getById(postID).isEmpty){

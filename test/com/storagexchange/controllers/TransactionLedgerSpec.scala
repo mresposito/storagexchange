@@ -74,13 +74,18 @@ class TransactionLedgerSpec extends Specification with TransactionTest {
       val Some(mysales) = route(requestWithSessionTransaction(routes.TransactionLedger.mySales.url,post1.email))
       contentAsString(mysales) must contain(transaction1.storageTaken.toString)
     }
-    "approve transaction" in CreateTransactions{
+    "approve transaction" in CreateTransactions {
       val Some(approve) = route(requestWithSessionTransaction(routes.TransactionLedger.approveTransaction(1).url,post1.email))
       contentAsString(approve) must not contain("Approve")
     }
-    "reject approval for non-existant transaction" in CreateTransactions{
+    "reject approval for non-existant transaction" in CreateTransactions {
       val Some(approve) = route(requestWithSessionTransaction(routes.TransactionLedger.approveTransaction(345234).url,post1.email))
       status(approve) must beEqualTo(BAD_REQUEST)
+    }
+    "reject approval by non-seller" in CreateTransactions {
+      val Some(approve) = route(requestWithSessionTransaction(routes.TransactionLedger.approveTransaction(1).url, "buyer@user.com"))
+      val Some(mysales) = route(requestWithSessionTransaction(routes.TransactionLedger.mySales.url,post1.email))
+      contentAsString(mysales) must contain("Approve")
     }
   }
 }
