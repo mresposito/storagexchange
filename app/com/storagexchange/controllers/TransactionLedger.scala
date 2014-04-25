@@ -34,8 +34,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
   def newTransaction(postID: Long) = IsAuthenticated { username => _ =>
     if (postStore.getById(postID).isEmpty){
       BadRequest(views.html.error404())
-    }
-    else{
+    }else{
       Ok(views.html.transaction.newtransaction(newTransactionForm,postID))
     }
     
@@ -48,8 +47,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
 
         if (postStore.getById(postID).isEmpty) {
           BadRequest(views.html.error404())
-        }
-        else {
+        }else {
           transactionStore.insert(Transaction(transactionData.storageTaken, 
             new Timestamp(transactionData.startDate), new Timestamp(transactionData.endDate), postID, username))
           Redirect(routes.TransactionLedger.myPurchases)
@@ -71,8 +69,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
   def approveTransaction(transactionID : Long) =  IsAuthenticated { username => implicit request =>
     if (transactionStore.getByID(transactionID).isEmpty){
       BadRequest(views.html.error404())
-    }
-    else{
+    }else{
       transactionStore.approve(transactionID, username)
       Redirect(routes.TransactionLedger.mySales)
     }
@@ -81,8 +78,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
   def cancelTransactionAsBuyer(transactionID : Long) =  IsAuthenticated { username => implicit request =>
     if (transactionStore.getByID(transactionID).isEmpty){
       BadRequest(views.html.error404())
-    }
-    else{
+    }else{
       transactionStore.cancelAsBuyer(transactionID, username)
       Redirect(routes.TransactionLedger.myPurchases)
     }
@@ -91,8 +87,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
   def cancelTransactionAsSeller(transactionID : Long) =  IsAuthenticated { username => implicit request =>
     if (transactionStore.getByID(transactionID).isEmpty){
       BadRequest(views.html.error404())
-    }
-    else{
+    }else{
       transactionStore.cancelAsSeller(transactionID, username)
       Redirect(routes.TransactionLedger.mySales)
     }
