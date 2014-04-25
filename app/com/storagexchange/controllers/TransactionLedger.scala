@@ -45,10 +45,10 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
       formWithErrors => BadRequest(views.html.transaction.newtransaction(formWithErrors,postID)),
       transactionData => {
 
-        if (postStore.getById(postID).isEmpty){
+        if (postStore.getById(postID).isEmpty) {
           BadRequest(views.html.error404())
         }
-        else{
+        else {
           transactionStore.insert(Transaction(transactionData.storageTaken, 
             new Timestamp(transactionData.startDate), new Timestamp(transactionData.endDate), postID, username))
           Redirect(routes.TransactionLedger.myPurchases)
