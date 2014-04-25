@@ -5,15 +5,22 @@ import java.io.File
 import java.util.UUID
 import org.elasticsearch.common.settings.ImmutableSettings
 import com.sksamuel.elastic4s.ElasticClient
+import play.api.Play
 
 trait ElasticClientInjector {
   val client: ElasticClient
-  def tearDown: Unit = {}
   def close = client.close
 }
 
 class LocalElasticClient extends ElasticClientInjector {33.858878
   val client = ElasticClient.local
+}
+
+class RemoteElasticClient extends ElasticClientInjector {
+
+  val esURL = Play.current.configuration.
+	  getString("elasticsearch.url").get
+  val client = ElasticClient.remote(esURL, 9200)
 }
 
 class EmbeddedElasticClient extends ElasticClientInjector {

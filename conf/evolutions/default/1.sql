@@ -35,7 +35,7 @@ CREATE VIEW VerifiedUser AS
 
 # --- !Downs
 
+DROP TABLE User;
 DROP VIEW VerifiedUser;
 DROP TABLE Messages;
 DROP TABLE Transactions;
-DROP TABLE User;
