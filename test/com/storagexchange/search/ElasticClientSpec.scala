@@ -3,14 +3,17 @@ package com.storagexchange.search
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers
 import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.mapping.FieldType._
 import org.elasticsearch.common.Priority
 import com.storagexchange.controllers.PostTest
+import org.elasticsearch.common.unit.DistanceUnit
 
 class ElasticClientSpec extends FlatSpec with Matchers
 	with ElasticSugar with PostTest {
   
-  dataSearch.insertPost(post1)
-  dataSearch.insertPost(post2)
+  dataSearch.createIndices
+  dataSearch.insertPost(post1, stanford.lat, stanford.lng)
+  dataSearch.insertPost(post2, berkley.lng, berkley.lng)
 
   client.admin.cluster.prepareHealth().setWaitForEvents(Priority.LANGUID).setWaitForGreenStatus().execute().actionGet
 
@@ -144,5 +147,22 @@ class ElasticClientSpec extends FlatSpec with Matchers
       }
     }
     resp.toString() should include(post2.description)
+  }
+  "location search" should "find that stanford is close to berkeley" in {
+    val resp = client.sync.execute {
+      search in "posts" types "post" filter {
+        geoDistance("location") lat berkley.lat lon berkley.lng distance (200, DistanceUnit.KILOMETERS)
+      }
+    }
+    resp.getHits.totalHits() should equal(1)
+    resp.toString() should include(post1.description)
+  }
+  it should "not find anything within 1 km of berkeley" in {
+    val resp = client.sync.execute {
+      search in "posts" types "post" filter {
+        geoDistance("location") lat berkley.lat lon berkley.lng distance (1, DistanceUnit.KILOMETERS)
+      }
+    }
+    resp.getHits.totalHits() should equal(0)
   }
 }

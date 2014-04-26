@@ -7,6 +7,7 @@ import play.api.db._
 import play.api.Play.current
 import javax.inject.Singleton
 import javax.inject.Inject
+import java.math.BigDecimal
 
 case class Post(email: String,
   description: String,
@@ -87,6 +88,15 @@ class PostDAL extends PostStore {
        WHERE postID = {postID} AND
         email = {email}
     """.stripMargin)
+  }
+
+  private[this] val joinPostLocation = {
+    SQL(
+      """
+        SELECT *
+        FROM Post, Location
+        WHERE locationID = id AND postID = {postID}
+      """.stripMargin)
   }
 
   implicit val postParser = 

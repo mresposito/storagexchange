@@ -9,7 +9,10 @@ define ([
 
     events: {
       "change .search": "searchCallback",
-      "click a.storageSize": "sizeRange"
+      "change .addressSearch": "addressCallback",
+      "change input.universitySearch": "uniCallback",
+      "click a.storageSize": "sizeRange",
+      "click .tt-dropdown-menu": "uniCallback"
     },
 
     initialize: function() {
@@ -56,15 +59,9 @@ define ([
       this.updateBoard();
     },
 
-    checkBottomPage: function(event) {
-       $('.container').bind('scroll', function() {
-         if($(this).scrollTop() + 
-            $(this).innerHeight()
-            >= $(this)[0].scrollHeight)
-         {
-           alert('end reached');
-         }
-       })
+    addressCallback: function() {
+      this.startingPost = 0;
+      this.updateBoard()
     },
 
     searchCallback: function() {
@@ -75,12 +72,30 @@ define ([
       this.updateBoard()
     },
 
+    uniCallback: function() {
+      this.startingPost = 0;
+      this.updateBoard()
+    },
+
     updateBoard: function() {
       var query = this.queryValue();
+      var addr = this.addressValue();
       var filters = this.filterValues();
       var starter = this.starterValues();
-      var search = _.extend(query, _.extend(filters, starter));
+      var university = this.universityValues();
+      var search = _.extend(query, addr, university, filters, starter);
       this.findPosts(search);
+    },
+
+    universityValues: function() {
+      var name = this.$el.find(".universitySearch.tt-input").val();
+      if(name.length > 2) {
+        return {
+          university: name
+        }
+      } else {
+        return {}
+      }
     },
 
     starterValues: function() {
@@ -98,6 +113,11 @@ define ([
 
     textSearch: function(event) {
       var json = this.queryValue();
+      this.findPosts(json);
+    },
+
+    addrSearch: function(event) {
+      var json = this.addressValue();
       this.findPosts(json);
     },
 
@@ -124,8 +144,26 @@ define ([
       return $(this.el).find(".search").val();
     },
 
+    getAddressSearchBox: function() {
+      return $(this.el).find(".addressSearch").val();
+    },
+
+    addressValue: function() {
+      var value = this.getAddressSearchBox()
+      if (value) {
+        return {
+          addressQuery: {
+            lat: 40.11374,
+            lon: -88.219657
+          }
+        }
+      } else {
+        return {};
+      }
+    },
+
     queryValue: function() {
-      var value = this.getTextSearchBox()
+      var value = this.getTextSearchBox();
       if(value.length > 2) {
         return {
           query: {
@@ -155,6 +193,7 @@ define ([
             data = posts;
           }
           var hits = data.hits.hits;
+          var total = data.hits.total;
           self.renderFacets(data.facets.size.ranges);
           self.renderPosts(hits);
           //41.85,-87.65
