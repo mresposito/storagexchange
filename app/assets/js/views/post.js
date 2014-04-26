@@ -20,6 +20,8 @@ define ([
       this.startingPost = 0;
       this.stepIncrement = 15;
       this.findPosts({});
+      this.markerArray = [];
+      this.circleArray = [];
 
       if (document.getElementById('map-canvas')) {
           // Coordinates to center the map. U.S.
@@ -65,9 +67,6 @@ define ([
     },
 
     searchCallback: function() {
-      // Test: pan to Chicago after query
-      window.map.panTo(new google.maps.LatLng(41.8781, -87.6297));
-      window.map.setZoom(14)
       this.startingPost = 0;
       this.updateBoard()
     },
@@ -89,6 +88,7 @@ define ([
 
     universityValues: function() {
       var name = this.$el.find(".universitySearch.tt-input").val();
+      this.panToLocation(name)
       if(name.length > 2) {
         return {
           university: name
@@ -96,6 +96,56 @@ define ([
       } else {
         return {}
       }
+    },
+
+    panToLocation: function(name) {
+      this.clearCircles();
+      this.clearMarkers();
+      geocoder = new google.maps.Geocoder();
+      geocoder.geocode( { 'address': name}, function(results, status) {
+        if (status == google.maps.GeocoderStatus.OK) {
+          lat = results[0].geometry.location.lat();
+          lng = results[0].geometry.location.lng();
+          window.map.panTo(new google.maps.LatLng(lat, lng));
+          window.map.setZoom(14);
+          var circle = new google.maps.Circle({
+            center: new google.maps.LatLng(lat, lng),
+            radius: 1000,
+            fillColor: "#FF0000",
+            fillOpacity: 0.35,
+            strokeOpacity: 0.0,
+            strokeWeight: 0,
+            map: window.map
+          });
+          this.circleArray.push(circle);
+          //window.map.fitBounds(circle.getBounds());
+        } 
+      });
+    },
+
+    pinPost: function(post) {
+      var latlng = post["_source"].location.split(',');
+      var lat = parseInt(arr[0]);
+      var lng = parseInt(arr[1]);
+      var marker = new google.maps.Marker({
+        position: new google.maps.LatLng(lat, lng),
+        map: window.map
+      });
+      this.markerArray.push(marker);
+    },
+
+    clearCircles: function() {
+      for (var i = 0; i < this.circleArray.length; i++) {
+          this.circleArray[i].setMap(null);
+      }
+      this.circleArray.length = 0;
+    },
+
+    clearMarkers: function() {
+      for (var i = 0; i < this.markerArray.length; i++) {
+          this.markerArray[i].setMap(null);
+      }
+      this.markerArray.length = 0;
     },
 
     starterValues: function() {
@@ -218,7 +268,8 @@ define ([
         this.resetBoard();
       }
       var $el = $(this.el);
-      var $posts = $el.find(".content .posts")
+      var $posts = $el.find(".content .posts");
+      _.map(posts, this.pinPost);
       _.map(posts, function(post) {
         $posts.append(postHTML(post["_source"]));
       });
