@@ -20,8 +20,6 @@ define ([
       this.startingPost = 0;
       this.stepIncrement = 15;
       this.findPosts({});
-      this.markerArray = [];
-      this.circleArray = [];
 
       if (document.getElementById('map-canvas')) {
           // Coordinates to center the map. U.S.
@@ -36,6 +34,9 @@ define ([
        
           // Attach a map to the DOM Element, with the defined settings
           window.map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+          // Keep track of circles and markers we place on map
+          window.markerArray = [];
+          window.circleArray = [];
       }
 
       $(window).scroll(function () {
@@ -99,15 +100,12 @@ define ([
     },
 
     panToLocation: function(name) {
-      this.clearCircles();
-      this.clearMarkers();
+      this.clearOverlays();
       geocoder = new google.maps.Geocoder();
-      geocoder.geocode( { 'address': name}, function(results, status) {
+      geocoder.geocode( { 'address': name }, function(results, status) {
         if (status == google.maps.GeocoderStatus.OK) {
           lat = results[0].geometry.location.lat();
           lng = results[0].geometry.location.lng();
-          window.map.panTo(new google.maps.LatLng(lat, lng));
-          window.map.setZoom(14);
           var circle = new google.maps.Circle({
             center: new google.maps.LatLng(lat, lng),
             radius: 1000,
@@ -117,35 +115,33 @@ define ([
             strokeWeight: 0,
             map: window.map
           });
-          this.circleArray.push(circle);
-          //window.map.fitBounds(circle.getBounds());
+          window.circleArray.push(circle);
+          window.map.panTo(new google.maps.LatLng(lat, lng));
+          window.map.fitBounds(circle.getBounds());
         } 
       });
     },
 
     pinPost: function(post) {
       var latlng = post["_source"].location.split(',');
-      var lat = parseInt(arr[0]);
-      var lng = parseInt(arr[1]);
+      var lat = parseInt(latlng[0]);
+      var lng = parseInt(latlng[1]);
       var marker = new google.maps.Marker({
         position: new google.maps.LatLng(lat, lng),
         map: window.map
       });
-      this.markerArray.push(marker);
+      window.markerArray.push(marker);
     },
 
-    clearCircles: function() {
-      for (var i = 0; i < this.circleArray.length; i++) {
-          this.circleArray[i].setMap(null);
+    clearOverlays: function() {
+      for (var i = 0; i < window.circleArray.length; i++) {
+        window.circleArray[i].setMap(null);
       }
-      this.circleArray.length = 0;
-    },
-
-    clearMarkers: function() {
-      for (var i = 0; i < this.markerArray.length; i++) {
-          this.markerArray[i].setMap(null);
+      for (var i = 0; i < window.markerArray.length; i++) {
+        window.markerArray[i].setMap(null);
       }
-      this.markerArray.length = 0;
+      window.circleArray.length = 0;
+      window.markerArray.length = 0;
     },
 
     starterValues: function() {
