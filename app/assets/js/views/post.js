@@ -124,8 +124,8 @@ define ([
 
     pinPost: function(post) {
       var latlng = post["_source"].location.split(',');
-      var lat = parseInt(latlng[0]);
-      var lng = parseInt(latlng[1]);
+      var lat = parseFloat(latlng[0]);
+      var lng = parseFloat(latlng[1]);
       var marker = new google.maps.Marker({
         position: new google.maps.LatLng(lat, lng),
         map: window.map
