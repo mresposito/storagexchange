@@ -9,7 +9,6 @@ define ([
 
     events: {
       "change .search": "searchCallback",
-      "change .addressSearch": "addressCallback",
       "change input.universitySearch": "uniCallback",
       "click a.storageSize": "sizeRange",
       "click .tt-dropdown-menu": "uniCallback"
@@ -62,11 +61,6 @@ define ([
       this.updateBoard();
     },
 
-    addressCallback: function() {
-      this.startingPost = 0;
-      this.updateBoard()
-    },
-
     searchCallback: function() {
       this.startingPost = 0;
       this.updateBoard()
@@ -79,11 +73,10 @@ define ([
 
     updateBoard: function() {
       var query = this.queryValue();
-      var addr = this.addressValue();
       var filters = this.filterValues();
       var starter = this.starterValues();
       var university = this.universityValues();
-      var search = _.extend(query, addr, university, filters, starter);
+      var search = _.extend(query, university, filters, starter);
       this.findPosts(search);
     },
 
@@ -162,11 +155,6 @@ define ([
       this.findPosts(json);
     },
 
-    addrSearch: function(event) {
-      var json = this.addressValue();
-      this.findPosts(json);
-    },
-
     /**
      * Prepare json values
      */
@@ -188,24 +176,6 @@ define ([
 
     getTextSearchBox: function() {
       return $(this.el).find(".search").val();
-    },
-
-    getAddressSearchBox: function() {
-      return $(this.el).find(".addressSearch").val();
-    },
-
-    addressValue: function() {
-      var value = this.getAddressSearchBox()
-      if (value) {
-        return {
-          addressQuery: {
-            lat: 40.11374,
-            lon: -88.219657
-          }
-        }
-      } else {
-        return {};
-      }
     },
 
     queryValue: function() {
