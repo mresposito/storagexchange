@@ -18,6 +18,21 @@ define ([
       this.stepIncrement = 15;
       this.findPosts({});
 
+      if (document.getElementById('map-canvas')) {
+          // Coordinates to center the map. U.S.
+          var latlng = new google.maps.LatLng(37.09024, -95.712891);
+       
+          // By default center map on U.S.
+          var mapOptions = {
+            zoom: 3,
+            center: latlng,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+          };
+       
+          // Attach a map to the DOM Element, with the defined settings
+          window.map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+      }
+
       $(window).scroll(function () {
         if ($(window).scrollTop() >= $(document).height() - $(window).height()) {
           self.loadMorePosts();
@@ -53,6 +68,9 @@ define ([
     },
 
     searchCallback: function() {
+      // Test: pan to Chicago after query
+      window.map.panTo(new google.maps.LatLng(41.8781, -87.6297));
+      window.map.setZoom(14)
       this.startingPost = 0;
       this.updateBoard()
     },
@@ -139,6 +157,7 @@ define ([
           var hits = data.hits.hits;
           self.renderFacets(data.facets.size.ranges);
           self.renderPosts(hits);
+          //41.85,-87.65
         }
       });
     },
