@@ -19,9 +19,10 @@ class PostSearchSpec extends FlatSpec with Matchers
 	  blockUntilCount(2, "posts")
   } catch {
     case e: IllegalArgumentException => {
+      dataSearch.createIndices
 		  refresh("posts")
-		  dataSearch.insertPost(post1)
-		  dataSearch.insertPost(post2)
+      dataSearch.insertPost(post1, stanford.lat, stanford.lng)
+      dataSearch.insertPost(post2, berkley.lng, berkley.lng)
 		  blockUntilCount(2, "posts")
     }
   }
@@ -136,13 +137,28 @@ class PostSearchSpec extends FlatSpec with Matchers
     val resp: SearchResponse = dataSearch.getPosts(Offset(0, 1))
     facetToSum(resp) should be(2)
   }
+  it should "not be effected by Location Query" in {
+    val resp: SearchResponse = dataSearch.getPosts(LocationQuery(berkley.lat, berkley.lng, 200))
+    facetToSum(resp) should be(2)
+  }
   
-  "offsets" should "find 1 post in offset (0,1)" in {
+  "Offsets" should "find 1 post in offset (0,1)" in {
     val resp: SearchResponse = dataSearch.getPosts(Offset(0,1))
     resp.getHits().hits().length should be(1) 
   } 
   it should "find 1 post in offset (1,1)" in {
     val resp: SearchResponse = dataSearch.getPosts(Offset(1,1))
     resp.getHits().hits().length should be(1) 
+  }
+  
+  "Geolocation" should "find that stanford is close to berkeley" in {
+    val resp: SearchResponse = dataSearch.getPosts(LocationQuery(berkley.lat, berkley.lng, 200))
+    resp.getHits.totalHits() should equal(1)
+    resp.toString() should include(post1.description)
+  }
+  
+  it should "not find anything within 1 km of berkeley" in {
+    val resp: SearchResponse = dataSearch.getPosts(LocationQuery(berkley.lat, berkley.lng, 1))
+    resp.getHits.totalHits() should equal(0)
   }
 }

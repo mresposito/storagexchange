@@ -15,6 +15,9 @@ require([
     var stubFilters = function(filters) {
       post.filterValues = sinon.stub().returns(filters);
     };
+    var stubUni = function(uniJson) {
+      post.universityValues = sinon.stub().returns(uniJson);
+    };
 
     beforeEach(function() {
       jasmine.Ajax.useMock();
@@ -32,6 +35,7 @@ require([
       // install stubs
       stubText("");
       stubFilters({});
+      stubUni({});
     });
 
     it("calls right URL", function() {
@@ -91,6 +95,17 @@ require([
             limit: 10
           }
         })).toBe(true);
+      });
+    });
+    describe("University value", function() {
+      it("calls find posts", function() {
+        post.uniCallback()
+        expect(findPostsSpy.calledWith({})).toBe(true);
+      });
+      it("calls with uni name", function() {
+        stubUni({university: "I forgot"});
+        post.uniCallback()
+        expect(findPostsSpy.calledWith({university: "I forgot"})).toBe(true);
       });
     });
   });
