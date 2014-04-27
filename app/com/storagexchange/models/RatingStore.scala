@@ -22,6 +22,7 @@ case class Rating(
 trait RatingStore{
     def insert(rating : Rating): Long
     def getByID(ratingID : Long): Option[Rating]
+    def getAvgByRatee(rateeEmail: String): Option[Double]
 }
 
 // Actual implementation of Transaction Store method
@@ -43,6 +44,12 @@ class RatingDAL extends RatingStore {
     """.stripMargin)
   }
 
+  private[this] val getAvgByRateeSql = {
+    SQL("""
+      SELECT AVG(SCORE * 10) AS avgScore FROM RATING WHERE rateeEmail = {rateeEmail} GROUP BY rateeEmail
+    """.stripMargin)
+  }
+
   implicit val ratingParser = 
     long("transactionID")~
     int("score")~
@@ -51,6 +58,11 @@ class RatingDAL extends RatingStore {
     long("ratingID") map {
       case transactionID ~ score ~ raterEmail ~ rateeEmail ~ ratingID =>
         Rating(transactionID, score, raterEmail, rateeEmail, Some(ratingID))
+    }
+
+    implicit val ratingAvgParser = 
+    int("avgScore") map {
+      case avgScore => avgScore/10.0
     }
 
   def insert(rating: Rating): Long = DB.withConnection { implicit conn =>
@@ -66,5 +78,11 @@ class RatingDAL extends RatingStore {
     findRatingByIdSql.on(
       'ratingID -> ID
     ).as(ratingParser.singleOpt)
+  }
+
+  def getAvgByRatee(rateeEmail: String): Option[Double] = DB.withConnection { implicit conn =>
+    getAvgByRateeSql.on(
+      'rateeEmail -> rateeEmail
+    ).as(ratingAvgParser.singleOpt)
   }
 }

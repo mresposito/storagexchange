@@ -24,7 +24,7 @@ class RatingStoreSpec extends Specification with PostTest {
 
   val ratingStore: RatingStore = new RatingDAL
   val rating1 = Rating(1, 5, "buyer@user.com", post1.email, Some(1))
-  val rating2 = Rating(2, 4, "buyer2@user.com", post1.email, Some(2))
+  val rating2 = Rating(2, 2, "buyer2@user.com", post1.email, Some(2))
 
   val InsertTransaction = BeforeHook {
     DB.withConnection { implicit conn =>
@@ -55,6 +55,12 @@ class RatingStoreSpec extends Specification with PostTest {
     }
     "find rating by id" in InsertRatings{
       ratingStore.getByID(1) must beSome(rating1)
+    }
+    "average score of ratee" in InsertRatings{
+      ratingStore.getAvgByRatee(post1.email) must beSome(3.5)
+    }
+    "not find average score of non-ratee" in InsertRatings{
+      ratingStore.getAvgByRatee("buyer@user.com") must beNone
     }
   }
 }
