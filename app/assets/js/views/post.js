@@ -72,6 +72,7 @@ define ([
     },
 
     updateBoard: function() {
+      this.clearOverlays();
       var query = this.queryValue();
       var filters = this.filterValues();
       var starter = this.starterValues();
@@ -82,8 +83,8 @@ define ([
 
     universityValues: function() {
       var name = this.$el.find(".universitySearch.tt-input").val();
-      this.panToLocation(name)
       if(name.length > 2) {
+        this.panToLocation(name)
         return {
           university: name
         }
@@ -93,7 +94,6 @@ define ([
     },
 
     panToLocation: function(name) {
-      this.clearOverlays();
       geocoder = new google.maps.Geocoder();
       geocoder.geocode( { 'address': name }, function(results, status) {
         if (status == google.maps.GeocoderStatus.OK) {
@@ -101,9 +101,9 @@ define ([
           lng = results[0].geometry.location.lng();
           var circle = new google.maps.Circle({
             center: new google.maps.LatLng(lat, lng),
-            radius: 1000,
+            radius: 3000,
             fillColor: "#FF0000",
-            fillOpacity: 0.35,
+            fillOpacity: 0.3,
             strokeOpacity: 0.0,
             strokeWeight: 0,
             map: window.map
