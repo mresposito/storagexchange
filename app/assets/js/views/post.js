@@ -116,25 +116,32 @@ define ([
     },
 
     pinPost: function(post) {
-      var latlng = post["_source"].location.split(',');
-      var lat = parseFloat(latlng[0]);
-      var lng = parseFloat(latlng[1]);
-      var marker = new google.maps.Marker({
-        position: new google.maps.LatLng(lat, lng),
-        map: window.map
-      });
-      window.markerArray.push(marker);
+      if(post["_source"].location !== undefined) {
+        var latlng = post["_source"].location.split(',');
+        var lat = parseFloat(latlng[0]);
+        var lng = parseFloat(latlng[1]);
+        var marker = new google.maps.Marker({
+          position: new google.maps.LatLng(lat, lng),
+          map: window.map
+        });
+        window.markerArray.push(marker);
+      }
     },
 
     clearOverlays: function() {
-      for (var i = 0; i < window.circleArray.length; i++) {
-        window.circleArray[i].setMap(null);
+      if(window.circleArray !== undefined) {
+        for (var i = 0; i < window.circleArray.length; i++) {
+          window.circleArray[i].setMap(null);
+        }
+        window.circleArray.length = 0;
       }
-      for (var i = 0; i < window.markerArray.length; i++) {
-        window.markerArray[i].setMap(null);
+
+      if(window.markerArray !== undefined) {
+        for (var i = 0; i < window.markerArray.length; i++) {
+          window.markerArray[i].setMap(null);
+        }
+        window.markerArray.length = 0;
       }
-      window.circleArray.length = 0;
-      window.markerArray.length = 0;
     },
 
     starterValues: function() {
