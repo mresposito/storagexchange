@@ -73,6 +73,14 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore,
     } yield (post, location)
     Ok(views.html.post.myposts(postList))
   }
+  
+  def viewPost(id: Long) = IsAuthenticated { _ => _ => 
+    postStore.getPostInfo(id).map { info =>
+      Ok(views.html.post.info(info))
+    }.getOrElse {
+      BadRequest(views.html.error404())  
+    }
+  }
 
   def delete(id: Long) = IsAuthenticated { username => _ => 
     if(postStore.removeById(id, username)) {

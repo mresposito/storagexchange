@@ -1,0 +1,20 @@
+@(info: models.PostInfo)
+@import helper.twitterBootstrap._
+
+@views.html.user.main("Storage Exchange", "Post information") {
+  <div class="index-trade">
+    <div class="container">
+      <div class="text-left">
+        <a href="/"><i class="fa fa-arrow-circle-left"></i> Back to board</a>
+      </div>
+      <div class="text-center">
+        <h1>Post</h1>
+        @info.post.description<br>
+        <h3>Created by</h3>
+        @info.user.name @info.user.surname<br>
+        <a href="">Contact the user</a><br>
+        @info.location.name<br>
+      </div>
+    </div>
+  </div>
+}
