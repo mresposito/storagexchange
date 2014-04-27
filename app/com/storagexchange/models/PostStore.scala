@@ -9,11 +9,17 @@ import javax.inject.Singleton
 import javax.inject.Inject
 import java.math.BigDecimal
 
-case class Post(email: String,
+case class Post (
+  email: String,
   description: String,
   storageSize: Int,
   locationID: Long,
   postID: Option[Long] = None)
+  
+case class PostInfo (
+  post: Post,
+  location: Location,
+  user: User)
 
 /**
  * Methods that we will be using from
@@ -21,12 +27,15 @@ case class Post(email: String,
  */
 trait PostStore {
   def insert(post: Post): Long
+
   def getById(id: Long): Option[Post]
   def getByEmail(email: String): List[Post]
-  def removeById(id: Long, email: String): Boolean
-  def updateById(id: Long, email: String, description: String, storageSize: Int): Int
+  def getPostInfo(id: Long): Option[PostInfo]
   def getPostsByLocationID(locationID: Long): List[Post]
   def getPostsByCity(city: String): List[Post]
+
+  def removeById(id: Long, email: String): Boolean
+  def updateById(id: Long, email: String, description: String, storageSize: Int): Int
 }
 
 // Actual implementation of Post Store method
@@ -66,10 +75,19 @@ class PostDAL extends PostStore {
 
   private[this] val updatePostById = {
     SQL("""
-       Update Post
+       UPDATE Post
        SET description={description}, storageSize={storageSize}
        WHERE postID = {postID} AND
         email = {email}
+    """.stripMargin)
+  }
+  private[this] val getPostInfoSql = {
+    SQL("""
+       SELECT *
+       FROM Post, User u, Location
+       WHERE postID = {postID} 
+         AND u.email = Post.email
+         AND Location.id = Post.locationID
     """.stripMargin)
   }
   
@@ -129,6 +147,17 @@ class PostDAL extends PostStore {
       'email -> email
     ).as(postParser *)
   }
+
+  def getPostInfo(id: Long): Option[PostInfo] = DB.withConnection { implicit conn =>
+    import LocationSql.locationParser
+    import UserSqlParser.userParserGen
+    val userParser = userParserGen("USER.")
+    getPostInfoSql.on(
+      'postID -> id
+    ).as((postParser ~ locationParser ~ userParser).singleOpt).map { 
+      case post ~ location ~ user => PostInfo(post, location,  user)
+    }
+  }
   
   def getPostsByLocationID(locationID: Long): List[Post] = DB.withConnection { implicit conn =>
     findPostsByLocationID.on(
@@ -152,10 +181,10 @@ class PostDAL extends PostStore {
   def updateById(id: Long, email: String, description: String,
       storageSize: Int): Int = DB.withConnection { implicit conn =>
     updatePostById.on(
-        'postID-> id,
-        'description-> description,
-        'storageSize-> storageSize,
-        'email -> email
-      ).executeUpdate()
+      'postID-> id,
+      'description-> description,
+      'storageSize-> storageSize,
+      'email -> email
+    ).executeUpdate()
   }
 }

@@ -11,7 +11,14 @@ import play.api.test._
 import play.api.test.Helpers._
 
 class VerifyUserSpec extends Specification with UserTest {
-
+  def createUser = {
+    insertUniversityLocation
+    val Some(create) = route(requestWithSamePasswords(password))
+    status(create) must beEqualTo(SEE_OTHER)
+  }
+  val CreateUser = BeforeHook {
+    createUser
+  }
   val idHasher: IdHasher = new FakeIdHasher
   val hashedId = idHasher.encrypt(id)
   val verifyUrl = s"/verify/${hashedId}"

@@ -9,7 +9,8 @@ define([
         <span class="description"><%= description %></span> \
         </div> \
         <div class="cos-sm-2"> \
-          <b>Size: </b><span class="size"><%= storageSize %></span> ftsq \
+          <b>Size: </b><span class="size"><%= storageSize %></span> ftsq <br>\
+          <a href="/post/<%= id %>">View post</a>\
         </div> \
       </div> \
     </div> \
