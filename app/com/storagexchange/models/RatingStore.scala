@@ -11,8 +11,8 @@ import javax.inject.Inject
 case class Rating(
   transactionID: Long,
   score: Int,
-  raterEmail: String,
-  rateeEmail: String,
+  raterEmail: Option[String],
+  rateeEmail: Option[String],
   ratingID: Option[Long] = None)
 
 /**
@@ -33,7 +33,9 @@ class RatingDAL extends RatingStore {
       INSERT INTO Rating
         (transactionID, score, raterEmail, rateeEmail)
       VALUES
-        ({transactionID}, {score}, {raterEmail}, {rateeEmail})
+        ({transactionID}, {score}, 
+          (SELECT buyerEmail FROM Transaction WHERE transactionID = {transactionID}), 
+          (SELECT sellerEmail FROM Transaction WHERE transactionID = {transactionID}))
     """.stripMargin)
   }
 
@@ -57,7 +59,7 @@ class RatingDAL extends RatingStore {
     str("rateeEmail")~
     long("ratingID") map {
       case transactionID ~ score ~ raterEmail ~ rateeEmail ~ ratingID =>
-        Rating(transactionID, score, raterEmail, rateeEmail, Some(ratingID))
+        Rating(transactionID, score, Some(raterEmail), Some(rateeEmail), Some(ratingID))
     }
 
     implicit val ratingAvgParser = 
