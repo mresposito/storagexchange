@@ -55,5 +55,13 @@ class UniversityStoreSpec extends Specification with UniversityTest {
     "get 1 unis if inserted one" in InsertUniversityLocation {
       universityStore.getAll must haveSize(1)
     }
+    "University Location" in {
+      "inexistent uni should be none" in InsertUniversityLocation {
+        universityStore.getUniversityLocation("Maybe") must beNone 
+      }
+      "find stanford" in InsertUniversityLocation {
+        universityStore.getUniversityLocation("Stanford University") must beSome(testLoc)
+      }
+    }
   }
 }

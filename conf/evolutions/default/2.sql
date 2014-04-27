@@ -27,7 +27,17 @@ CREATE TABLE Post (
   storageSize INT NOT NULL,
   FOREIGN KEY(locationID) REFERENCES Location(id) ON DELETE CASCADE);
 
+CREATE TABLE Message (
+  fromUser VARCHAR(50) NOT NULL,
+  toUser VARCHAR(50) NOT NULL,
+  message VARCHAR(2000) NOT NULL,
+  parentID BIGINT,
+  childID BIGINT,
+  messageID BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY);
+
+
 # --- !Downs
 DROP TABLE Post;
 DROP TABLE University;
 DROP TABLE Location;
+DROP TABLE Message;

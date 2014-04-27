@@ -1,11 +1,5 @@
 # --- !Ups
 
-CREATE TABLE Messages (
-  message VARCHAR(2000) NOT NULL,
-  toUserId BIGINT NOT NULL, 
-  fromUserId BIGINT NOT NULL, 
-  id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY);
-
 CREATE TABLE Transactions (
   storageTaken INT NOT NULL,
   fromDate TIMESTAMP NOT NULL,
@@ -37,5 +31,4 @@ CREATE VIEW VerifiedUser AS
 
 DROP TABLE User;
 DROP VIEW VerifiedUser;
-DROP TABLE Messages;
 DROP TABLE Transactions;

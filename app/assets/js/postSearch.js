@@ -3,8 +3,7 @@ require.config({
     jquery: "/assets/js/jquery-2.0.3.min",
     underscore: "/assets/js/underscore-min",
     backbone: "/assets/js/backbone-min",
-    typeahead: "/assets/js/typeahead.min",
-    hogan: "/assets/js/hogan-2.0.0"
+    typeahead: "/assets/js/typeahead.bundle.min"
   },
   shim: {
     jquery: {
@@ -21,14 +20,16 @@ require.config({
   }
 });
 
-require ([
+require([
   "jquery",
   "underscore",
   "backbone",
-  "views/post"
-], function($, _, Backbone, PostSearch) {
+  "views/post",
+  "views/Typeahead"
+], function($, _, Backbone, PostSearch, Typeahead) {
 
   new PostSearch({
     el: $(".index")
   });
+  Typeahead($('.universitySearch'));
 });

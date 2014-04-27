@@ -21,8 +21,16 @@ case class Location(name: String,
   state: String,
   address: String,
   zip: String,
-  id: Option[Long] = None)
+  id: Option[Long] = None) {
+  
+  def toGeo: String = s"${lat.doubleValue()}, ${lng.doubleValue()}"
+}
 
+trait LocationConversions {
+  implicit def convert(u: Double): BigDecimal = new BigDecimal(u).
+    setScale(6,BigDecimal.ROUND_HALF_UP)
+  implicit def toDouble(b: java.math.BigDecimal): Double = b.doubleValue()
+}
 
 trait LocationStore {
   def insert(location: Location): Long
@@ -30,10 +38,8 @@ trait LocationStore {
   def getById(id: Long): Option[Location]
 }
 
-@Singleton
-class LocationDAL extends LocationStore {
-  
-  private[this] val createLocationSql = {
+object LocationSql {
+  val createLocationSql = {
     SQL("""
       INSERT INTO Location
         (name, lat, lng, city, state, address, zip, id)
@@ -42,7 +48,7 @@ class LocationDAL extends LocationStore {
     """.stripMargin)
   }
   
-  private[this] val selectById = {
+  val selectById = {
     SQL("""
       SELECT *
       FROM Location 
@@ -62,6 +68,13 @@ class LocationDAL extends LocationStore {
         Location(name, lat, lng, city, state, address, zip, id)
     }
 
+}
+
+@Singleton
+class LocationDAL extends LocationStore {
+  
+  import LocationSql._
+  
   def insert(location: Location): Long = DB.withConnection { implicit conn =>
     createLocationSql.on(
       'name -> location.name,
@@ -80,5 +93,4 @@ class LocationDAL extends LocationStore {
       'id -> id
     ).as(locationParser.singleOpt)
   }
-
 }
