@@ -2,14 +2,17 @@ define ([
   "jquery",
   "underscore",
   "backbone",
-  "views/post.html"
-], function($, _, Backbone, postHTML) {
+  "views/post.html",
+  "views/map"
+], function($, _, Backbone, postHTML, Map) {
 
   return Backbone.View.extend({
 
     events: {
       "change .search": "searchCallback",
-      "click a.storageSize": "sizeRange"
+      "change input.universitySearch": "uniCallback",
+      "click a.storageSize": "sizeRange",
+      "click .tt-dropdown-menu": "uniCallback"
     },
 
     initialize: function() {
@@ -17,6 +20,8 @@ define ([
       this.startingPost = 0;
       this.stepIncrement = 15;
       this.findPosts({});
+
+      Map.initialize()
 
       $(window).scroll(function () {
         if ($(window).scrollTop() >= $(document).height() - $(window).height()) {
@@ -41,28 +46,36 @@ define ([
       this.updateBoard();
     },
 
-    checkBottomPage: function(event) {
-       $('.container').bind('scroll', function() {
-         if($(this).scrollTop() + 
-            $(this).innerHeight()
-            >= $(this)[0].scrollHeight)
-         {
-           alert('end reached');
-         }
-       })
-    },
-
     searchCallback: function() {
       this.startingPost = 0;
       this.updateBoard()
     },
 
+    uniCallback: function() {
+      this.startingPost = 0;
+      this.updateBoard()
+    },
+
     updateBoard: function() {
+      Map.clearOverlays();
       var query = this.queryValue();
       var filters = this.filterValues();
       var starter = this.starterValues();
-      var search = _.extend(query, _.extend(filters, starter));
+      var university = this.universityValues();
+      var search = _.extend(query, university, filters, starter);
       this.findPosts(search);
+    },
+
+    universityValues: function() {
+      var name = this.$el.find(".universitySearch.tt-input").val();
+      if(name.length > 2) {
+        Map.panToLocation(name)
+        return {
+          university: name
+        }
+      } else {
+        return {}
+      }
     },
 
     starterValues: function() {
@@ -107,7 +120,7 @@ define ([
     },
 
     queryValue: function() {
-      var value = this.getTextSearchBox()
+      var value = this.getTextSearchBox();
       if(value.length > 2) {
         return {
           query: {
@@ -137,6 +150,7 @@ define ([
             data = posts;
           }
           var hits = data.hits.hits;
+          var total = data.hits.total;
           self.renderFacets(data.facets.size.ranges);
           self.renderPosts(hits);
         }
@@ -160,7 +174,8 @@ define ([
         this.resetBoard();
       }
       var $el = $(this.el);
-      var $posts = $el.find(".content .posts")
+      var $posts = $el.find(".content .posts");
+      _.map(posts, Map.pinPost);
       _.map(posts, function(post) {
         $posts.append(postHTML(post["_source"]));
       });

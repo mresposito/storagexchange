@@ -11,6 +11,7 @@ import play.api.libs.json.Json
 import play.api.test._
 import play.api.test.Helpers._
 import com.storagexchange.utils.RunningApp
+import com.storagexchange.utils.BeforeHook
 
 /**
  * Add your spec here.
@@ -18,7 +19,11 @@ import com.storagexchange.utils.RunningApp
  * For more information, consult the wiki.
  */
 class SecuredSpec extends Specification with UserTest {
-  
+  val CreateUser = BeforeHook {
+    insertUniversityLocation
+    val Some(create) = route(requestWithSamePasswords(password))
+    status(create) must beEqualTo(SEE_OTHER)
+  }
   "Secured" should {
     
     "Non authorized user should not get profile page" in RunningApp {

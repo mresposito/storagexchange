@@ -40,4 +40,3 @@ class EmbeddedElasticClient extends ElasticClientInjector {
 
   val client = ElasticClient.local(settings.build)
 }
-

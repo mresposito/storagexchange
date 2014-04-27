@@ -1,8 +1,8 @@
 @(user: com.storagexchange.models.User)
 
 @js = {
-
-  @helper.requireJs(core = routes.Assets.at("js/require.js").url, module = routes.Assets.at("js/postSearch.js").url)
+  @helper.requireJs(core = routes.Assets.at("js/require.js").url,
+    module = routes.Assets.at("js/postSearch.js").url)
 }
 
 @storageSize(from: Int, to: Int, text: String) = {
@@ -13,16 +13,34 @@
   </li>
 }
 
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<style type="text/css">
+  html { height: 100% }
+  body { height: 100%; margin: 0; padding: 0 }
+  #map-canvas { height: 25% }
+</style>
+
 @main("Storage Exchange", "Home", js) {
+  <link rel="stylesheet" type="text/css" href="assets/css/typeahead.css">
+
   <div class="index-trade">
     <div class="container">
       <h2>Welcome, @user.name.</h2>
       <div class="index row">
+        <div class="col-md-11 well">
+          <div id="map-canvas"></div>
+          <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false" type="text/javascript"></script>
+        </div>
         <div class="col-sm-3 sidebar well">
           <h4>Search</h4>
           <div class="textSearch">
             <input type="text" class="search" placeholder="Find a term"></input>
           </div>
+          <h4>University</h4>
+          <div class="university">
+            <input type="text" class="universitySearch" placeholder="Enter a university"></input>
+          </div>
+
           <h4>Storage size</h4>
           <ul class="nav nav-pills nav-stacked storageControls">
             @storageSize(0, 100, "Under 100 ftsq")

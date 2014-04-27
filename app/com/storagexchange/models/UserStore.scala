@@ -102,7 +102,25 @@ trait UserSQLQueries {
        WHERE userID = {id}
     """.stripMargin)
   }
+}
 
+object UserSqlParser {
+  implicit val userParser = userParserGen("")
+  implicit def userParserGen(prefix: String) = {
+    str(prefix + "name") ~
+    str(prefix + "surname") ~
+    str(prefix + "email") ~
+    str(prefix + "password") ~
+    long(prefix + "universityId") ~ 
+    long(prefix + "userID").? ~
+    long(prefix + "creationTime") ~
+    long(prefix + "lastLogin") map {
+      case name ~ surname ~ email ~ password ~ universityId ~ userId ~ created ~ lastLogin => {
+        User(name, surname, email, password, universityId,
+          Some(new Timestamp(created)), Some(new Timestamp(lastLogin)), userId)
+      }
+    }
+  }
 }
 
 // Actual implementation of User Store method
@@ -110,20 +128,8 @@ trait UserSQLQueries {
 class UserDAL @Inject()(passwordHasher: PasswordHelper,
     clock: Clock) extends UserStore with UserSQLQueries with Logging {
   
-  implicit val userParser = str("name") ~
-    str("surname") ~
-    str("email") ~
-    str("password") ~
-    long("universityId") ~ 
-    long("userID").? ~
-    long("creationTime") ~
-    long("lastLogin") map {
-      case name ~ surname ~ email ~ password ~ universityId ~ userId ~ created ~ lastLogin => {
-        User(name, surname, email, password, universityId,
-          Some(new Timestamp(created)), Some(new Timestamp(lastLogin)), userId)
-      }
-    }
-
+  import UserSqlParser.userParser
+  
   trait SelectQueriesImp extends SelectQueries {
     this: UserSQLQueries =>
     def getById(id: Long): Option[User] = DB.withConnection { implicit conn =>

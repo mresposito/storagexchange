@@ -14,7 +14,7 @@ import java.sql.Timestamp
 import play.api.db._
 import java.math.BigDecimal
 
-trait UserTest extends Specification with LocationTest {
+trait UserTest extends LocationTest {
     
   val today = new Timestamp(600)
   val tomorrow = new Timestamp(100430600)
@@ -23,9 +23,6 @@ trait UserTest extends Specification with LocationTest {
   when(clock.now).thenReturn(today)
   val pswHasher = new FakePasswordHelper
   val userStore: UserStore = new UserDAL(pswHasher, clock)
-  val SignUp = BeforeHook {
-    createUser
-  }
   val id = 1
   val now = Some(clock.now)
   val password = "12345678"
@@ -33,15 +30,6 @@ trait UserTest extends Specification with LocationTest {
   val userId = user.copy(userId = Some(id))
   val univ = "Stanford University"
   val invalidUniv = "Stanford"
-
-  def createUser = {
-    insertUniversityLocation
-    val Some(create) = route(requestWithSamePasswords(password))
-    status(create) must beEqualTo(SEE_OTHER)
-  }
-  val CreateUser = BeforeHook {
-    createUser
-  }
 
   def createUserRequest(user: User) = genericCreateRequest(user.password, user.password, user, univ)
   def genericCreateRequest(psw1: String, psw2: String, user: User, university: String) = FakeRequest(
@@ -59,6 +47,18 @@ trait UserTest extends Specification with LocationTest {
 }
 
 class UserSpec extends Specification with UserTest  {
+
+  val SignUp = BeforeHook {
+    createUser
+  }
+  def createUser = {
+    insertUniversityLocation
+    val Some(create) = route(requestWithSamePasswords(password))
+    status(create) must beEqualTo(SEE_OTHER)
+  }
+  val CreateUser = BeforeHook {
+    createUser
+  }
   
   "User" should {
     /**
