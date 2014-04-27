@@ -29,6 +29,7 @@ trait UniversityStore {
   
   def getAll: List[University]
 
+  def getUniversityLocation(name: String): Option[Location]
 }
 
 @Singleton
@@ -64,6 +65,14 @@ class UniversityDAL extends UniversityStore with Logging {
         FROM University
       """.stripMargin)
   }
+  private[this] val getUniLocationSql = {
+    SQL("""
+        SELECT *
+        FROM University u, Location l
+        WHERE u.locationID = l.id
+          AND u.name = {name}
+      """.stripMargin)
+  }
 
   implicit val universityParser = 
     long("locationID") ~
@@ -95,12 +104,19 @@ class UniversityDAL extends UniversityStore with Logging {
   } 
 
   def getUniversityByName(name: String): Option[University] = DB.withConnection { implicit conn =>
-        getUnivByName.on(
-          'name -> name
-        ).as(universityParser.singleOpt)
+    getUnivByName.on(
+      'name -> name
+    ).as(universityParser.singleOpt)
   }
 
   def getAll: List[University] = DB.withConnection { implicit connection =>
     getAllSql.as(universityParser *)
+  }
+
+  def getUniversityLocation(name: String): Option[Location] = DB.withConnection { implicit connection =>
+    import LocationSql.locationParser
+    getUniLocationSql.on(
+      'name -> name
+    ).as(locationParser.singleOpt)
   }
 }

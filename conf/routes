@@ -13,6 +13,7 @@ GET     /verify/:token              @com.storagexchange.controllers.Application.
 # Posting urls
 GET     /post                       @com.storagexchange.controllers.PostBoard.myPosts
 POST    /post                       @com.storagexchange.controllers.PostBoard.recieveNewPost
+GET     /post/:id                   @com.storagexchange.controllers.PostBoard.viewPost(id: Long)
 DELETE  /post/:id                   @com.storagexchange.controllers.PostBoard.delete(id: Long)
 POST    /post/:id/:locId            @com.storagexchange.controllers.PostBoard.modify(id: Long, locId: Long)
 GET     /newpost                    @com.storagexchange.controllers.PostBoard.newPost

@@ -52,3 +52,4 @@ CREATE TABLE Transaction (
 DROP TABLE Post;
 DROP TABLE University;
 DROP TABLE Location;
+DROP TABLE Message;

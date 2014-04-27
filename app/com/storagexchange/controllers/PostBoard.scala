@@ -24,8 +24,8 @@ case class PostRequest(
   lng: String)
 
 @Singleton
-class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, dataSearch: DataSearch) 
-  extends Controller with Secured {
+class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore,
+  dataSearch: DataSearch) extends Controller with Secured with LocationConversions {
 
   val newPostForm = Form(
     mapping(
@@ -51,17 +51,16 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, da
       postData => {
         //When inserting an address into Location, we concatenate the street number with the street
         val fullStreet = postData.streetNum.toString + " " + postData.street
-        val locID: Long = locationStore.insert(
-          Location(postData.description, 
+        val location = Location(postData.description, 
             new BigDecimal(postData.lat), 
             new BigDecimal(postData.lng), 
-            postData.city, 
-            postData.state, 
-            fullStreet, 
-            postData.zip))
+            postData.city, postData.state, 
+            fullStreet, postData.zip)
+        val locID: Long = locationStore.insert(location)
         val post = Post(username, postData.description, postData.storageSize, locID)
         val id = postStore.insert(post)
-        dataSearch.insertPost(post.copy(postID = Some(id))) 
+        dataSearch.insertPost(post.copy(postID = Some(id)),
+          location.lat, location.lng)
         Redirect(routes.PostBoard.myPosts)
       }
     )
@@ -73,6 +72,14 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, da
       location <- locationStore.getById(post.locationID)
     } yield (post, location)
     Ok(views.html.post.myposts(postList))
+  }
+  
+  def viewPost(id: Long) = IsAuthenticated { _ => _ => 
+    postStore.getPostInfo(id).map { info =>
+      Ok(views.html.post.info(info))
+    }.getOrElse {
+      BadRequest(views.html.error404())  
+    }
   }
 
   def delete(id: Long) = IsAuthenticated { username => _ => 

@@ -11,6 +11,7 @@ import scala.concurrent.Future
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.search.facet.range.RangeFacet
 import scala.collection.JavaConversions._
+import com.storagexchange.models._
 
 /** @author Stephen Samuel, @modified Michele Esposito*/
 trait ElasticSugar extends BeforeAndAfterAll with Logging {
@@ -18,7 +19,7 @@ trait ElasticSugar extends BeforeAndAfterAll with Logging {
   this: Suite =>
 
   val clientInjector = new EmbeddedElasticClient
-  val dataSearch = new ElasticSearch(clientInjector)
+  val dataSearch = new ElasticSearch(clientInjector, new LocationDAL)
   implicit val client = clientInjector.client
 
   val atMost: Duration = Duration(10, "seconds")
@@ -46,9 +47,7 @@ trait ElasticSugar extends BeforeAndAfterAll with Logging {
     listener.actionGet()
   }
 
-  def blockUntilCount(expected: Long,
-                      index: String,
-                      types: String*) {
+  def blockUntilCount(expected: Long, index: String, types: String*) {
 
     var backoff = 0
     var actual = 0l
