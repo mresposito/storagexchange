@@ -48,6 +48,14 @@ CREATE TABLE Transaction (
   canceled BOOLEAN  NOT NULL DEFAULT 0,
   timestamp TIMESTAMP);
 
+CREATE TABLE Rating (
+  ratingID BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  transactionID BIGINT NOT NULL,
+  raterEmail VARCHAR(50) NOT NULL,
+  rateeEmail VARCHAR(50) NOT NULL,
+  score INT NOT NULL,
+)
+
 # --- !Downs
 DROP TABLE Post;
 DROP TABLE University;
