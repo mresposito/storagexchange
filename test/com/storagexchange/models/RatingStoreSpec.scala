@@ -23,8 +23,8 @@ class RatingStoreSpec extends Specification with PostTest {
     1,  "buyer2@user.com", Some(post1.email), Some(2))
 
   val ratingStore: RatingStore = new RatingDAL
-  val rating1 = Rating(1, 5, "buyer@user.com", post1.email, Some(1))
-  val rating2 = Rating(2, 2, "buyer2@user.com", post1.email, Some(2))
+  val rating1 = Rating(1, 5, Some("buyer@user.com"), Some(post1.email), Some(1))
+  val rating2 = Rating(2, 2, Some("buyer2@user.com"), Some(post1.email), Some(2))
 
   val InsertTransaction = BeforeHook {
     DB.withConnection { implicit conn =>
