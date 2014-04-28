@@ -20,8 +20,8 @@ case class TransactionRequest(
   endDate: Long)
 
 @Singleton
-class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore: PostStore) 
-  extends Controller with Secured {
+class TransactionLedger @Inject()(transactionStore: TransactionStore, 
+  ratingStore: RatingStore, postStore: PostStore) extends Controller with Secured {
 
   val newTransactionForm = Form(
     mapping(
@@ -88,6 +88,15 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
     if (transactionStore.getByID(transactionID).isEmpty){
       BadRequest(views.html.error404())
     }else{
+      transactionStore.cancelAsSeller(transactionID, username)
+      Redirect(routes.TransactionLedger.mySales)
+    }
+  }
+
+  def rateTransaction(transactionID: Long) = IsAuthenticated { username => _ =>
+    if (transactionStore.getByID(transactionID).isEmpty) {
+      BadRequest(views.html.error404())
+    } else {
       transactionStore.cancelAsSeller(transactionID, username)
       Redirect(routes.TransactionLedger.mySales)
     }

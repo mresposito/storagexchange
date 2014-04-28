@@ -16,6 +16,7 @@ trait CommodModule extends ScalaModule {
     bind[LocationStore].to[LocationDAL]
     bind[PostStore].to[PostDAL]
     bind[TransactionStore].to[TransactionDAL]
+    bind[RatingStore].to[RatingDAL]
     bind[MessageStore].to[MessageDAL]
     bind[DataGenerator].to[JavaFakerDataGenerator]
     bind[DataSearch].to[ElasticSearch]

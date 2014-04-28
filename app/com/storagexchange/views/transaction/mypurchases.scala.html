@@ -2,6 +2,15 @@
 @import helper.twitterBootstrap._
 @import java.util.Calendar
 
+@js = {
+  <script>
+    function rating() {
+      var ratingList=document.getElementById("ratingList");
+      document.getElementById("rating").value=ratingList.options[ratingList.selectedIndex].text;
+    }
+  </script>
+}
+
 @views.html.user.main("Storage Exchange", "My Purchases") {
  <div class="post">
     <div class="container">
@@ -15,11 +24,27 @@
             <div class="col-md-2">
               <b>Start Date: </b><span class="area">@purchase.startDate.toString.substring(0,10)</span>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2">
               <b>End Date: </b><span class="area">@purchase.endDate.toString.substring(0,10)</span>
             </div>
             <div class="col-md-2">
               <b>Seller: </b><span class="area">@purchase.sellerEmail</span>
+            </div>
+            <div class="col-md-2">
+              <b>Rating: </b>
+              <span class="area">
+                <select id="ratingList" onchange="rating()">
+                  <option>Rate User</option>
+                  <option>1</option>
+                  <option>2</option>  
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                </select>
+                <a href="@controllers.routes.TransactionLedger.cancelTransactionAsBuyer(purchase.transactionID.get)">
+                  <button type="submit" class="btn btn-block">Submit</button>
+                </a>
+              </span>
             </div>
             <div class="col-md-2">
               @if(!purchase.approved){

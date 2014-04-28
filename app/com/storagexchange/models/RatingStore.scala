@@ -80,8 +80,8 @@ class RatingDAL extends RatingStore {
     }
 
     implicit val ratingAvgParser = 
-    int("avgScore") map {
-      case avgScore => avgScore/10.0
+      int("avgScore") map {
+        case avgScore => avgScore/10.0
     }
 
   def insert(rating: Rating): Long = DB.withConnection { implicit conn =>
