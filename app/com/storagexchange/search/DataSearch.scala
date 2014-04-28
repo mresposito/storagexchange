@@ -114,7 +114,7 @@ class ElasticSearch @Inject() (clientInjector: ElasticClientInjector,
 		      rangeFilter(field) lte lt.toString gte gt.toString
 		    }
         case LocationQuery(latit, long, range) => red filter {
-          geoDistance("location") lat latit lon long distance (range, DistanceUnit.MILES) 
+          geoDistance("location") lat latit lon long distance (range, DistanceUnit.KILOMETERS) 
         }
         case Query(term) => red query term
 		    case Offset(at, max) => red start at limit max
