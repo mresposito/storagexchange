@@ -81,6 +81,7 @@ class TransactionLedgerSpec extends Specification with TransactionTest {
     "reject approval by non-seller" in CreateTransactions {
       val Some(approve) = route(requestWithSessionTransaction(routes.TransactionLedger.approveTransaction(1).url, "buyer@user.com"))
       val Some(mysales) = route(requestWithSessionTransaction(routes.TransactionLedger.mySales.url,post1.email))
+      status(approve) must beEqualTo(BAD_REQUEST)
       contentAsString(mysales) must contain("Approve")
     }
     "cancel transaction as buyer" in CreateTransactions {
@@ -94,11 +95,13 @@ class TransactionLedgerSpec extends Specification with TransactionTest {
     "reject cancel transaction as buyer by non-buyer" in CreateTransactions {
       val Some(cancel) =  route(requestWithSessionTransaction(routes.TransactionLedger.cancelTransactionAsBuyer(1).url, post1.email))
       val Some(myPurchases) = route(requestWithSessionTransaction(routes.TransactionLedger.myPurchases.url, transaction1.buyerEmail))
+      status(cancel) must beEqualTo(BAD_REQUEST)
       contentAsString(myPurchases) must contain(transaction1.storageTaken.toString)
     }
     "reject cancel transaction as seller by non-seller" in CreateTransactions {
       val Some(cancel) =  route(requestWithSessionTransaction(routes.TransactionLedger.cancelTransactionAsSeller(1).url, "buyer@user.com"))
       val Some(mysales) = route(requestWithSessionTransaction(routes.TransactionLedger.mySales.url, post1.email))
+      status(cancel) must beEqualTo(BAD_REQUEST)
       contentAsString(mysales) must contain(transaction1.storageTaken.toString)
     }
   }

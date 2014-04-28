@@ -32,9 +32,9 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore,
     )
 
   def newTransaction(postID: Long) = IsAuthenticated { username => _ =>
-    if (postStore.getById(postID).isEmpty){
+    if (postStore.getById(postID).isEmpty) { 
       BadRequest(views.html.error404())
-    }else{
+    } else { 
       Ok(views.html.transaction.newtransaction(newTransactionForm,postID))
     }
     
@@ -43,15 +43,13 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore,
   def receiveNewTransaction(postID: Long)  = IsAuthenticated { username => implicit request =>
     newTransactionForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.transaction.newtransaction(formWithErrors,postID)),
-      transactionData => {
-
-        if (postStore.getById(postID).isEmpty) {
-          BadRequest(views.html.error404())
-        }else {
-          transactionStore.insert(Transaction(transactionData.storageTaken, 
-            new Timestamp(transactionData.startDate), new Timestamp(transactionData.endDate), postID, username))
-          Redirect(routes.TransactionLedger.myPurchases)
-        }
+      transactionData => 
+      if (postStore.getById(postID).isEmpty) {
+        BadRequest(views.html.error404())
+      } else {
+        transactionStore.insert(Transaction(transactionData.storageTaken, 
+          new Timestamp(transactionData.startDate), new Timestamp(transactionData.endDate), postID, username))
+        Redirect(routes.TransactionLedger.myPurchases)
       }
     )
   }
@@ -66,38 +64,29 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore,
     Ok(views.html.transaction.mysales(salelist))
   }
 
-  def approveTransaction(transactionID : Long) =  IsAuthenticated { username => implicit request =>
-    if (transactionStore.getByID(transactionID).isEmpty){
+  def approveTransaction(transactionID : Long) =  IsAuthenticated { username => _ =>
+    val result = transactionStore.approve(transactionID, username)
+    if (result == 0) { 
       BadRequest(views.html.error404())
-    }else{
-      transactionStore.approve(transactionID, username)
+    } else { 
       Redirect(routes.TransactionLedger.mySales)
     }
   }
 
-  def cancelTransactionAsBuyer(transactionID : Long) =  IsAuthenticated { username => implicit request =>
-    if (transactionStore.getByID(transactionID).isEmpty){
+  def cancelTransactionAsBuyer(transactionID : Long) =  IsAuthenticated { username => _ =>
+    val result = transactionStore.cancelAsBuyer(transactionID, username)
+    if (result == 0) { 
       BadRequest(views.html.error404())
-    }else{
-      transactionStore.cancelAsBuyer(transactionID, username)
+    } else { 
       Redirect(routes.TransactionLedger.myPurchases)
     }
   }
 
-  def cancelTransactionAsSeller(transactionID : Long) =  IsAuthenticated { username => implicit request =>
-    if (transactionStore.getByID(transactionID).isEmpty){
+  def cancelTransactionAsSeller(transactionID : Long) =  IsAuthenticated { username => _ =>
+    val result = transactionStore.cancelAsSeller(transactionID, username)
+    if (result == 0) { 
       BadRequest(views.html.error404())
-    }else{
-      transactionStore.cancelAsSeller(transactionID, username)
-      Redirect(routes.TransactionLedger.mySales)
-    }
-  }
-
-  def rateTransaction(transactionID: Long) = IsAuthenticated { username => _ =>
-    if (transactionStore.getByID(transactionID).isEmpty) {
-      BadRequest(views.html.error404())
-    } else {
-      transactionStore.cancelAsSeller(transactionID, username)
+    } else { 
       Redirect(routes.TransactionLedger.mySales)
     }
   }

@@ -53,11 +53,12 @@ CREATE TABLE Rating (
   transactionID BIGINT NOT NULL UNIQUE,
   raterEmail VARCHAR(50) NOT NULL,
   rateeEmail VARCHAR(50) NOT NULL,
-  score INT NOT NULL,
-)
+  score INT NOT NULL);
 
 # --- !Downs
 DROP TABLE Post;
 DROP TABLE University;
 DROP TABLE Location;
 DROP TABLE Message;
+DROP TABLE Rating;
+DROP TABLE Transaction;
