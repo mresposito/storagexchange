@@ -17,6 +17,16 @@ GET     /post/:id                   @com.storagexchange.controllers.PostBoard.vi
 DELETE  /post/:id                   @com.storagexchange.controllers.PostBoard.delete(id: Long)
 POST    /post/:id/:locId            @com.storagexchange.controllers.PostBoard.modify(id: Long, locId: Long)
 GET     /newpost                    @com.storagexchange.controllers.PostBoard.newPost
+
+# Transaction urls
+GET     /reserve/:postID            @com.storagexchange.controllers.TransactionLedger.newTransaction(postID : Long)
+POST    /reserve/:postID            @com.storagexchange.controllers.TransactionLedger.receiveNewTransaction(postID : Long)
+GET     /mypurchases                @com.storagexchange.controllers.TransactionLedger.myPurchases
+GET     /mysales                    @com.storagexchange.controllers.TransactionLedger.mySales
+GET     /mysales/approve/:id        @com.storagexchange.controllers.TransactionLedger.approveTransaction(id : Long)
+GET     /mypurchases/cancel/:id     @com.storagexchange.controllers.TransactionLedger.cancelTransactionAsBuyer(id : Long)
+GET     /mysales/cancel/:id         @com.storagexchange.controllers.TransactionLedger.cancelTransactionAsSeller(id : Long)
+
 # Messaging urls
 GET     /message                    @com.storagexchange.controllers.MessageBoard.myMessages
 POST    /message                    @com.storagexchange.controllers.MessageBoard.receiveNewMessage

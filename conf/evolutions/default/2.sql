@@ -33,8 +33,20 @@ CREATE TABLE Message (
   message VARCHAR(2000) NOT NULL,
   parentID BIGINT,
   childID BIGINT,
-  messageID BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY);
+  messageID BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY
+);
 
+CREATE TABLE Transaction (
+  transactionID BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  postID BIGINT NOT NULL,
+  buyerEmail VARCHAR(50) NOT NULL,
+  sellerEmail VARCHAR(50) NOT NULL,
+  storageTaken INT NOT NULL,
+  startDate BIGINT,
+  endDate BIGINT,
+  approved BOOLEAN NOT NULL DEFAULT 0,
+  canceled BOOLEAN  NOT NULL DEFAULT 0,
+  timestamp TIMESTAMP);
 
 # --- !Downs
 DROP TABLE Post;
