@@ -49,29 +49,33 @@
 @views.html.user.main("Storage Exchange", "My Posts", js) {
  <div class="post">
     <div class="container">
-        @postLoc.map { postTuple =>
-        <div class="row well"  data-id="@postTuple._1.postID.get">
-          <div class="col-md-8">
-            <b>Description</b><br>
-            <span class="description">@postTuple._1.description</span>
+        @defining("""[0-9]+""".r) { addressRegex =>
+          @postLoc.map { postTuple =>
+          <div class="row well"  data-id="@postTuple._1.postID.get">
+            <div class="col-md-8">
+              <b>Description</b><br>
+              <span class="description">@postTuple._1.description</span>
+            </div>
+            <div class="col-md-2">
+              <b>Size: </b><span class="area">@postTuple._1.storageSize</span> sq/ft
+            </div>
+            <div class="locId" data-id="@postTuple._2.id">
+              @defining(addressRegex.findFirstIn(postTuple._2.address).get.toInt) { streetNumber =>
+                <input type="hidden" class="form-control" id="route" name="street" value="@postTuple._2.address"></input>
+                <input type="hidden" class="form-control" id="street_number" name="streetNum" value="@streetNumber"></input>
+                <input type="hidden" class="form-control" id="locality" name="city" value="@postTuple._2.city"></input> 
+                <input type="hidden" class="form-control" id="administrative_area_level_1" name="state" value="@postTuple._2.state"></input> 
+                <input type="hidden" class="form-control" id="postal_code" name="zip" value="@postTuple._2.zip"></input>
+                <input type="hidden" class="form-control" id="latitude" name="lat" value="@postTuple._2.lat"></input>
+                <input type="hidden" class="form-control" id="longitude" name="lng" value="@postTuple._2.lng"></input>
+              }
+            </div>
+            <div class="col-md-2 actions">
+              <a href="#" class="edit"><i class="fa fa-pencil-square-o"></i></a>
+              <a href="#" class="delete"><i class="fa fa-trash-o"></i></a>
+            </div>
           </div>
-          <div class="col-md-2">
-            <b>Size: </b><span class="area">@postTuple._1.storageSize</span> sq/ft
-          </div>
-          <div class="locId" data-id="@postTuple._2.id"> 
-            <input type="hidden" class="form-control" id="route" name="street" value="@postTuple._2.address"></input>
-            <input type="hidden" class="form-control" id="street_number" name="streetNum" value="@postTuple._2.address.split(" ")(0).toInt"></input>
-            <input type="hidden" class="form-control" id="locality" name="city" value="@postTuple._2.city"></input> 
-            <input type="hidden" class="form-control" id="administrative_area_level_1" name="state" value="@postTuple._2.state"></input> 
-            <input type="hidden" class="form-control" id="postal_code" name="zip" value="@postTuple._2.zip"></input>
-            <input type="hidden" class="form-control" id="latitude" name="lat" value="@postTuple._2.lat"></input>
-            <input type="hidden" class="form-control" id="longitude" name="lng" value="@postTuple._2.lng"></input>
-          </div>
-          <div class="col-md-2 actions">
-            <a href="#" class="edit"><i class="fa fa-pencil-square-o"></i></a>
-            <a href="#" class="delete"><i class="fa fa-trash-o"></i></a>
-          </div>
-        </div>
+          }
       }
       @if(postLoc.isEmpty) {
         <h3>You have no posts</h3>
