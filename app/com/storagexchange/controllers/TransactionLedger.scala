@@ -43,15 +43,13 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
   def receiveNewTransaction(postID: Long)  = IsAuthenticated { username => implicit request =>
     newTransactionForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.transaction.newtransaction(formWithErrors,postID)),
-      transactionData => {
-
-        if (postStore.getById(postID).isEmpty) {
-          BadRequest(views.html.error404())
-        }else {
-          transactionStore.insert(Transaction(transactionData.storageTaken, 
-            new Timestamp(transactionData.startDate), new Timestamp(transactionData.endDate), postID, username))
-          Redirect(routes.TransactionLedger.myPurchases)
-        }
+      transactionData => 
+      if (postStore.getById(postID).isEmpty) {
+        BadRequest(views.html.error404())
+      }else {
+        transactionStore.insert(Transaction(transactionData.storageTaken, 
+          new Timestamp(transactionData.startDate), new Timestamp(transactionData.endDate), postID, username))
+        Redirect(routes.TransactionLedger.myPurchases)
       }
     )
   }
@@ -66,7 +64,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
     Ok(views.html.transaction.mysales(salelist))
   }
 
-  def approveTransaction(transactionID : Long) =  IsAuthenticated { username => implicit request =>
+  def approveTransaction(transactionID : Long) =  IsAuthenticated { username => _ =>
     val result = transactionStore.approve(transactionID, username)
     if (result == 0){
       BadRequest(views.html.error404())
@@ -75,7 +73,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
     }
   }
 
-  def cancelTransactionAsBuyer(transactionID : Long) =  IsAuthenticated { username => implicit request =>
+  def cancelTransactionAsBuyer(transactionID : Long) =  IsAuthenticated { username => _ =>
     val result = transactionStore.cancelAsBuyer(transactionID, username)
     if (result == 0){
       BadRequest(views.html.error404())
@@ -84,7 +82,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
     }
   }
 
-  def cancelTransactionAsSeller(transactionID : Long) =  IsAuthenticated { username => implicit request =>
+  def cancelTransactionAsSeller(transactionID : Long) =  IsAuthenticated { username => _ =>
     val result = transactionStore.cancelAsSeller(transactionID, username)
     if (result == 0){
       BadRequest(views.html.error404())

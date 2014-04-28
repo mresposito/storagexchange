@@ -158,20 +158,20 @@ class TransactionDAL extends TransactionStore {
     approveSql.on(
       'transactionID -> transactionID,
       'sellerEmail -> sellerEmail
-      ).executeUpdate()
+    ).executeUpdate()
   }
 
   def cancelAsBuyer(transactionID: Long, buyerEmail: String): Int = DB.withConnection { implicit conn =>
     cancelAsBuyerSql.on(
       'transactionID -> transactionID,
       'userEmail -> buyerEmail
-      ).executeUpdate()
+    ).executeUpdate()
   }
 
   def cancelAsSeller(transactionID: Long, sellerEmail: String): Int = DB.withConnection { implicit conn =>
     cancelAsSellerSql.on(
       'transactionID -> transactionID,
       'userEmail -> sellerEmail
-      ).executeUpdate()
+    ).executeUpdate()
   }
 }
