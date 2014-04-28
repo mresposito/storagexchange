@@ -34,7 +34,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
   def newTransaction(postID: Long) = IsAuthenticated { username => _ =>
     if (postStore.getById(postID).isEmpty) { 
       BadRequest(views.html.error404())
-    }else { 
+    } else { 
       Ok(views.html.transaction.newtransaction(newTransactionForm,postID))
     }
     
@@ -46,7 +46,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
       transactionData => 
       if (postStore.getById(postID).isEmpty) {
         BadRequest(views.html.error404())
-      }else {
+      } else {
         transactionStore.insert(Transaction(transactionData.storageTaken, 
           new Timestamp(transactionData.startDate), new Timestamp(transactionData.endDate), postID, username))
         Redirect(routes.TransactionLedger.myPurchases)
@@ -68,7 +68,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
     val result = transactionStore.approve(transactionID, username)
     if (result == 0) { 
       BadRequest(views.html.error404())
-    }else { 
+    } else { 
       Redirect(routes.TransactionLedger.mySales)
     }
   }
@@ -77,7 +77,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
     val result = transactionStore.cancelAsBuyer(transactionID, username)
     if (result == 0) { 
       BadRequest(views.html.error404())
-    }else { 
+    } else { 
       Redirect(routes.TransactionLedger.myPurchases)
     }
   }
@@ -86,7 +86,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
     val result = transactionStore.cancelAsSeller(transactionID, username)
     if (result == 0) { 
       BadRequest(views.html.error404())
-    }else { 
+    } else { 
       Redirect(routes.TransactionLedger.mySales)
     }
   }
