@@ -32,9 +32,9 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
     )
 
   def newTransaction(postID: Long) = IsAuthenticated { username => _ =>
-    if (postStore.getById(postID).isEmpty){
+    if (postStore.getById(postID).isEmpty) { 
       BadRequest(views.html.error404())
-    }else{
+    }else { 
       Ok(views.html.transaction.newtransaction(newTransactionForm,postID))
     }
     
@@ -66,27 +66,27 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
 
   def approveTransaction(transactionID : Long) =  IsAuthenticated { username => _ =>
     val result = transactionStore.approve(transactionID, username)
-    if (result == 0){
+    if (result == 0) { 
       BadRequest(views.html.error404())
-    }else{
+    }else { 
       Redirect(routes.TransactionLedger.mySales)
     }
   }
 
   def cancelTransactionAsBuyer(transactionID : Long) =  IsAuthenticated { username => _ =>
     val result = transactionStore.cancelAsBuyer(transactionID, username)
-    if (result == 0){
+    if (result == 0) { 
       BadRequest(views.html.error404())
-    }else{
+    }else { 
       Redirect(routes.TransactionLedger.myPurchases)
     }
   }
 
   def cancelTransactionAsSeller(transactionID : Long) =  IsAuthenticated { username => _ =>
     val result = transactionStore.cancelAsSeller(transactionID, username)
-    if (result == 0){
+    if (result == 0) { 
       BadRequest(views.html.error404())
-    }else{
+    }else { 
       Redirect(routes.TransactionLedger.mySales)
     }
   }
