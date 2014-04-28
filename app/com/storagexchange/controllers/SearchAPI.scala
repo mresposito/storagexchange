@@ -60,7 +60,7 @@ class SearchAPI @Inject()(dataSearch: DataSearch,
       universityStore.getUniversityLocation
     }.getOrElse(None)
     loc.map { l =>
-      (LocationQuery(l.lat, l.lng, 100)) :: search.allQueries
+      (LocationQuery(l.lat, l.lng, 50)) :: search.allQueries
     }.getOrElse(search.allQueries)
   }
   

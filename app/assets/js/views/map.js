@@ -30,7 +30,7 @@ define ([
           lng = results[0].geometry.location.lng();
           var circle = new google.maps.Circle({
             center: new google.maps.LatLng(lat, lng),
-            radius: 3000,
+            radius: 50000,
             fillColor: "#FF0000",
             fillOpacity: 0.3,
             strokeOpacity: 0.0,
@@ -51,7 +51,11 @@ define ([
         var lng = parseFloat(latlng[1]);
         var marker = new google.maps.Marker({
           position: new google.maps.LatLng(lat, lng),
+          url: "post/" + post["_source"].id,
           map: window.map
+        });
+        google.maps.event.addListener(marker, 'click', function() {
+          window.location.href = this.url;
         });
         window.markerArray.push(marker);
       }
