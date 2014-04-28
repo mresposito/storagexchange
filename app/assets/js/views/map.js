@@ -30,7 +30,7 @@ define ([
           lng = results[0].geometry.location.lng();
           var circle = new google.maps.Circle({
             center: new google.maps.LatLng(lat, lng),
-            radius: 3000,
+            radius: 50000,
             fillColor: "#FF0000",
             fillOpacity: 0.3,
             strokeOpacity: 0.0,

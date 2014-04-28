@@ -29,7 +29,7 @@ class JavaFakerDataGenerator @Inject()(userStore: UserStore,
   private val maxStorage = 3000
   private val numberOfUsers = 100
   private val maxPosts = 10
-  private val locationGenVal = 4
+  private val locationGenVal = 529
   private val universityGenVal = 4
 
   private val random = new Random()
