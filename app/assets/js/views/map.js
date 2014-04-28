@@ -51,7 +51,11 @@ define ([
         var lng = parseFloat(latlng[1]);
         var marker = new google.maps.Marker({
           position: new google.maps.LatLng(lat, lng),
+          url: "post/" + post["_source"].id,
           map: window.map
+        });
+        google.maps.event.addListener(marker, 'click', function() {
+          window.location.href = this.url;
         });
         window.markerArray.push(marker);
       }
