@@ -12,16 +12,12 @@ import play.api.test._
 import play.api.test.Helpers._
 
 trait TransactionTest extends Specification with PostTest{
-
-  val today = new Timestamp(600)
-  val tomorrow = new Timestamp(100430600)
-  val clock = mock(classOf[Clock])
   // mock the class
   when(clock.now).thenReturn(today)
-  val now = clock.now
+  val time = clock.now
 
   val postStore: PostStore = new PostDAL
-  val transaction1 = Transaction(10, now, now,
+  val transaction1 = Transaction(10, time, time,
     1, "buyer@user.com", Some(post1.email), Some(1))
 
   val CreateTransactions = BeforeHook {
