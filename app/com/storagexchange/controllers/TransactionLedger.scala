@@ -66,14 +66,17 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore,
   def receiveNewRating(transactionID: Long) = IsAuthenticated { _ => implicit request =>
     newRatingForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.error404()),
-      ratingData => {
-        println(ratingData.score)
-        Redirect(routes.TransactionLedger.myPurchases)
-        //messageStore.insert(Message(username, messageData.toUser, messageData.message))
-        //Redirect(routes.MessageBoard.myMessages)
+      scoreData => { 
+        println(scoreData.score)
+        transactionStore.getByID(transactionID).map { transaction =>
+          ratingStore.insert(Rating(transactionID, scoreData.score, 
+            Some(transaction.buyerEmail), transaction.sellerEmail))
+          Redirect(routes.TransactionLedger.myPurchases)     
+        }.getOrElse {
+          BadRequest(views.html.error404())  
+        }
       }
     )
-    Redirect(routes.TransactionLedger.myPurchases)
   }
 
   def myPurchases = IsAuthenticated { username => _ =>
