@@ -22,11 +22,11 @@
             </div>
             <div class="col-md-2">
               @if(!sale.approved){
-                <a href="@controllers.routes.TransactionLedger.approveTransaction(sale.transactionID.get)">
+                <a href="@controllers.routes.TransactionLedger.approveTransaction(sale.transactionID.get)" style="text-decoration:none">
                   <button type="submit" class="btn btn-block btn-flashy">Approve</button>
                 </a>
               }
-              <a href="@controllers.routes.TransactionLedger.cancelTransactionAsSeller(sale.transactionID.get)">
+              <a href="@controllers.routes.TransactionLedger.cancelTransactionAsSeller(sale.transactionID.get)" style="text-decoration:none">
                 <button type="submit" class="btn btn-block">Cancel</button>
               </a>
             </div>

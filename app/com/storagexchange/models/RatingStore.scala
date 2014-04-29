@@ -99,21 +99,23 @@ class RatingDAL extends RatingStore {
     ).as(ratingParser.singleOpt)
   }
 
-  def getByTransactionID(ID: Long): Option[Rating] = DB.withConnection { implicit conn =>
-    findByTransactionIdSql.on(
-      'transactionID -> ID
-    ).as(ratingParser.singleOpt)
+  def getByTransactionID(ID: Long): Option[Rating] = 
+    DB.withConnection { implicit conn =>
+      findByTransactionIdSql.on(
+        'transactionID -> ID
+      ).as(ratingParser.singleOpt)
   }
 
-  def getAvgByRatee(rateeEmail: String): Option[Double] = DB.withConnection { implicit conn =>
-    getAvgByRateeSql.on(
-      'rateeEmail -> rateeEmail
-    ).as(ratingAvgParser.singleOpt)
+  def getAvgByRatee(rateeEmail: String): Option[Double] = 
+    DB.withConnection { implicit conn =>
+      getAvgByRateeSql.on(
+        'rateeEmail -> rateeEmail
+      ).as(ratingAvgParser.singleOpt)
   }
 
   def updateByTransactionID(id: Long, score: Int): Int = 
-      DB.withConnection { implicit conn =>
-    updateRatingByTransactionIDSql.on(
+    DB.withConnection { implicit conn =>
+      updateRatingByTransactionIDSql.on(
         'transactionID-> id,
         'score-> score
       ).executeUpdate()

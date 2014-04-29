@@ -19,6 +19,11 @@ case class TransactionRequest(
   startDate: Long,
   endDate: Long)
 
+case class RatingRequest(
+  raterEmail: String,
+  rateeEmail: String,
+  score: Int)
+
 @Singleton
 class TransactionLedger @Inject()(transactionStore: TransactionStore, 
   ratingStore: RatingStore, postStore: PostStore) extends Controller with Secured {
@@ -31,16 +36,23 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore,
       )(TransactionRequest.apply)(TransactionRequest.unapply)
     )
 
+  val newRatingForm = Form(
+    mapping(
+      "raterEmail" -> nonEmptyText(minLength = 4),
+      "rateeEmail" -> nonEmptyText(minLength = 4),
+      "score" -> number(min=1)
+      )(RatingRequest.apply)(RatingRequest.unapply)
+    )
+
   def newTransaction(postID: Long) = IsAuthenticated { username => _ =>
     if (postStore.getById(postID).isEmpty) { 
       BadRequest(views.html.error404())
     } else { 
-      Ok(views.html.transaction.newtransaction(newTransactionForm,postID))
+      Ok(views.html.transaction.newtransaction(newTransactionForm, postID))
     }
-    
   }
 
-  def receiveNewTransaction(postID: Long)  = IsAuthenticated { username => implicit request =>
+  def receiveNewTransaction(postID: Long) = IsAuthenticated { username => implicit request =>
     newTransactionForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.transaction.newtransaction(formWithErrors,postID)),
       transactionData => 
@@ -54,6 +66,23 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore,
     )
   }
 
+  def receiveNewRating(transactionID: Long) = IsAuthenticated { _ => implicit request =>
+    newRatingForm.bindFromRequest
+    println(newRatingForm)
+    // newRatingForm.bindFromRequest.fold(
+    //   formWithErrors => BadRequest(views.html.error404()),
+    //   ratingData => {
+    //     println(ratingData.raterEmail)
+    //     println(ratingData.rateeEmail)
+    //     println(ratingData.score)
+    //     Redirect(routes.TransactionLedger.myPurchases)
+    //     //messageStore.insert(Message(username, messageData.toUser, messageData.message))
+    //     //Redirect(routes.MessageBoard.myMessages)
+    //   }
+    // )
+    Redirect(routes.TransactionLedger.myPurchases)
+  }
+
   def myPurchases = IsAuthenticated { username => _ =>
     val purchaselist = transactionStore.getByBuyerEmail(username)
     Ok(views.html.transaction.mypurchases(purchaselist))
@@ -64,7 +93,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore,
     Ok(views.html.transaction.mysales(salelist))
   }
 
-  def approveTransaction(transactionID : Long) =  IsAuthenticated { username => _ =>
+  def approveTransaction(transactionID: Long) = IsAuthenticated { username => _ =>
     val result = transactionStore.approve(transactionID, username)
     if (result == 0) { 
       BadRequest(views.html.error404())
@@ -73,7 +102,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore,
     }
   }
 
-  def cancelTransactionAsBuyer(transactionID : Long) =  IsAuthenticated { username => _ =>
+  def cancelTransactionAsBuyer(transactionID: Long) = IsAuthenticated { username => _ =>
     val result = transactionStore.cancelAsBuyer(transactionID, username)
     if (result == 0) { 
       BadRequest(views.html.error404())
@@ -82,7 +111,7 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore,
     }
   }
 
-  def cancelTransactionAsSeller(transactionID : Long) =  IsAuthenticated { username => _ =>
+  def cancelTransactionAsSeller(transactionID: Long) = IsAuthenticated { username => _ =>
     val result = transactionStore.cancelAsSeller(transactionID, username)
     if (result == 0) { 
       BadRequest(views.html.error404())
