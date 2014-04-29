@@ -2,10 +2,10 @@
 @import helper.twitterBootstrap._
 
 @views.html.user.main("Storage Exchange", "My Sales") {
- <div class="post">
+  <div class="post">
     <div class="container">
-        @mySales.map { sale =>
-        @if(!sale.canceled){
+      @mySales.map { sale =>
+        @if(!sale.canceled) {
           <div class="row well"  data-id="@sale.transactionID">
             <div class="col-md-2">
               <b>Storage Size</b><br>
@@ -21,7 +21,7 @@
               <b>Buyer: </b><span class="area">@sale.buyerEmail</span>
             </div>
             <div class="col-md-2">
-              @if(!sale.approved){
+              @if(!sale.approved) {
                 <a href="@controllers.routes.TransactionLedger.approveTransaction(sale.transactionID.get)" style="text-decoration:none">
                   <button type="submit" class="btn btn-block btn-flashy">Approve</button>
                 </a>
@@ -30,7 +30,8 @@
                 <button type="submit" class="btn btn-block">Cancel</button>
               </a>
             </div>
-          }
+          </div>
+        }  
       }
       @if(mySales.isEmpty) {
         <h3>You have made no sales</h3>

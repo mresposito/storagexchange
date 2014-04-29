@@ -3,9 +3,9 @@
 @import java.util.Calendar
 
 @views.html.user.main("Storage Exchange", "My Purchases") {
- <div class="post">
+  <div class="post">
     <div class="container">
-        @myPurchases.map { purchase =>
+      @myPurchases.map { purchase =>
         @if(!purchase.canceled) {
           <div class="row well"  data-id="@purchase.transactionID">
             <div class="col-md-2">
@@ -18,13 +18,13 @@
               <b>End Date: </b><span class="area">@purchase.endDate.toString.substring(0,10)</span>
               </span>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-4">
               <b>Seller: </b><span class="area">@purchase.sellerEmail</span>
             </div>
             <div class="col-md-2">
-              <b>Rating: </b>
               <span class="area">
                 <form method="post" action="@controllers.routes.TransactionLedger.receiveNewRating(purchase.transactionID.get)">
+                  <b>Rate Seller: </b>
                   <select id="ratingList" name="score" onchange="rating()">
                     <option>Rate User</option>
                     @for(rating <- 1 until 11) {
@@ -36,7 +36,9 @@
               </span>
             </div>
             <div class="col-md-2">
-              @if(!purchase.approved){
+              @if(purchase.approved) {
+                <b>Cancel Transaction...</b>
+              } else {
                 <b>Approval Pending...</b>
               }
               <a href="@controllers.routes.TransactionLedger.cancelTransactionAsBuyer(purchase.transactionID.get)">

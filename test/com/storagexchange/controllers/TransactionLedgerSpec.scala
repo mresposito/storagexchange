@@ -11,7 +11,7 @@ import org.specs2.mutable._
 import play.api.test._
 import play.api.test.Helpers._
 
-trait TransactionTest extends Specification with PostTest{
+trait TransactionTest extends Specification with PostTest {
   // mock the class
   when(clock.now).thenReturn(today)
   val time = clock.now
@@ -47,11 +47,11 @@ trait TransactionTest extends Specification with PostTest{
 class TransactionLedgerSpec extends Specification with TransactionTest {
   "Transaction Ledger" should {
     "accept valid new transaction url" in CreatePostsTransactions {
-      val Some(createForm) =  route(requestWithSessionTransaction(routes.TransactionLedger.newTransaction(1).url, transaction1.buyerEmail))
+      val Some(createForm) = route(requestWithSessionTransaction(routes.TransactionLedger.newTransaction(1).url, transaction1.buyerEmail))
       status(createForm) must beEqualTo(OK)
     }
     "reject invalid new transaction url" in CreatePostsTransactions {
-      val Some(createForm) =  route(requestWithSessionTransaction(routes.TransactionLedger.newTransaction(2342132).url, transaction1.buyerEmail))
+      val Some(createForm) = route(requestWithSessionTransaction(routes.TransactionLedger.newTransaction(2342132).url, transaction1.buyerEmail))
       status(createForm) must beEqualTo(BAD_REQUEST)
     }
     "accept valid transaction" in CreatePostsTransactions {
@@ -85,21 +85,21 @@ class TransactionLedgerSpec extends Specification with TransactionTest {
       contentAsString(mysales) must contain("Approve")
     }
     "cancel transaction as buyer" in CreateTransactions {
-      val Some(cancel) =  route(requestWithSessionTransaction(routes.TransactionLedger.cancelTransactionAsBuyer(1).url, "buyer@user.com"))
+      val Some(cancel) = route(requestWithSessionTransaction(routes.TransactionLedger.cancelTransactionAsBuyer(1).url, "buyer@user.com"))
       contentAsString(cancel) must not contain(transaction1.storageTaken.toString)
     }
     "cancel transaction as seller" in CreateTransactions {
-      val Some(cancel) =  route(requestWithSessionTransaction(routes.TransactionLedger.cancelTransactionAsSeller(1).url, post1.email))
+      val Some(cancel) = route(requestWithSessionTransaction(routes.TransactionLedger.cancelTransactionAsSeller(1).url, post1.email))
       contentAsString(cancel) must not contain(transaction1.storageTaken.toString)
     }
     "reject cancel transaction as buyer by non-buyer" in CreateTransactions {
-      val Some(cancel) =  route(requestWithSessionTransaction(routes.TransactionLedger.cancelTransactionAsBuyer(1).url, post1.email))
+      val Some(cancel) = route(requestWithSessionTransaction(routes.TransactionLedger.cancelTransactionAsBuyer(1).url, post1.email))
       val Some(myPurchases) = route(requestWithSessionTransaction(routes.TransactionLedger.myPurchases.url, transaction1.buyerEmail))
       status(cancel) must beEqualTo(BAD_REQUEST)
       contentAsString(myPurchases) must contain(transaction1.storageTaken.toString)
     }
     "reject cancel transaction as seller by non-seller" in CreateTransactions {
-      val Some(cancel) =  route(requestWithSessionTransaction(routes.TransactionLedger.cancelTransactionAsSeller(1).url, "buyer@user.com"))
+      val Some(cancel) = route(requestWithSessionTransaction(routes.TransactionLedger.cancelTransactionAsSeller(1).url, "buyer@user.com"))
       val Some(mysales) = route(requestWithSessionTransaction(routes.TransactionLedger.mySales.url, post1.email))
       status(cancel) must beEqualTo(BAD_REQUEST)
       contentAsString(mysales) must contain(transaction1.storageTaken.toString)
