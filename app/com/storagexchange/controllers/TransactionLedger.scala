@@ -67,10 +67,13 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore,
     newRatingForm.bindFromRequest.fold(
       formWithErrors => BadRequest(views.html.error404()),
       scoreData => { 
-        println(scoreData.score)
         transactionStore.getByID(transactionID).map { transaction =>
-          ratingStore.insert(Rating(transactionID, scoreData.score, 
-            Some(transaction.buyerEmail), transaction.sellerEmail))
+          ratingStore.getByTransactionID(transactionID).map { rating =>
+            ratingStore.updateByTransactionID(transactionID, scoreData.score)
+          }.getOrElse {
+            ratingStore.insert(Rating(transactionID, scoreData.score, 
+              Some(transaction.buyerEmail), transaction.sellerEmail))
+          }
           Redirect(routes.TransactionLedger.myPurchases)     
         }.getOrElse {
           BadRequest(views.html.error404())  
