@@ -24,6 +24,11 @@ case class Location(name: String,
   id: Option[Long] = None) {
   
   def toGeo: String = s"${lat.doubleValue()}, ${lng.doubleValue()}"
+  
+  def getStreetNum: Int = {
+    val addressRegex = """[0-9]+""".r
+    addressRegex.findFirstIn(address).get.toInt
+  }
 }
 
 trait LocationConversions {
@@ -93,4 +98,5 @@ class LocationDAL extends LocationStore {
       'id -> id
     ).as(locationParser.singleOpt)
   }
+
 }
