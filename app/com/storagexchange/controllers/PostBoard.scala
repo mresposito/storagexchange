@@ -67,10 +67,12 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore,
   }
 
   def myPosts = IsAuthenticated { username => _ => 
+    //Used to get the street number from an address
+    val addressRegex = """[0-9]+""".r
     val postList = for {
       post <- postStore.getByEmail(username)
       location <- locationStore.getById(post.locationID)
-    } yield (post, location)
+    } yield (post, location, addressRegex.findFirstIn(location.address).get.toInt)
     Ok(views.html.post.myposts(postList))
   }
   
