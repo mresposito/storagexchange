@@ -24,7 +24,7 @@ case class PostRequest(
   lng: String)
 
 @Singleton
-class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore,
+class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore, ratingStore: RatingStore,
   dataSearch: DataSearch) extends Controller with Secured with LocationConversions {
 
   val newPostForm = Form(
@@ -76,7 +76,7 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore,
   
   def viewPost(id: Long) = IsAuthenticated { _ => _ => 
     postStore.getPostInfo(id).map { info =>
-      Ok(views.html.post.info(info))
+      Ok(views.html.post.info(info, ratingStore.getAvgByRatee(info.user.email)))
     }.getOrElse {
       BadRequest(views.html.error404())  
     }
