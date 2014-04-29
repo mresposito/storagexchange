@@ -2,15 +2,6 @@
 @import helper.twitterBootstrap._
 @import java.util.Calendar
 
-@js = {
-  <script>
-    function rating() {
-      var ratingList=document.getElementById("ratingList");
-      document.getElementById("rating").value=ratingList.options[ratingList.selectedIndex].text;
-    }
-  </script>
-}
-
 @views.html.user.main("Storage Exchange", "My Purchases") {
  <div class="post">
     <div class="container">
@@ -33,8 +24,8 @@
             <div class="col-md-2">
               <b>Rating: </b>
               <span class="area">
-                <form method="post" action="@controllers.routes.TransactionLedger.receiveNewRating(purchase.transactionID.get)"
-                  <select id="ratingList" onchange="rating()">
+                <form method="post" action="@controllers.routes.TransactionLedger.receiveNewRating(purchase.transactionID.get)">
+                  <select id="ratingList" name="score" onchange="rating()">
                     <option>Rate User</option>
                     <option>1</option>
                     <option>2</option>  

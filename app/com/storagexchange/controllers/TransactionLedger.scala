@@ -20,8 +20,6 @@ case class TransactionRequest(
   endDate: Long)
 
 case class RatingRequest(
-  raterEmail: String,
-  rateeEmail: String,
   score: Int)
 
 @Singleton
@@ -38,8 +36,6 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore,
 
   val newRatingForm = Form(
     mapping(
-      "raterEmail" -> nonEmptyText(minLength = 4),
-      "rateeEmail" -> nonEmptyText(minLength = 4),
       "score" -> number(min=1)
       )(RatingRequest.apply)(RatingRequest.unapply)
     )
@@ -68,19 +64,15 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore,
   }
 
   def receiveNewRating(transactionID: Long) = IsAuthenticated { _ => implicit request =>
-    newRatingForm.bindFromRequest
-    println(newRatingForm)
-    // newRatingForm.bindFromRequest.fold(
-    //   formWithErrors => BadRequest(views.html.error404()),
-    //   ratingData => {
-    //     println(ratingData.raterEmail)
-    //     println(ratingData.rateeEmail)
-    //     println(ratingData.score)
-    //     Redirect(routes.TransactionLedger.myPurchases)
-    //     //messageStore.insert(Message(username, messageData.toUser, messageData.message))
-    //     //Redirect(routes.MessageBoard.myMessages)
-    //   }
-    // )
+    newRatingForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(views.html.error404()),
+      ratingData => {
+        println(ratingData.score)
+        Redirect(routes.TransactionLedger.myPurchases)
+        //messageStore.insert(Message(username, messageData.toUser, messageData.message))
+        //Redirect(routes.MessageBoard.myMessages)
+      }
+    )
     Redirect(routes.TransactionLedger.myPurchases)
   }
 
