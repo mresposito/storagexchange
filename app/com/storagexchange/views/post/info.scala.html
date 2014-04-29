@@ -12,6 +12,7 @@
         @info.post.description<br>
         <h3>Created by</h3>
         @info.user.name @info.user.surname<br>
+        <a href="@controllers.routes.TransactionLedger.newTransaction(info.post.postID.get)">Reserve space</a><br>
         <a href="">Contact the user</a><br>
         @info.location.name<br>
       </div>
