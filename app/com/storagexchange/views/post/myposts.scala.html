@@ -1,4 +1,4 @@
-@(postLoc : List[(models.Post, models.Location, scala.Int)])
+@(postLoc : List[(models.Post, models.Location)])
 @import helper.twitterBootstrap._
 
 @js = {
@@ -49,7 +49,7 @@
 @views.html.user.main("Storage Exchange", "My Posts", js) {
  <div class="post">
     <div class="container">
-          @postLoc.map { case (post, location, streetNum) =>
+          @postLoc.map { case (post, location) =>
           <div class="row well"  data-id="@post.postID.get">
             <div class="col-md-8">
               <b>Description</b><br>
@@ -60,7 +60,7 @@
             </div>
             <div class="locId" data-id="@location.id">
               <input type="hidden" class="form-control" id="route" name="street" value="@location.address"></input>
-              <input type="hidden" class="form-control" id="street_number" name="streetNum" value="@streetNum"></input>
+              <input type="hidden" class="form-control" id="street_number" name="streetNum" value="@location.getStreetNum"></input>
               <input type="hidden" class="form-control" id="locality" name="city" value="@location.city"></input> 
               <input type="hidden" class="form-control" id="administrative_area_level_1" name="state" value="@location.state"></input> 
               <input type="hidden" class="form-control" id="postal_code" name="zip" value="@location.zip"></input>

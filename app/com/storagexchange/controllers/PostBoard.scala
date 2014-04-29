@@ -70,7 +70,7 @@ class PostBoard @Inject()(postStore: PostStore, locationStore: LocationStore,
     val postList = for {
       post <- postStore.getByEmail(username)
       location <- locationStore.getById(post.locationID)
-    } yield (post, location, location.getStreetNum)
+    } yield (post, location)
     Ok(views.html.post.myposts(postList))
   }
   
