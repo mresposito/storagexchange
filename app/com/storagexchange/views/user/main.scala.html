@@ -9,6 +9,8 @@
   @Seq(
     (controllers.routes.Application.index(), "Home"),
     (controllers.routes.PostBoard.myPosts(), "My Posts"),
+    (controllers.routes.TransactionLedger.myPurchases(), "My Purchases"),
+    (controllers.routes.TransactionLedger.mySales(), "My Sales"),
     (controllers.routes.MessageBoard.myMessages(), "My Messages"),
     (controllers.routes.Dynamic.profile(), "Profile"),
     (controllers.routes.Application.logout(), "Logout")).map { case(link, name) =>

@@ -60,7 +60,8 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore,
         BadRequest(views.html.error404())
       } else {
         transactionStore.insert(Transaction(transactionData.storageTaken, 
-          new Timestamp(transactionData.startDate), new Timestamp(transactionData.endDate), postID, username))
+          new Timestamp(transactionData.startDate), 
+          new Timestamp(transactionData.endDate), postID, username))
         Redirect(routes.TransactionLedger.myPurchases)
       }
     )
