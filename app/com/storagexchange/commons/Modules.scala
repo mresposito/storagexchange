@@ -31,7 +31,7 @@ class ProdModule extends CommodModule {
     bind[IdHasher].to[Base64AES]
     bind[Clock].to[RealClock]
 //    bind[ElasticClientInjector].to[RemoteElasticClient] 
-    bind[ElasticClientInjector].to[LocalElasticClient]
+    bind[ElasticClientInjector].to[EmbeddedElasticClient]
   }
 }
 
