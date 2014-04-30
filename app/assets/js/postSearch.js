@@ -25,7 +25,7 @@ require([
   "underscore",
   "backbone",
   "views/post",
-  "views/Typeahead"
+  "views/typeahead"
 ], function($, _, Backbone, PostSearch, Typeahead) {
 
   new PostSearch({
