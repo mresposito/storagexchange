@@ -19,9 +19,12 @@ case class TransactionRequest(
   startDate: Long,
   endDate: Long)
 
+case class RatingRequest(
+  score: Int)
+
 @Singleton
-class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore: PostStore) 
-  extends Controller with Secured {
+class TransactionLedger @Inject()(transactionStore: TransactionStore, 
+  ratingStore: RatingStore, postStore: PostStore) extends Controller with Secured {
 
   val newTransactionForm = Form(
     mapping(
@@ -31,11 +34,17 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
       )(TransactionRequest.apply)(TransactionRequest.unapply)
     )
 
+  val newRatingForm = Form(
+    mapping(
+      "score" -> number(min=1)
+      )(RatingRequest.apply)(RatingRequest.unapply)
+    )
+
   def newTransaction(postID: Long) = IsAuthenticated { username => _ =>
     if (postStore.getById(postID).isEmpty) { 
       BadRequest(views.html.error404())
     } else { 
-      Ok(views.html.transaction.newtransaction(newTransactionForm,postID))
+      Ok(views.html.transaction.newtransaction(newTransactionForm, postID))
     }
   }
 
@@ -50,6 +59,25 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
           new Timestamp(transactionData.startDate), 
           new Timestamp(transactionData.endDate), postID, username))
         Redirect(routes.TransactionLedger.myPurchases)
+      }
+    )
+  }
+
+  def receiveNewRating(transactionID: Long) = IsAuthenticated { _ => implicit request =>
+    newRatingForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(views.html.error404()),
+      scoreData => { 
+        transactionStore.getByID(transactionID).map { transaction =>
+          ratingStore.getByTransactionID(transactionID).map { rating =>
+            ratingStore.updateByTransactionID(transactionID, scoreData.score)
+          }.getOrElse {
+            ratingStore.insert(Rating(transactionID, scoreData.score, 
+              Some(transaction.buyerEmail), transaction.sellerEmail))
+          }
+          Redirect(routes.TransactionLedger.myPurchases)     
+        }.getOrElse {
+          BadRequest(views.html.error404())  
+        }
       }
     )
   }
@@ -90,4 +118,5 @@ class TransactionLedger @Inject()(transactionStore: TransactionStore, postStore:
       Redirect(routes.TransactionLedger.mySales)
     }
   }
+
 }
