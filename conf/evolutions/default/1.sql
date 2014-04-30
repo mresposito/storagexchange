@@ -19,5 +19,5 @@ CREATE VIEW VerifiedUser AS
 
 # --- !Downs
 
-DROP TABLE User;
 DROP VIEW VerifiedUser;
+DROP TABLE User;

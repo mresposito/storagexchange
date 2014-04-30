@@ -53,5 +53,4 @@ DROP TABLE Post;
 DROP TABLE University;
 DROP TABLE Location;
 DROP TABLE Message;
-DROP TABLE Rating;
 DROP TABLE Transaction;

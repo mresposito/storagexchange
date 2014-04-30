@@ -6,3 +6,6 @@ CREATE TABLE Rating (
   raterEmail VARCHAR(50) NOT NULL,
   rateeEmail VARCHAR(50) NOT NULL,
   score INT NOT NULL);
+
+# --- !Downs
+DROP TABLE Rating;
