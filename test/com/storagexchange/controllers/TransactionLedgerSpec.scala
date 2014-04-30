@@ -31,8 +31,7 @@ trait TransactionTest extends Specification with PostTest {
     locationStore.insert(stanford)
     userStore.insert(user)
     route(createRequest(post1))
-    val create1 = route(createTransactionRequest(transaction1, 1)).get
-    status(create1) must beEqualTo(SEE_OTHER)
+    route(createTransactionRequest(transaction1, 1))
     route(requestWithSessionTransaction(
       routes.TransactionLedger.approveTransaction(1).url, post1.email))
   }
@@ -135,11 +134,6 @@ class TransactionLedgerSpec extends Specification with TransactionTest {
         routes.TransactionLedger.mySales.url, post1.email))
       status(cancel) must beEqualTo(BAD_REQUEST)
       contentAsString(mysales) must contain(transaction1.storageTaken.toString)
-    }
-    "avg rating shows up on rated post page" in CreateTransactionRatings {
-      route(createRatingRequest(transaction1, 3))
-      val Some(postInfo) = route(viewPost(post1.postID.get)) 
-      contentAsString(postInfo) must contain("Avg. Rating")
     }
     "avg rating does not show up on unrated post page" in CreateTransactionRatings {
       val Some(postInfo) = route(viewPost(post1.postID.get)) 
