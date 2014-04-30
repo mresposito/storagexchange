@@ -18,9 +18,11 @@
               <b>End Date: </b><span class="area">@purchase.endDate.toString.substring(0,10)</span>
               </span>
             </div>
-            <div class="col-md-4">
-              <b>Seller: </b><span class="area">@purchase.sellerEmail</span>
-            </div>
+            @if(purchase.approved) {
+              <div class="col-md-4">
+                <b>Seller: </b><span class="area">@purchase.sellerEmail</span>
+              </div>
+            }
             <div class="col-md-2">
               <span class="area">
                 <form method="post" action="@controllers.routes.TransactionLedger.receiveNewRating(purchase.transactionID.get)">
